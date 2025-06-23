@@ -65,7 +65,7 @@ trait PresentationConversionCompletedSysPubMsgHdlr {
           "presentation",
           "app.presentation.newCurrentPresentationNotification",
           "Notification when a new presentation is set as current",
-          Vector(s"${pres.name}")
+          Map("presentationName"->s"${pres.name}")
         )
         NotificationDAO.insert(notifyEvent)
       }

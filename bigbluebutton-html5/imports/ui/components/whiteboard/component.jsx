@@ -209,7 +209,7 @@ const Whiteboard = React.memo((props) => {
 
       const bbbMultiUserPenOnly = getFromUserSettings(
         'bbb_multi_user_pen_only',
-        false,
+        window.meetingClientSettings.public.whiteboard.toolbar.multiUserPenOnly,
       );
       const bbbPresenterTools = getFromUserSettings(
         'bbb_presenter_tools',
@@ -323,16 +323,12 @@ const Whiteboard = React.memo((props) => {
       presentationAreaWidth > 0 &&
       presentationAreaHeight > 0
     ) {
-      const adjustedPresentationAreaHeight = isPresenterRef.current
-        ? presentationAreaHeight - 40
-        : presentationAreaHeight;
-
       const slideAspectRatio =
         currentPresentationPageRef.current.scaledWidth /
         currentPresentationPageRef.current.scaledHeight;
 
       const presentationAreaAspectRatio =
-        presentationAreaWidth / adjustedPresentationAreaHeight;
+        presentationAreaWidth / presentationAreaHeight;
 
       let initialZoom;
 
@@ -345,7 +341,7 @@ const Whiteboard = React.memo((props) => {
           currentPresentationPageRef.current.scaledWidth;
       } else {
         initialZoom =
-          adjustedPresentationAreaHeight /
+          presentationAreaHeight /
           currentPresentationPageRef.current.scaledHeight;
       }
 
@@ -657,6 +653,34 @@ const Whiteboard = React.memo((props) => {
         '!': () => {
           zoomChanger(HUNDRED_PERCENT);
         },
+        '@': () => {
+          const selectionBounds = tlEditorRef.current?.getSelectionPageBounds();
+          const selectionAspectRatio = selectionBounds.w / selectionBounds.h;
+          const presentationAreaAspectRatio = presentationWidth / presentationHeight;
+
+          let baseZoomToFitIn;
+
+          if (
+            selectionAspectRatio > presentationAreaAspectRatio
+            || (fitToWidthRef.current && isPresenterRef.current)
+          ) {
+            baseZoomToFitIn = presentationWidth / selectionBounds.w;
+          } else {
+            baseZoomToFitIn = presentationHeight / selectionBounds.h;
+          }
+
+          const adjustedBaseZoomToFitIn = (Math.max(baseZoomToFitIn, initialZoomRef.current)) / initialZoomRef.current;
+          const zoomPercentage = adjustedBaseZoomToFitIn * 100;
+          zoomChanger(zoomPercentage);
+
+          const nextCamera = {
+            x: selectionBounds.x,
+            y: selectionBounds.y,
+            z: adjustedBaseZoomToFitIn,
+          };
+
+          tlEditorRef.current.setCamera(nextCamera, { duration: 175 });
+        },
       };
 
       if (shiftKeyMap[key]) {
@@ -754,7 +778,7 @@ const Whiteboard = React.memo((props) => {
     }
   }, [
     tlEditorRef, isPresenterRef, hasWBAccessRef, previousTool, handleCut, handleCopy, handlePaste,
-    isInfiniteWhiteboard, zoomChanger,
+    isInfiniteWhiteboard, zoomChanger, presentationHeight, presentationWidth,
   ]);
 
   const createPage = (currentPageId) => [
@@ -775,9 +799,11 @@ const Whiteboard = React.memo((props) => {
     }
 
     return () => {
-      whiteboardRef.current?.removeEventListener('keydown', handleKeyDown);
+      whiteboardRef.current?.removeEventListener('keydown', handleKeyDown, {
+        capture: true,
+      });
     };
-  }, [whiteboardRef.current]);
+  }, [whiteboardRef.current, handleKeyDown]);
 
   const language = React.useMemo(() => mapLanguage(locale?.toLowerCase() || 'en'), [locale]);
 
@@ -1703,7 +1729,7 @@ const Whiteboard = React.memo((props) => {
       && isPresenter
       && !isWheelZoomRef.current
     ) {
-      if (!isMounting && prevZoomValueRef.current !== zoomValue) {
+      if (!isMounting) {
         syncCameraOnPresenterZoom();
       }
     }
