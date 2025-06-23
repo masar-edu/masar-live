@@ -33,6 +33,7 @@ class Join extends Create {
       await breakoutUserPage.closeAudioModal();
     }
     await breakoutUserPage.hasElement(e.presentationTitle, 'should display the presentation title on the breakout room');
+    await breakoutUserPage.hasText(e.timeRemaining, /1[4-5]:[0-5][0-9]/, 'should have the time remaining counting down on the breakout room');
     return breakoutUserPage;
   }
 
