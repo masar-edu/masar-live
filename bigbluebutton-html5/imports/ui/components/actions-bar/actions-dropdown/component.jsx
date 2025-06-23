@@ -297,7 +297,7 @@ class ActionsDropdown extends PureComponent {
             key: actionButtonItem.id,
             allowed: actionButtonItem.allowed,
             isSeparator: true,
-            dataTest: 'pluginsSeparator',
+            dataTest: actionButtonItem.dataTest,
           });
           break;
         default:
