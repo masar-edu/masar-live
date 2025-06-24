@@ -55,7 +55,7 @@ const useIntersectionObserver = <P extends HTMLElement, C extends HTMLElement>(
           } else if (childRef.current) {
             observer.current.unobserve(childRef.current);
           }
-          if (newValue instanceof HTMLDivElement && observer.current) {
+          if (newValue instanceof HTMLElement && observer.current) {
             observer.current.observe(newValue);
           }
         }
