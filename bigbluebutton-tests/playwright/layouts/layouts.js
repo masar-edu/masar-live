@@ -1,3 +1,4 @@
+const { expect } = require('@playwright/test');
 const { MultiUsers } = require("../user/multiusers");
 const Page = require('../core/page');
 const e = require('../core/elements');
@@ -140,16 +141,19 @@ class Layouts extends MultiUsers {
     }
 
     await this.modPage.hasElementCount(e.webcamVideoItem, 7);
-    await this.modPage.wasRemoved(e.nextPage);
-    await this.modPage.wasRemoved(e.previousPage);
+    const nextPageVideoPaginationLocator = await this.modPage.getLocator(e.nextPageVideoPagination);
+    await expect(nextPageVideoPaginationLocator).toBeHidden();
+    const previousPageVideoPaginationLocator = await this.modPage.getLocator(e.nextPageVideoPagination);
+    await expect(previousPageVideoPaginationLocator).toBeHidden();
 
     for (const page of pages) {
-      page.hasElement(e.whiteboard);
-      page.hasElement(e.previousPage);
+      await page.hasElement(e.nextPageVideoPagination);
+      await page.hasElement(e.previousPageVideoPagination);
     }
-      
+    await this.userPage.hasElementCount(e.webcamVideoItem, 6); 
     await checkScreenshots(this, 'pagination should work for the attendees', 'video', 'pagination');
-    await this.userPage.waitAndClick(e.nextPage);
+    await this.userPage.waitAndClick(e.nextPageVideoPagination);
+    await this.userPage.hasElementCount(e.webcamVideoItem, 2);
     await checkScreenshots(this, 'pagination should work for the attendees', 'video', 'pagination-second-page');
   }
 }

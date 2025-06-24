@@ -469,8 +469,8 @@ exports.dropAreaRight = 'div[data-test="dropArea-contentRight"]';
 exports.dropAreaTop = 'div[data-test="dropArea-contentTop"]';
 exports.dropAreaSidebarBottom = 'div[data-test="dropArea-sidebarContentBottom"]';
 exports.selfViewDisableBtn = 'li[data-test="selfViewDisableBtn"]';
-exports.nextPage = 'button[data-test="nextPageBtn"]';
-exports.previousPage = 'button[data-test="previousPageBtn"]';
+exports.nextPageVideoPagination = 'button[data-test="nextPageVideoPaginationBtn"]';
+exports.previousPageVideoPagination = 'button[data-test="previousPageVideoPaginationBtn"]';
 
 exports.videoQualitySelector = 'select[id="setQuality"]';
 exports.webcamItemTalkingUser = 'div[data-test="webcamItemTalkingUser"]';
