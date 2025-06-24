@@ -4,16 +4,16 @@ import React, {
 
 const CURRENT_FIELD = 'current';
 
-const useIntersectionObserver = (
-  parentRef: React.MutableRefObject<HTMLDivElement | null>,
-  childRef: React.MutableRefObject<HTMLDivElement | null>,
+const useIntersectionObserver = <P extends HTMLElement, C extends HTMLElement>(
+  parentRef: React.MutableRefObject<P | null>,
+  childRef: React.MutableRefObject<C | null>,
   threshold: number = 0.1,
 ) => {
   const observer = useRef<IntersectionObserver | null>(null);
   const [intersecting, setIntersecting] = useState(false);
 
   const updateIntersectionObserver = useCallback(
-    (root?: HTMLDivElement | null) => {
+    (root?: HTMLElement | null) => {
       if (observer.current) {
         observer.current.disconnect();
       }

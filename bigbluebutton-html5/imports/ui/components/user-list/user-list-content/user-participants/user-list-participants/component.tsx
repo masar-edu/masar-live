@@ -24,7 +24,7 @@ const UserListParticipants: React.FC<UserListParticipantsProps> = ({
   const [visibleUsers, setVisibleUsers] = React.useState<{
     [key: number]: User[];
   }>({});
-  const userListRef = React.useRef<HTMLDivElement | null>(null);
+  const userListRef = React.useRef<HTMLUListElement | null>(null);
   const selectedUserRef = React.useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -82,12 +82,11 @@ const UserListParticipants: React.FC<UserListParticipantsProps> = ({
   return (
     (
       <Styled.UserListColumn
-        // @ts-ignore
         onKeyDown={rove}
         tabIndex={0}
         role="list"
       >
-        <Styled.VirtualizedList ref={userListRef}>
+        <Styled.VirtualizedList as="ul" ref={userListRef}>
           {
             Array.from({ length: amountOfPages }).map((_, i) => {
               const isLastItem = amountOfPages === (i + 1);
