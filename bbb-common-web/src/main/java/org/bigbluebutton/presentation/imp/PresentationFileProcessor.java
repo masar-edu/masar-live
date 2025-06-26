@@ -106,7 +106,7 @@ public class PresentationFileProcessor {
                 if (!success) {
                     log.warn("Failed to cancel conversion task");
                 }
-                notifier.sendUploadFileTimedout(pres, 1);
+                notifier.sendUploadConversionCancelled(pres);
             }
         });
     }
@@ -137,7 +137,7 @@ public class PresentationFileProcessor {
             extractIntoPages(pres, cancelled);
         } else if (SupportedFileTypes.isImageFile(pres.getFileType())) {
             sendDocPageConversionStartedProgress(pres);
-            imageSlidesGenerationService.generateSlides(pres, cancelled);
+            imageSlidesGenerationService.generateSlides(pres);
         }
     }
 
