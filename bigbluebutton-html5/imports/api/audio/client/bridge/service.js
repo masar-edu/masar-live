@@ -24,6 +24,9 @@ const getCurrentAudioSessionNumber = () => sessionStorage.getItem(AUDIO_SESSION_
 const reloadAudioElement = (audioElement) => {
   if (audioElement && (audioElement.readyState > 0)) {
     audioElement.load();
+    if (audioElement.paused) {
+      audioElement.play();
+    }
     return true;
   }
 
