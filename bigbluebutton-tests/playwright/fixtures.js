@@ -5,7 +5,7 @@ const helpers = require('./core/helpers');
 
 base.test.beforeAll(async ({ request }) => {
   // Validate environment variables and endpoints
-  const BBB_URL_PATTERN = /^https:\/\/[^/]+\/bigbluebutton\/(?:api\/)?$/;
+  const BBB_URL_PATTERN = /^https:\/\/[^/]+\/bigbluebutton\/(?:api\/?)?$/;
   if (!parameters.secret) throw new Error('BBB_SECRET environment variable is not set');
   if (!parameters.server) throw new Error('BBB_URL environment variable is not set');
   if (!BBB_URL_PATTERN.test(parameters.server)) throw new Error('BBB_URL must follow the pattern "https://{{DOMAIN_NAME}}/bigbluebutton/"');
@@ -33,7 +33,7 @@ base.test.beforeAll(async ({ request }) => {
       throw new Error(msg);
     }
 
-    console.log('Endpoints validation okay: /create and /join are accessible!!!!');
+    console.log('Endpoints validation okay: /create and /join are accessible!');
   } catch (error) {
     console.error('Endpoints validation failed:', error.message);
     throw error;
