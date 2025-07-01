@@ -1,6 +1,5 @@
 import styled, { css, keyframes } from 'styled-components';
 import Icon from '/imports/ui/components/common/icon/component';
-import { headingsFontWeight } from '/imports/ui/stylesheets/styled-components/typography';
 import {
   colorDanger,
   colorGray,
@@ -9,8 +8,6 @@ import {
   colorOffWhite,
 } from '/imports/ui/stylesheets/styled-components/palette';
 import {
-  borderSizeLarge,
-  lgPaddingX,
   statusIconSize,
   borderSize,
   statusInfoHeight,
