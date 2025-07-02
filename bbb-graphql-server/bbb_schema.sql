@@ -2433,3 +2433,17 @@ CREATE INDEX "idx_user_audioGroup_userId" ON "user_audioGroup"("meetingId", "use
 CREATE INDEX "idx_user_audioGroup_userId_reverse" ON "user_audioGroup"("userId", "meetingId");
 CREATE INDEX "idx_user_audioGroup_groupId_participantType" ON "user_audioGroup"("meetingId", "groupId", "participantType");
 CREATE OR REPLACE VIEW "v_user_audioGroup" AS SELECT * FROM "user_audioGroup";
+
+-- Workaround to prevent Hasura from appending "OR IS NULL" to filters on view columns
+-- By marking certain columns in views as NOT NULL, Hasura treats them as non-nullable and avoids adding unnecessary null checks
+-- This updates columns commonly used in filters (e.g., IDs, sessionToken, isModerator) across all views (tables starting with "v_")
+UPDATE pg_attribute
+SET attnotnull = true
+WHERE attrelid IN (
+  SELECT oid FROM pg_class WHERE relname LIKE 'v_%'
+)
+AND (
+	attname like '%Id'
+	or attname = 'sessionToken'
+	or attname = 'isModerator'
+);
