@@ -2440,10 +2440,12 @@ CREATE OR REPLACE VIEW "v_user_audioGroup" AS SELECT * FROM "user_audioGroup";
 UPDATE pg_attribute
 SET attnotnull = true
 WHERE attrelid IN (
-  SELECT oid FROM pg_class WHERE relname LIKE 'v_%'
+  SELECT c.oid
+  FROM pg_class c
+  JOIN pg_namespace  n ON n.oid = c.relnamespace
+  where c.relkind LIKE 'v' --view only
+  and c.relname LIKE 'v_%' --view only
+  and n.nspname = 'public' -- restrict to public schema
 )
-AND (
-	attname like '%Id'
-	or attname = 'sessionToken'
-	or attname = 'isModerator'
-);
+AND (attname ~ 'Id$' or attname in ('sessionToken', 'isModerator'))
+AND attnotnull IS FALSE; -- skip already set
