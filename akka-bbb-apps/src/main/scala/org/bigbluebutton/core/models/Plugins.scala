@@ -11,15 +11,8 @@ import com.github.zafarkhaja.semver.Version
 
 import java.util
 
-case class RateLimiting(
-    messagesAllowedPerSecond: Int,
-    messagesAllowedPerMinute: Int
-)
-
 case class EventPersistence(
     isEnabled:                 Boolean,
-    maximumPayloadSizeInBytes: Int,
-    rateLimiting:              RateLimiting
 )
 
 case class DataChannel(
