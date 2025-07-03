@@ -25,7 +25,15 @@ const reloadAudioElement = (audioElement) => {
   if (audioElement && (audioElement.readyState > 0)) {
     audioElement.load();
     if (audioElement.paused) {
-      audioElement.play();
+      audioElement.play().catch((error) => {
+        logger.error({
+          logCode: 'audio_element_play_error',
+          extraInfo: {
+            errorName: error.name,
+            errorMessage: error.message,
+          },
+        }, 'Error playing audio element after reload');
+      });
     }
     return true;
   }
