@@ -11,12 +11,11 @@ runs:
       uses: actions/download-artifact@v4
       with:
         name: all-bbb-artifacts
-    - name: Extract all artifacts
+        path: artifacts
+    - name: List downloaded artifacts
       shell: bash
       run: |
         set -e
-        mkdir -p artifacts
-        tar -xzf all-bbb-artifacts.tar.gz -C artifacts/
         echo "----ls artifacts/----"
         ls artifacts/
         echo "Done"
