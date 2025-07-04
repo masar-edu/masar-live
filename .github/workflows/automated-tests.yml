@@ -107,8 +107,165 @@ jobs:
         with:
           name: artifacts_${{ matrix.package }}.tar
           path: artifacts.tar
-  install-and-run-bbb-tests:
+  unify-artifacts:
     needs: build-package
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Create all-artifacts directory
+        run: mkdir -p all-artifacts
+      - name: Download artifacts_bbb-apps-akka
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-apps-akka.tar
+      - run: |
+          tar xf artifacts.tar
+          cp -r artifacts/* all-artifacts/ 2>/dev/null || true
+          rm -rf artifacts
+        shell: bash
+      - name: Download artifacts_bbb-config
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-config.tar
+      - run: |
+          tar xf artifacts.tar
+          cp -r artifacts/* all-artifacts/ 2>/dev/null || true
+          rm -rf artifacts
+        shell: bash
+      - name: Download artifacts_bbb-export-annotations
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-export-annotations.tar
+      - run: |
+          tar xf artifacts.tar
+          cp -r artifacts/* all-artifacts/ 2>/dev/null || true
+          rm -rf artifacts
+        shell: bash
+      - name: Download artifacts_bbb-learning-dashboard
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-learning-dashboard.tar
+      - run: |
+          tar xf artifacts.tar
+          cp -r artifacts/* all-artifacts/ 2>/dev/null || true
+          rm -rf artifacts
+        shell: bash
+      - name: Download artifacts_bbb-playback-record
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-playback-record.tar
+      - run: |
+          tar xf artifacts.tar
+          cp -r artifacts/* all-artifacts/ 2>/dev/null || true
+          rm -rf artifacts
+        shell: bash
+      - name: Download artifacts_bbb-graphql-server
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-graphql-server.tar
+      - run: |
+          tar xf artifacts.tar
+          cp -r artifacts/* all-artifacts/ 2>/dev/null || true
+          rm -rf artifacts
+        shell: bash
+      - name: Download artifacts_bbb-etherpad
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-etherpad.tar
+      - run: |
+          tar xf artifacts.tar
+          cp -r artifacts/* all-artifacts/ 2>/dev/null || true
+          rm -rf artifacts
+        shell: bash
+      - name: Download artifacts_bbb-freeswitch
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-freeswitch.tar
+      - run: |
+          tar xf artifacts.tar
+          cp -r artifacts/* all-artifacts/ 2>/dev/null || true
+          rm -rf artifacts
+        shell: bash
+      - name: Download artifacts_bbb-webrtc
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-webrtc.tar
+      - run: |
+          tar xf artifacts.tar
+          cp -r artifacts/* all-artifacts/ 2>/dev/null || true
+          rm -rf artifacts
+        shell: bash
+      - name: Download artifacts_bbb-web
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-web.tar
+      - run: |
+          tar xf artifacts.tar
+          cp -r artifacts/* all-artifacts/ 2>/dev/null || true
+          rm -rf artifacts
+        shell: bash
+      - name: Download artifacts_bbb-fsesl-akka
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-fsesl-akka.tar
+      - run: |
+          tar xf artifacts.tar
+          cp -r artifacts/* all-artifacts/ 2>/dev/null || true
+          rm -rf artifacts
+        shell: bash
+      - name: Download artifacts_bbb-html5
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-html5.tar
+      - run: |
+          tar xf artifacts.tar
+          cp -r artifacts/* all-artifacts/ 2>/dev/null || true
+          rm -rf artifacts
+        shell: bash
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_others.tar
+      - run: |
+          tar xf artifacts.tar
+          cp -r artifacts/* all-artifacts/ 2>/dev/null || true
+          rm -rf artifacts
+        shell: bash
+      - name: Combine all extracted artifacts
+        run: |
+          echo "Current directory contents:"
+          ls -la
+          echo "Final contents of all-artifacts:"
+          ls -la all-artifacts/
+      - name: Create all-artifacts tar file
+        run: |
+          tar -czf all-bbb-artifacts.tar.gz -C all-artifacts .
+          ls -lah all-bbb-artifacts.tar.gz
+      - name: Upload all artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-bbb-artifacts
+          path: all-bbb-artifacts.tar.gz
+          retention-days: 7
+      - name: Remove individual artifacts
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: |
+            artifacts_bbb-apps-akka.tar
+            artifacts_bbb-config.tar
+            artifacts_bbb-export-annotations.tar
+            artifacts_bbb-learning-dashboard.tar
+            artifacts_bbb-playback-record.tar
+            artifacts_bbb-graphql-server.tar
+            artifacts_bbb-etherpad.tar
+            artifacts_bbb-freeswitch.tar
+            artifacts_bbb-webrtc.tar
+            artifacts_bbb-web.tar
+            artifacts_bbb-fsesl-akka.tar
+            artifacts_bbb-html5.tar
+            artifacts_others.tar
+          failOnError: false
+  install-and-run-bbb-tests:
+    needs: unify-artifacts
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -184,7 +341,7 @@ jobs:
           name: bbb-logs-${{ env.MATRIX_SHARD_UNDERSCORED }}
           path: ./bbb-logs.tar.gz
   install-and-run-plugin-tests:
-    needs: build-package
+    needs: unify-artifacts
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
