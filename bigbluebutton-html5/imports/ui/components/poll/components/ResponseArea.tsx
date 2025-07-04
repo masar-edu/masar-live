@@ -36,8 +36,8 @@ const intlMessages = defineMessages({
 
 interface ResponseAreaProps {
   type: string | null;
-  toggleIsMultipleResponse: () => void;
-  isMultipleResponse: boolean;
+  toggleMultipleResponse: () => void;
+  multipleResponse: boolean;
   optList: Array<{ val: string }>;
   handleAddOption: () => void;
   secretPoll: boolean;
@@ -52,8 +52,8 @@ interface ResponseAreaProps {
 
 const ResponseArea: React.FC<ResponseAreaProps> = ({
   type,
-  toggleIsMultipleResponse,
-  isMultipleResponse,
+  toggleMultipleResponse,
+  multipleResponse,
   optList,
   handleAddOption,
   secretPoll,
@@ -76,8 +76,8 @@ const ResponseArea: React.FC<ResponseAreaProps> = ({
           <div>
             <Styled.PollCheckbox data-test="allowMultiple">
               <Checkbox
-                onChange={toggleIsMultipleResponse}
-                checked={isMultipleResponse}
+                onChange={toggleMultipleResponse}
+                checked={multipleResponse}
                 ariaLabelledBy="multipleResponseCheckboxLabel"
                 label={intl.formatMessage(intlMessages.enableMultipleResponseLabel)}
               />
@@ -140,7 +140,7 @@ const ResponseArea: React.FC<ResponseAreaProps> = ({
         )}
         <StartPollButton
           question={question}
-          isMultipleResponse={isMultipleResponse}
+          multipleResponse={multipleResponse}
           optList={optList}
           type={type}
           secretPoll={secretPoll}

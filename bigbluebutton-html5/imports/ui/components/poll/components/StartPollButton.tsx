@@ -51,7 +51,7 @@ interface StartPollButtonProps {
   setError: (err: string) => void;
   setIsPolling: (isPolling: boolean) => void;
   secretPoll: boolean;
-  isMultipleResponse: boolean;
+  multipleResponse: boolean;
 }
 
 const StartPollButton: React.FC<StartPollButtonProps> = ({
@@ -61,7 +61,7 @@ const StartPollButton: React.FC<StartPollButtonProps> = ({
   setError,
   setIsPolling,
   secretPoll,
-  isMultipleResponse,
+  multipleResponse,
 }) => {
   const CHAT_CONFIG = window.meetingClientSettings.public.chat;
   const PUBLIC_CHAT_KEY = CHAT_CONFIG.public_id;
@@ -76,7 +76,7 @@ const StartPollButton: React.FC<StartPollButtonProps> = ({
     pollType: string | null,
     secretPoll: boolean,
     question: string | string[],
-    isMultipleResponse: boolean,
+    multipleResponse: boolean,
     answers: (string | null)[] = [],
   ) => {
     const pollId = PUBLIC_CHAT_KEY;
@@ -87,8 +87,10 @@ const StartPollButton: React.FC<StartPollButtonProps> = ({
         pollId: `${pollId}/${new Date().getTime()}`,
         secretPoll,
         question,
-        isMultipleResponse,
+        multipleResponse,
+        quiz: false,
         answers,
+        correctAnswer: '',
       },
     });
   };
@@ -143,11 +145,11 @@ const StartPollButton: React.FC<StartPollButtonProps> = ({
               verifiedPollType,
               secretPoll,
               question,
-              isMultipleResponse,
+              multipleResponse,
               verifiedOptions?.filter(Boolean),
             );
           } else {
-            startPoll(verifiedPollType, secretPoll, question, isMultipleResponse);
+            startPoll(verifiedPollType, secretPoll, question, multipleResponse);
           }
         }
       }}

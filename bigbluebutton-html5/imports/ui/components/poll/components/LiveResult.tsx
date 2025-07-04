@@ -113,6 +113,7 @@ const LiveResult: React.FC<LiveResultProps> = ({
     pollPublishResult({
       variables: {
         pollId: pId,
+        showAnswer: false,
       },
     });
   }, []);

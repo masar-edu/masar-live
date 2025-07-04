@@ -65,8 +65,11 @@ case class Poll(
   pollType:   String,
   anonymous:  Boolean,
   multiple:   Boolean,
+  quiz:       Boolean,
   question:   String,
   options:    Vector[String] = Vector(),
+  correctOption: String = "",
+  published: Boolean = false,
   anonymousAnswers: Vector[String] = Vector(),
   createdOn:  Long = System.currentTimeMillis(),
 )
@@ -187,6 +190,8 @@ class LearningDashboardActor(
       // Poll
       case m: PollStartedEvtMsg                     => handlePollStartedEvtMsg(m)
       case m: UserRespondedToPollRecordMsg          => handleUserRespondedToPollRecordMsg(m)
+      case m: PollShowResultEvtMsg                  => handlePollShowResultEvtMsg(m)
+//      case m: PollStoppedEvtMsg                     => handlePollStoppedEvtMsg(m)
 
       case _                          => // message not to be handled.
     }
@@ -549,10 +554,56 @@ class LearningDashboardActor(
       meeting <- meetings.values.find(m => m.intId == msg.header.meetingId)
     } yield {
       val options = msg.body.poll.answers.map(answer => answer.key)
-      val newPoll = Poll(msg.body.pollId, msg.body.pollType, msg.body.secretPoll, msg.body.poll.isMultipleResponse, msg.body.question, options.toVector)
+      val newPoll = Poll(
+        msg.body.pollId,
+        msg.body.pollType,
+        msg.body.secretPoll,
+        msg.body.poll.multipleResponse,
+        msg.body.poll.quiz,
+        msg.body.question,
+        options.toVector)
 
       val updatedMeeting = meeting.copy(polls = meeting.polls + (newPoll.pollId -> newPoll))
       meetings += (updatedMeeting.intId -> updatedMeeting)
+    }
+  }
+
+  private def handlePollShowResultEvtMsg(msg: PollShowResultEvtMsg): Unit = {
+    for {
+      meeting <- meetings.values.find(m => m.intId == msg.header.meetingId)
+    } yield {
+      for {
+        poll <- meeting.polls.find(p => p._1 == msg.body.pollId)
+      } yield {
+        val updatedPoll = poll._2.copy(
+          published = true,
+          correctOption = {
+            if(poll._2.quiz && msg.body.showAnswer) {
+              msg.body.poll.correctAnswer.getOrElse("")
+            } else {
+              ""
+            }
+          }
+        )
+        val updatedMeeting = meeting.copy(polls = meeting.polls + (poll._1 -> updatedPoll))
+        meetings += (updatedMeeting.intId -> updatedMeeting)
+      }
+    }
+  }
+
+  private def handlePollStoppedEvtMsg(msg: PollStoppedEvtMsg): Unit = {
+    for {
+      meeting <- meetings.values.find(m => m.intId == msg.header.meetingId)
+    } yield {
+      for {
+        poll <- meeting.polls.find(p => p._1 == msg.body.pollId)
+      } yield {
+        // Remove if Poll was not published
+        if(!poll._2.published) {
+          val updatedMeeting = meeting.copy(polls = meeting.polls.-(poll._1))
+          meetings += (updatedMeeting.intId -> updatedMeeting)
+        }
+      }
     }
   }
 

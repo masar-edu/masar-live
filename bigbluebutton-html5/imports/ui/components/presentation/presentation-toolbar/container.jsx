@@ -104,7 +104,9 @@ const PresentationToolbarContainer = (props) => {
   const [createPoll] = useMutation(POLL_CREATE);
   const [presentationSetZoom] = useMutation(PRESENTATION_SET_ZOOM);
   const [presentationSetPage] = useMutation(PRESENTATION_SET_PAGE);
-  const [presentationSetPageInfiniteWhiteboard] = useMutation(PRESENTATION_SET_PAGE_INFINITE_WHITEBOARD);
+  const [presentationSetPageInfiniteWhiteboard] = useMutation(
+    PRESENTATION_SET_PAGE_INFINITE_WHITEBOARD,
+  );
 
   const resetSlide = () => {
     const { pageId, num } = currentPresentationPage;
@@ -165,7 +167,7 @@ const PresentationToolbarContainer = (props) => {
     skipToSlide(nextSlideNum);
   };
 
-  const startPoll = (pollType, pollId, answers = [], question, isMultipleResponse = false) => {
+  const startPoll = (pollType, pollId, answers = [], question, multipleResponse = false) => {
     Session.setItem('openPanel', 'poll');
     Session.setItem('forcePollOpen', true);
 
@@ -174,7 +176,7 @@ const PresentationToolbarContainer = (props) => {
         pollType,
         secretPoll: false,
         question,
-        isMultipleResponse,
+        multipleResponse,
         answers,
       });
     } else {
@@ -184,8 +186,10 @@ const PresentationToolbarContainer = (props) => {
           pollId: `${pollId}/${new Date().getTime()}`,
           secretPoll: false,
           question,
-          isMultipleResponse,
+          multipleResponse,
+          quiz: false,
           answers,
+          correctAnswer: '',
         },
       });
     }
@@ -248,4 +252,10 @@ PresentationToolbarContainer.propTypes = {
 
   // Actions required for the presenter toolbar
   layoutSwapped: PropTypes.bool,
+
+  userIsPresenter: PropTypes.bool,
+  presentationId: PropTypes.string,
+  hasPoll: PropTypes.bool.isRequired,
+  currentSlide: PropTypes.number.isRequired,
+  currentPresentationPage: PropTypes.number.isRequired,
 };

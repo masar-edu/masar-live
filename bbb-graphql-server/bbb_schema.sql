@@ -1653,9 +1653,11 @@ CREATE UNLOGGED TABLE "poll" (
 "type" varchar(30),
 "secret" boolean,
 "multipleResponses" boolean,
+"quiz" boolean,
 "ended" boolean,
 "published" boolean,
 "publishedAt" timestamp with time zone,
+"publishedShowingAnswer" boolean,
 "createdAt" timestamp with time zone not null default current_timestamp,
 FOREIGN KEY ("meetingId", "ownerId") REFERENCES "user"("meetingId","userId") ON DELETE CASCADE
 );
@@ -1668,6 +1670,7 @@ CREATE UNLOGGED TABLE "poll_option" (
 	"pollId" varchar(100) REFERENCES "poll"("pollId") ON DELETE CASCADE,
 	"optionId" integer,
 	"optionDesc" TEXT,
+	"correctOption" boolean,
 	CONSTRAINT "poll_option_pkey" PRIMARY KEY ("pollId", "optionId")
 );
 CREATE INDEX "idx_poll_option_pollId" ON "poll_option"("pollId");
@@ -1693,15 +1696,20 @@ poll."type",
 poll."questionText",
 poll."meetingId" AS "pollOwnerMeetingId",
 poll."ownerId" AS "pollOwnerId",
-poll.published,
+poll."published",
 o."optionId",
 o."optionDesc",
+case
+    when poll."published" is false then o."correctOption" --when not published only presenter can see
+    when poll."published" and poll."publishedShowingAnswer" then o."correctOption"
+    else null
+end "correctOption",
 count(r."optionId") AS "optionResponsesCount",
 sum(count(r."optionId")) OVER (partition by poll."pollId") "pollResponsesCount"
 FROM poll
 JOIN poll_option o ON o."pollId" = poll."pollId"
 LEFT JOIN poll_response r ON r."pollId" = poll."pollId" AND o."optionId" = r."optionId"
-GROUP BY poll."pollId", o."optionId", o."optionDesc"
+GROUP BY poll."pollId", o."pollId", o."optionId"
 ORDER BY poll."pollId";
 
 CREATE VIEW "v_poll_user" AS

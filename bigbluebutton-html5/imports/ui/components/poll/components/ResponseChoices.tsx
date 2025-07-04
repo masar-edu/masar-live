@@ -21,8 +21,8 @@ const intlMessages = defineMessages({
 
 interface ResponseChoicesProps {
   type: string | null;
-  toggleIsMultipleResponse: () => void;
-  isMultipleResponse: boolean;
+  toggleMultipleResponse: () => void;
+  multipleResponse: boolean;
   optList: Array<{ val: string }>;
   handleAddOption: () => void;
   secretPoll: boolean;
@@ -39,8 +39,8 @@ interface ResponseChoicesProps {
 
 const ResponseChoices: React.FC<ResponseChoicesProps> = ({
   type,
-  toggleIsMultipleResponse,
-  isMultipleResponse,
+  toggleMultipleResponse,
+  multipleResponse,
   optList,
   handleAddOption,
   secretPoll,
@@ -79,8 +79,8 @@ const ResponseChoices: React.FC<ResponseChoicesProps> = ({
         <ResponseArea
           error={error}
           type={type}
-          toggleIsMultipleResponse={toggleIsMultipleResponse}
-          isMultipleResponse={isMultipleResponse}
+          toggleMultipleResponse={toggleMultipleResponse}
+          multipleResponse={multipleResponse}
           optList={optList}
           handleAddOption={handleAddOption}
           secretPoll={secretPoll}

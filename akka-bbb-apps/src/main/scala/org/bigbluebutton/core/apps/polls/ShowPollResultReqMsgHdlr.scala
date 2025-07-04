@@ -8,9 +8,8 @@ import org.bigbluebutton.core.domain.MeetingState2x
 import org.bigbluebutton.core.models.Polls
 import org.bigbluebutton.core.running.LiveMeeting
 import org.bigbluebutton.core.apps.{PermissionCheck, RightsManagementTrait}
-import org.bigbluebutton.core.db.{ChatMessageDAO, JsonUtils, NotificationDAO}
+import org.bigbluebutton.core.db.{ChatMessageDAO, NotificationDAO}
 import org.bigbluebutton.core2.message.senders.MsgBuilder
-import spray.json.DefaultJsonProtocol.jsonFormat2
 
 trait ShowPollResultReqMsgHdlr extends RightsManagementTrait {
   this: PollApp2x =>
@@ -23,7 +22,7 @@ trait ShowPollResultReqMsgHdlr extends RightsManagementTrait {
       val envelope = BbbCoreEnvelope(PollShowResultEvtMsg.NAME, routing)
       val header = BbbClientMsgHeader(PollShowResultEvtMsg.NAME, liveMeeting.props.meetingProp.intId, msg.header.userId)
 
-      val body = PollShowResultEvtMsgBody(msg.header.userId, msg.body.pollId, result)
+      val body = PollShowResultEvtMsgBody(msg.header.userId, msg.body.pollId, result, msg.body.showAnswer)
       val event = PollShowResultEvtMsg(header, body)
       val msgEvent = BbbCommonEnvCoreMsg(envelope, event)
       bus.outGW.send(msgEvent)
@@ -35,7 +34,7 @@ trait ShowPollResultReqMsgHdlr extends RightsManagementTrait {
       PermissionCheck.ejectUserForFailedPermission(meetingId, msg.header.userId, reason, bus.outGW, liveMeeting)
     } else {
       for {
-        (result) <- Polls.getPollResult(msg.body.pollId, liveMeeting)
+        (result) <- Polls.getPollResult(msg.body.pollId, msg.body.showAnswer, liveMeeting)
       } yield {
         //it will be used to render the chat message (will be stored as json in chat-msg metadata)
         val resultAsSimpleMap = Map(
@@ -73,12 +72,14 @@ trait ShowPollResultReqMsgHdlr extends RightsManagementTrait {
 
         // Add Chat message with result
         ChatMessageDAO.insertSystemMsg(liveMeeting.props.meetingProp.intId, GroupChatApp.MAIN_PUBLIC_CHAT, "", GroupChatMessageType.POLL, resultAsSimpleMap, "")
+
+        //Add whiteboard annotation
         for {
           pod <- state.presentationPodManager.getDefaultPod()
           currentPres <- pod.getCurrentPresentation()
         } {
           if (currentPres.current) {
-            Polls.handleShowPollResultReqMsgForAnnotation(state, msg.header.userId, msg.body.pollId, liveMeeting, result, bus)
+            Polls.handleShowPollResultReqMsgForAnnotation(state, msg.header.userId, msg.body.pollId, msg.body.showAnswer, liveMeeting, result, bus)
           }
         }
 

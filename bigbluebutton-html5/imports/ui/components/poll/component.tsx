@@ -245,14 +245,14 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
   const [questionAndOptions, setQuestionAndOptions] = useState<string[] | string>('');
   const [optList, setOptList] = useState<Array<{val: string}>>([]);
   const [error, setError] = useState<string | null>(null);
-  const [isMultipleResponse, setIsMultipleResponse] = useState(false);
+  const [multipleResponse, setMultipleResponse] = useState(false);
   const [secretPoll, setSecretPoll] = useState(false);
   const [warning, setWarning] = useState<string | null>('');
   const [isPasting, setIsPasting] = useState(false);
   const [type, setType] = useState<string | null>('');
 
   const quickPollVariables = useStorageKey('quickPollVariables') as {
-    isMultipleResponse: boolean;
+    multipleResponse: boolean;
     pollType: string;
     question: string;
     secretPoll: boolean;
@@ -263,7 +263,7 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
     if (quickPollVariables) {
       const {
         answers,
-        isMultipleResponse,
+        multipleResponse,
         pollType,
         question,
         secretPoll,
@@ -277,7 +277,7 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
       setError(null);
       setWarning(null);
       setCustomInput(isCustom);
-      setIsMultipleResponse(isMultipleResponse);
+      setMultipleResponse(multipleResponse);
       setQuestionAndOptions(questionAndOptionsList);
       setQuestion(question);
       setSecretPoll(secretPoll);
@@ -345,14 +345,14 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
       questionAndOptions,
       optList,
       error,
-      isMultipleResponse,
+      multipleResponse,
       secretPoll,
       warning,
       type,
     };
   }, [
     customInput, question, questionAndOptions, optList,
-    isMultipleResponse, secretPoll, warning, type, error,
+    multipleResponse, secretPoll, warning, type, error,
   ]);
 
   useEffect(() => () => {
@@ -366,7 +366,7 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
       questionAndOptions: string[] | string;
       optList: { val: string }[];
       error: string;
-      isMultipleResponse: boolean;
+      multipleResponse: boolean;
       secretPoll: boolean;
       warning: string;
       type: string;
@@ -375,7 +375,7 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
     if (pollSavedState) {
       const {
         customInput,
-        isMultipleResponse,
+        multipleResponse,
         optList,
         error,
         question,
@@ -386,7 +386,7 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
       } = pollSavedState;
 
       setCustomInput(customInput);
-      setIsMultipleResponse(isMultipleResponse);
+      setMultipleResponse(multipleResponse);
       setOptList(optList);
       setError(error);
       setQuestion(question);
@@ -505,9 +505,9 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
     }
   };
 
-  const toggleIsMultipleResponse = () => {
-    setIsMultipleResponse((prev) => !prev);
-    return !isMultipleResponse;
+  const toggleMultipleResponse = () => {
+    setMultipleResponse((prev) => !prev);
+    return !multipleResponse;
   };
 
   useEffect(() => {
@@ -592,8 +592,8 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
         />
         <ResponseChoices
           type={type}
-          toggleIsMultipleResponse={toggleIsMultipleResponse}
-          isMultipleResponse={isMultipleResponse}
+          toggleMultipleResponse={toggleMultipleResponse}
+          multipleResponse={multipleResponse}
           optList={optList}
           handleAddOption={handleAddOption}
           secretPoll={secretPoll}
