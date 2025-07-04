@@ -128,7 +128,7 @@ class Layouts extends MultiUsers {
     await this.modPage.waitAndClickElement(e.updateEveryoneLayoutToggle);
     await this.modPage.waitAndClick(e.updateLayoutBtn);
     await this.modPage.closeAllToastNotifications();
-    await this.modPage.wasRemoved(e.toastContainer);
+    await this.modPage.wasRemoved(e.toastContainer, 'should not display the toast container');
 
     for (let i = 1; i <= 5; i++) {
       const userName = `User-${i}`;
@@ -140,20 +140,20 @@ class Layouts extends MultiUsers {
       pages.push(userPage);
     }
 
-    await this.modPage.hasElementCount(e.webcamVideoItem, 7);
+    await this.modPage.hasElementCount(e.webcamVideoItem, 7, 'should display 7 webcams for the moderator');
     const nextPageVideoPaginationLocator = await this.modPage.getLocator(e.nextPageVideoPagination);
     await expect(nextPageVideoPaginationLocator).toBeHidden();
     const previousPageVideoPaginationLocator = await this.modPage.getLocator(e.nextPageVideoPagination);
     await expect(previousPageVideoPaginationLocator).toBeHidden();
 
     for (const page of pages) {
-      await page.hasElement(e.nextPageVideoPagination);
-      await page.hasElement(e.previousPageVideoPagination);
+      await page.hasElement(e.nextPageVideoPagination, 'should display the next page button for the video pagination');
+      await page.hasElement(e.previousPageVideoPagination, 'should display the previous page button for the video pagination');
     }
-    await this.userPage.hasElementCount(e.webcamVideoItem, 6); 
+    await this.userPage.hasElementCount(e.webcamVideoItem, 6, 'should display 6 webcams for the attendee'); 
     await checkScreenshots(this, 'pagination should work for the attendees', 'video', 'pagination');
     await this.userPage.waitAndClick(e.nextPageVideoPagination);
-    await this.userPage.hasElementCount(e.webcamVideoItem, 2);
+    await this.userPage.hasElementCount(e.webcamVideoItem, 2, 'should display 2 webcams for the attendee');
     await checkScreenshots(this, 'pagination should work for the attendees', 'video', 'pagination-second-page');
   }
 }
