@@ -8,7 +8,7 @@ base.test.beforeAll(async ({ request }) => {
   const BBB_URL_PATTERN = /^https:\/\/[^/]+\/bigbluebutton\/(?:api\/?)?$/;
   if (!parameters.secret) throw new Error('BBB_SECRET environment variable is not set');
   if (!parameters.server) throw new Error('BBB_URL environment variable is not set');
-  if (!BBB_URL_PATTERN.test(parameters.server)) throw new Error('BBB_URL must follow the pattern "https://{{DOMAIN_NAME}}/bigbluebutton/"');
+  if (!BBB_URL_PATTERN.test(parameters.server)) throw new Error('BBB_URL must follow the pattern "https://{{DOMAIN_NAME}}/bigbluebutton/api"');
 
   try {
     // Test the /create endpoint with a temporary meeting
