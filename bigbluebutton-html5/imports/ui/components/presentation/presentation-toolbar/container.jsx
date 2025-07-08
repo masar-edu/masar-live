@@ -86,6 +86,8 @@ const PresentationToolbarContainer = (props) => {
   const { pluginsExtensibleAreasAggregatedState } = pluginsContext;
 
   const WHITEBOARD_CONFIG = window.meetingClientSettings.public.whiteboard;
+  const POLL_SETTINGS = window.meetingClientSettings.public.poll;
+  const QUIZ_ENABLED = POLL_SETTINGS.quiz.enabled;
 
   const {
     userIsPresenter,
@@ -167,7 +169,15 @@ const PresentationToolbarContainer = (props) => {
     skipToSlide(nextSlideNum);
   };
 
-  const startPoll = (pollType, pollId, answers = [], question, multipleResponse = false) => {
+  const startPoll = (
+    pollType,
+    pollId,
+    answers = [],
+    question,
+    multipleResponse = false,
+    isQuiz = false,
+    correctAnswer = '',
+  ) => {
     Session.setItem('openPanel', 'poll');
     Session.setItem('forcePollOpen', true);
 
@@ -178,6 +188,8 @@ const PresentationToolbarContainer = (props) => {
         question,
         multipleResponse,
         answers,
+        isQuiz: QUIZ_ENABLED ? isQuiz : false,
+        correctAnswer: QUIZ_ENABLED ? correctAnswer : '',
       });
     } else {
       createPoll({
@@ -189,7 +201,8 @@ const PresentationToolbarContainer = (props) => {
           multipleResponse,
           quiz: false,
           answers,
-          correctAnswer: '',
+          isQuiz: QUIZ_ENABLED ? isQuiz : false,
+          correctAnswer: QUIZ_ENABLED ? correctAnswer : '',
         },
       });
     }

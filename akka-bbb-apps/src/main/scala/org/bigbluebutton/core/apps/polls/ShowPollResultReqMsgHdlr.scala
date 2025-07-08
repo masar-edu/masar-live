@@ -34,13 +34,15 @@ trait ShowPollResultReqMsgHdlr extends RightsManagementTrait {
       PermissionCheck.ejectUserForFailedPermission(meetingId, msg.header.userId, reason, bus.outGW, liveMeeting)
     } else {
       for {
-        (result) <- Polls.getPollResult(msg.body.pollId, msg.body.showAnswer, liveMeeting)
+        (poll) <- Polls.getPoll(msg.body.pollId, liveMeeting.polls)
+        (result) <- Polls.getPollResult(msg.body.pollId, liveMeeting)
       } yield {
         //it will be used to render the chat message (will be stored as json in chat-msg metadata)
         val resultAsSimpleMap = Map(
           "id" -> result.id,
           "questionType" -> result.questionType,
           "questionText" -> result.questionText.getOrElse(""),
+          "quiz" -> poll.questions(0).quiz,
           "answers" -> {
             for {
               answer <- result.answers
@@ -48,7 +50,12 @@ trait ShowPollResultReqMsgHdlr extends RightsManagementTrait {
               Map(
                 "id" -> answer.id,
                 "key" -> answer.key,
-                "numVotes" -> answer.numVotes
+                "numVotes" -> answer.numVotes,
+                "isCorrectAnswer" -> (
+                    poll.questions(0).quiz &&
+                    msg.body.showAnswer &&
+                    result.correctAnswer.getOrElse("") == answer.key
+                  )
               )
             }
           },

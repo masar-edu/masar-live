@@ -23,7 +23,7 @@ interface ResponseChoicesProps {
   type: string | null;
   toggleMultipleResponse: () => void;
   multipleResponse: boolean;
-  optList: Array<{ val: string }>;
+  optList: Array<{ key: string; val: string }>;
   handleAddOption: () => void;
   secretPoll: boolean;
   question: string | string[];
@@ -35,6 +35,12 @@ interface ResponseChoicesProps {
   handleRemoveOption: (i: number) => void;
   customInput: boolean;
   questionAndOptions: string[] | string;
+  isQuiz: boolean;
+  correctAnswer: {
+    text: string;
+    index: number;
+  };
+  setCorrectAnswer: (param: {text: string, index: number }) => void;
 }
 
 const ResponseChoices: React.FC<ResponseChoicesProps> = ({
@@ -53,6 +59,9 @@ const ResponseChoices: React.FC<ResponseChoicesProps> = ({
   handleRemoveOption,
   customInput,
   questionAndOptions,
+  isQuiz,
+  correctAnswer,
+  setCorrectAnswer,
 }) => {
   const intl = useIntl();
   if ((!customInput && type) || (questionAndOptions && customInput)) {
@@ -90,6 +99,9 @@ const ResponseChoices: React.FC<ResponseChoicesProps> = ({
           handleToggle={handleToggle}
           handleInputChange={handleInputChange}
           handleRemoveOption={handleRemoveOption}
+          isQuiz={isQuiz}
+          correctAnswer={correctAnswer}
+          setCorrectAnswer={setCorrectAnswer}
         />
       </div>
     );

@@ -584,6 +584,9 @@ public:
     maxTypedAnswerLength: 45
     chatMessage: true
     quickPollConfirmationStep: true
+    quiz:
+      enabled: false
+      quickPollCorrectAnswerSuffix: "__"
   captions:
     enabled: true
     id: captions

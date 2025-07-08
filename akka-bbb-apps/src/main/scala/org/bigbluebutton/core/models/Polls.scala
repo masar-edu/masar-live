@@ -9,7 +9,6 @@ import org.bigbluebutton.core.domain.MeetingState2x
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 import org.bigbluebutton.core.running.LiveMeeting
-import org.bigbluebutton.core.models.PresentationPage
 
 object Polls {
 
@@ -96,9 +95,9 @@ object Polls {
     }
   }
 
-  def getPollResult(pollId: String, showAnswer: Boolean, lm: LiveMeeting): Option[(SimplePollResultOutVO)] = {
+  def getPollResult(pollId: String, lm: LiveMeeting): Option[(SimplePollResultOutVO)] = {
     for {
-      result <- getSimplePollResult(pollId, showAnswer, lm.polls)
+      result <- getSimplePollResult(pollId, lm.polls)
     } yield {
       (result)
     }
@@ -127,10 +126,11 @@ object Polls {
     }
 
     for {
+      poll <- Polls.getPoll(pollId, lm.polls)
       pod <- state.presentationPodManager.getDefaultPod()
       pres <- pod.getCurrentPresentation()
       page <- PresentationInPod.getCurrentPage(pres)
-      shape = pollResultToWhiteboardShape(result, page)
+      shape = pollResultToWhiteboardShape(result, page, poll.questions(0).quiz, showAnswer)
       annot <- send(result, shape)
     } yield {
       lm.wbModel.addAnnotations(annot.wbId, lm.props.meetingProp.intId, requesterId, Array[AnnotationVO](annot), isPresenter = false, isModerator = false)
@@ -175,7 +175,7 @@ object Polls {
 
     for {
       poll <- lm.polls.get(pollId)
-      simplePoll <- getSimplePollResult(pollId, showAnswer = false, lm.polls)
+      simplePoll <- getSimplePollResult(pollId, lm.polls)
       pvo <- handleRespondToPoll(simplePoll, requesterId, pollId, questionId, answerIds, lm)
     } yield {
       PollResponseDAO.insert(poll, lm.props.meetingProp.intId, requesterId, answerIds)
@@ -187,7 +187,7 @@ object Polls {
   def handleRespondToTypedPollReqMsg(requesterId: String, pollId: String, questionId: Int, answer: String,
                                      lm: LiveMeeting): Option[(String, SimplePollResultOutVO)] = {
     for {
-      poll <- getSimplePollResult(pollId, showAnswer = false, lm.polls)
+      poll <- getSimplePollResult(pollId, lm.polls)
       pvo <- handleRespondToTypedPoll(poll, requesterId, pollId, questionId, answer, lm)
     } yield {
       PollDAO.updateOptions(pvo)
@@ -268,7 +268,7 @@ object Polls {
     def storePollResult(responder: Responder): Option[SimplePollResultOutVO] = {
       respondToQuestion(poll.id, questionId, answerIds, responder, lm.polls)
       for {
-        updatedPoll <- getSimplePollResult(poll.id, showAnswer = false, lm.polls)
+        updatedPoll <- getSimplePollResult(poll.id, lm.polls)
       } yield updatedPoll
 
     }
@@ -286,13 +286,18 @@ object Polls {
                                        answer: String, lm: LiveMeeting): Option[SimplePollResultOutVO] = {
     addQuestionResponse(poll.id, questionId, answer, requesterId, lm.polls)
     for {
-      updatedPoll <- getSimplePollResult(poll.id, showAnswer = false, lm.polls)
+      updatedPoll <- getSimplePollResult(poll.id, lm.polls)
     } yield {
       updatedPoll
     }
   }
 
-  private def pollResultToWhiteboardShape(result: SimplePollResultOutVO, page: PresentationPage): scala.collection.immutable.Map[String, Object] = {
+  private def pollResultToWhiteboardShape(
+      result:     SimplePollResultOutVO,
+      page:       PresentationPage,
+      quiz:       Boolean,
+      showAnswer: Boolean
+  ): scala.collection.immutable.Map[String, Object] = {
     val maxImageWidth = 1440
     val maxImageHeight = 1080
     val poll_width = 300
@@ -309,7 +314,20 @@ object Polls {
     val props = new scala.collection.mutable.HashMap[String, Object]()
     val meta = new scala.collection.mutable.HashMap[String, Object]()
 
-    props += "answers" -> result.answers
+    props += "answers" -> {
+      for {
+        answer <- result.answers
+      } yield {
+        if (showAnswer && answer.key == result.correctAnswer.getOrElse("")) {
+          // temporarily adding a check mark to the correct answer
+          // while the whiteboard doesn't know how to handle the correct answer
+          answer.copy(key = s"✅ ${answer.key}")
+        } else {
+          answer
+        }
+      }
+    }
+
     props += "numRespondents" -> Integer.valueOf(result.numRespondents)
     props += "numResponders" -> Integer.valueOf(result.numResponders)
     props += "questionText" -> result.questionText.getOrElse("")
@@ -378,9 +396,9 @@ object Polls {
     pvo
   }
 
-  def getSimplePollResult(pollId: String, showAnswer: Boolean, polls: Polls): Option[SimplePollResultOutVO] = {
+  def getSimplePollResult(pollId: String, polls: Polls): Option[SimplePollResultOutVO] = {
     var pvo: Option[SimplePollResultOutVO] = None
-    polls.get(pollId) foreach (p => pvo = Some(p.toSimplePollResultOutVO(showAnswer)))
+    polls.get(pollId) foreach (p => pvo = Some(p.toSimplePollResultOutVO()))
     pvo
   }
 
@@ -713,8 +731,8 @@ class Poll(
     new SimplePollOutVO(id, questions(0).multiResponse, questions(0).quiz, questions(0).toSimpleAnswerOutVO(), questions(0).correctAnswer)
   }
 
-  def toSimplePollResultOutVO(showAnswer: Boolean): SimplePollResultOutVO = {
-    new SimplePollResultOutVO(id, questions(0).questionType, questions(0).text, questions(0).toSimpleVotesOutVO(showAnswer), questions(0).correctAnswer, numRespondents, _numResponders)
+  def toSimplePollResultOutVO(): SimplePollResultOutVO = {
+    new SimplePollResultOutVO(id, questions(0).questionType, questions(0).text, questions(0).toSimpleVotesOutVO(), questions(0).correctAnswer, numRespondents, _numResponders)
   }
 }
 
@@ -772,10 +790,10 @@ class Question(
     rvos.toArray
   }
 
-  def toSimpleVotesOutVO(showAnswer: Boolean): Array[SimpleVoteOutVO] = {
+  def toSimpleVotesOutVO(): Array[SimpleVoteOutVO] = {
     val rvos = new ArrayBuffer[SimpleVoteOutVO]
     answers.foreach(answer => {
-      rvos += answer.toSimpleVoteOutVO(quiz, showAnswer, correctAnswer)
+      rvos += answer.toSimpleVoteOutVO()
     })
 
     rvos.toArray
@@ -805,12 +823,8 @@ class Answer(val id: Int, val key: String, val text: Option[String]) {
     new SimpleAnswerOutVO(id, key)
   }
 
-  def toSimpleVoteOutVO(quiz: Boolean, showAnswer: Boolean, correctAnswer: Option[String]): SimpleVoteOutVO = {
-    if (quiz && showAnswer && key == correctAnswer.getOrElse("")) {
-      new SimpleVoteOutVO(id, s"✅ ${key}", numResponders)
-    } else {
-      new SimpleVoteOutVO(id, key, numResponders)
-    }
+  def toSimpleVoteOutVO(): SimpleVoteOutVO = {
+    new SimpleVoteOutVO(id, key, numResponders)
   }
 }
 

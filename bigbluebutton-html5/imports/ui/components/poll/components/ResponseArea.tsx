@@ -38,7 +38,7 @@ interface ResponseAreaProps {
   type: string | null;
   toggleMultipleResponse: () => void;
   multipleResponse: boolean;
-  optList: Array<{ val: string }>;
+  optList: Array<{ key: string; val: string }>;
   handleAddOption: () => void;
   secretPoll: boolean;
   question: string | string[];
@@ -48,6 +48,12 @@ interface ResponseAreaProps {
   error: string | null;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>, i: number) => void;
   handleRemoveOption: (i: number) => void;
+  isQuiz: boolean;
+  correctAnswer: {
+    text: string;
+    index: number;
+  };
+  setCorrectAnswer: (param: {text: string, index: number }) => void;
 }
 
 const ResponseArea: React.FC<ResponseAreaProps> = ({
@@ -64,6 +70,9 @@ const ResponseArea: React.FC<ResponseAreaProps> = ({
   error,
   handleInputChange,
   handleRemoveOption,
+  isQuiz,
+  correctAnswer,
+  setCorrectAnswer,
 }) => {
   const POLL_SETTINGS = window.meetingClientSettings.public.poll;
   const MAX_CUSTOM_FIELDS = POLL_SETTINGS.maxCustom;
@@ -72,7 +81,7 @@ const ResponseArea: React.FC<ResponseAreaProps> = ({
   if (defaultPoll || type === pollTypes.Response) {
     return (
       <Styled.ResponseArea>
-        {defaultPoll && (
+        {(defaultPoll && !isQuiz) && (
           <div>
             <Styled.PollCheckbox data-test="allowMultiple">
               <Checkbox
@@ -94,6 +103,9 @@ const ResponseArea: React.FC<ResponseAreaProps> = ({
             handleInputChange={handleInputChange}
             handleRemoveOption={handleRemoveOption}
             type={type}
+            isQuiz={isQuiz}
+            correctAnswer={correctAnswer}
+            setCorrectAnswer={setCorrectAnswer}
           />
         )}
         {defaultPoll && (
@@ -107,32 +119,36 @@ const ResponseArea: React.FC<ResponseAreaProps> = ({
             onClick={() => handleAddOption()}
           />
         )}
-        <Styled.AnonymousRow>
-          <Styled.AnonymousHeadingCol aria-hidden="true">
-            <Styled.AnonymousHeading>
-              {intl.formatMessage(intlMessages.secretPollLabel)}
-            </Styled.AnonymousHeading>
-          </Styled.AnonymousHeadingCol>
-          <Styled.AnonymousToggleCol>
-            {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-            <Styled.Toggle>
-              <Styled.ToggleLabel>
-                {secretPoll
-                  ? intl.formatMessage(intlMessages.on)
-                  : intl.formatMessage(intlMessages.off)}
-              </Styled.ToggleLabel>
-              <Toggle
-              // @ts-ignore - component Wrapped by intl, not reflecting the correct props
-                icons={false}
-                checked={secretPoll}
-                onChange={() => handleToggle()}
-                ariaLabel={intl.formatMessage(intlMessages.secretPollLabel)}
-                showToggleLabel={false}
-                data-test="anonymousPollBtn"
-              />
-            </Styled.Toggle>
-          </Styled.AnonymousToggleCol>
-        </Styled.AnonymousRow>
+        {
+          !isQuiz && (
+            <Styled.AnonymousRow>
+              <Styled.AnonymousHeadingCol aria-hidden="true">
+                <Styled.AnonymousHeading>
+                  {intl.formatMessage(intlMessages.secretPollLabel)}
+                </Styled.AnonymousHeading>
+              </Styled.AnonymousHeadingCol>
+              <Styled.AnonymousToggleCol>
+                {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+                <Styled.Toggle>
+                  <Styled.ToggleLabel>
+                    {secretPoll
+                      ? intl.formatMessage(intlMessages.on)
+                      : intl.formatMessage(intlMessages.off)}
+                  </Styled.ToggleLabel>
+                  <Toggle
+                    // @ts-ignore - component Wrapped by intl, not reflecting the correct props
+                    icons={false}
+                    checked={secretPoll}
+                    onChange={() => handleToggle()}
+                    ariaLabel={intl.formatMessage(intlMessages.secretPollLabel)}
+                    showToggleLabel={false}
+                    data-test="anonymousPollBtn"
+                  />
+                </Styled.Toggle>
+              </Styled.AnonymousToggleCol>
+            </Styled.AnonymousRow>
+          )
+        }
         {secretPoll && (
           <Styled.PollParagraph>
             {intl.formatMessage(intlMessages.isSecretPollLabel)}
@@ -147,6 +163,8 @@ const ResponseArea: React.FC<ResponseAreaProps> = ({
           setError={setError}
           setIsPolling={setIsPolling}
           key="startPollButton"
+          isQuiz={isQuiz}
+          correctAnswerText={correctAnswer.text}
         />
       </Styled.ResponseArea>
     );

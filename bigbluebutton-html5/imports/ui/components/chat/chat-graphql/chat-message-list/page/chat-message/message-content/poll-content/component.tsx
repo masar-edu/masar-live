@@ -26,6 +26,7 @@ interface Answers {
   key: string;
   numVotes: number;
   id: number;
+  isCorrectAnswer: boolean;
 }
 
 const intlMessages = defineMessages({
@@ -56,6 +57,10 @@ const intlMessages = defineMessages({
   votes: {
     id: 'app.chat.content.pollVotes',
     description: 'Votes label',
+  },
+  correctAnswer: {
+    id: 'app.poll.quiz.options.correct',
+    description: 'Correct answer label for quiz options',
   },
 });
 
@@ -97,7 +102,7 @@ const ChatPollContent: React.FC<ChatPollContentProps> = ({
   const translatedAnswers = answers.map((answer: Answers) => {
     const translationKey = intlMessages[answer.key.toLowerCase() as keyof typeof intlMessages];
     const pollAnswer = translationKey ? intl.formatMessage(translationKey) : answer.key;
-    const pollAnswerWithNumVotes = `${pollAnswer} (${answer.numVotes})`;
+    const pollAnswerWithNumVotes = `${answer.isCorrectAnswer ? '✅ ' : ''}${pollAnswer} (${answer.numVotes})`;
     return {
       ...answer,
       pollAnswer,
@@ -129,14 +134,14 @@ const ChatPollContent: React.FC<ChatPollContentProps> = ({
       <p className="sr-only">
         {pollData.questionText ? `${pollData.questionText}: ` : ''}
         {`${translatedAnswers
-          .map((a: Answers & { pollAnswer: string }) => `${a.pollAnswer}: ${a.numVotes} ${
+          .map((a: Answers & { pollAnswer: string }) => `${a.isCorrectAnswer ? `${intl.formatMessage(intlMessages.correctAnswer)}: ` : ''}${a.pollAnswer}: ${a.numVotes} ${
             a.numVotes === 1 ? intl.formatMessage(intlMessages.vote) : intl.formatMessage(intlMessages.votes)
           }`)
           .join(', ')}.`}
       </p>
       <ul className="sr-only">
         {translatedAnswers.map((a: Answers & { pollAnswer: string }) => (
-          <li key={a.pollAnswer}>{`${a.pollAnswer} — ${a.numVotes}`}</li>
+          <li key={a.pollAnswer}>{`${a.isCorrectAnswer ? `${intl.formatMessage(intlMessages.correctAnswer)}: ` : ''}${a.pollAnswer} — ${a.numVotes}`}</li>
         ))}
       </ul>
     </>

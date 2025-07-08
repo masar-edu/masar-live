@@ -482,6 +482,10 @@ export const meetingClientSettingsInitialValues: MeetingClientSettings = {
       maxTypedAnswerLength: 45,
       chatMessage: true,
       quickPollConfirmationStep: false,
+      quiz: {
+        enabled: false,
+        quickPollCorrectAnswerSuffix: '__',
+      },
     },
     captions: {
       enabled: true,
