@@ -379,7 +379,16 @@ const Whiteboard = React.memo((props) => {
     if (!hasWBAccess && !isPresenter) {
       tlEditorRef?.current?.setCurrentTool('noop');
     } else if (hasWBAccess && !isPresenter) {
-      tlEditorRef?.current?.setCurrentTool('draw');
+      const {
+        initialSelectedTool: initialSelectedToolFromConfig,
+        multiUserTools,
+      } = window.meetingClientSettings.public.whiteboard.toolbar;
+      const initialSelectedTool = getFromUserSettings(
+        'bbb_initial_selected_tool',
+        initialSelectedToolFromConfig,
+      );
+      const initialTool = multiUserTools.includes(initialSelectedTool) ? initialSelectedTool : 'draw';
+      tlEditorRef?.current?.setCurrentTool(initialTool);
     }
   }, [hasWBAccess]);
 
