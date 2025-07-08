@@ -441,7 +441,7 @@ const createEndpointTableData = [
               <code className="language-plaintext highlighter-rouge">chatEmojiPicker</code> - <b>Enable/Disable chat emoji picker (added in BigBlueButton 3.0)</b>
             </li>
             <li>
-              <code className="language-plaintext highlighter-rouge">quiz</code> - <b>Quiz  (added in BigBlueButton 3.0)</b>
+              <code className="language-plaintext highlighter-rouge">quizzes</code> - <b>Quizzes  (added in BigBlueButton 3.0)</b>
             </li>
           </ul>
         </>

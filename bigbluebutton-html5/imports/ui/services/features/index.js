@@ -21,7 +21,7 @@ export function useIsPollingEnabled() {
 }
 
 export function useIsQuizEnabled() {
-  return useDisabledFeatures().indexOf('quiz') === -1 && window.meetingClientSettings.public.poll.quiz.enabled;
+  return useDisabledFeatures().indexOf('quizzes') === -1 && window.meetingClientSettings.public.poll.quiz.enabled;
 }
 
 export function useIsPresentationEnabled() {
