@@ -27,6 +27,7 @@ import Session from '/imports/ui/services/storage/in-memory';
 import SessionStorage from '/imports/ui/services/storage/session';
 import { useStorageKey } from '../../services/storage/hooks';
 import QuizAndPollTabSelector from './components/QuizAndPollTabSelector';
+import { useIsQuizEnabled } from '../../services/features';
 
 const intlMessages = defineMessages({
   pollPaneTitle: {
@@ -240,7 +241,7 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
   hasPoll,
 }) => {
   const POLL_SETTINGS = window.meetingClientSettings.public.poll;
-  const QUIZ_ENABLED = POLL_SETTINGS.quiz.enabled;
+  const isQuizEnabled = useIsQuizEnabled();
   const ALLOW_CUSTOM_INPUT = POLL_SETTINGS.allowCustomResponseInput;
   const MAX_CUSTOM_FIELDS = POLL_SETTINGS.maxCustom;
   const [stopPoll] = useMutation(POLL_CANCEL);
@@ -601,7 +602,7 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
     return (
       <>
         {
-          QUIZ_ENABLED && (
+          isQuizEnabled && (
             <QuizAndPollTabSelector
               isQuiz={isQuiz}
               onTabChange={(isQuiz: boolean) => {

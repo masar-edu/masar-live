@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { useMutation } from '@apollo/client';
 import FullscreenService from '/imports/ui/components/common/fullscreen-button/service';
-import { useIsInfiniteWhiteboardEnabled, useIsPollingEnabled } from '/imports/ui/services/features';
+import { useIsInfiniteWhiteboardEnabled, useIsPollingEnabled, useIsQuizEnabled } from '/imports/ui/services/features';
 import { PluginsContext } from '/imports/ui/components/components-data/plugin-context/context';
 import { POLL_CANCEL, POLL_CREATE } from '/imports/ui/components/poll/mutations';
 import { PRESENTATION_SET_ZOOM, PRESENTATION_SET_PAGE, PRESENTATION_SET_PAGE_INFINITE_WHITEBOARD } from '../mutations';
@@ -86,8 +86,7 @@ const PresentationToolbarContainer = (props) => {
   const { pluginsExtensibleAreasAggregatedState } = pluginsContext;
 
   const WHITEBOARD_CONFIG = window.meetingClientSettings.public.whiteboard;
-  const POLL_SETTINGS = window.meetingClientSettings.public.poll;
-  const QUIZ_ENABLED = POLL_SETTINGS.quiz.enabled;
+  const isQuizEnabled = useIsQuizEnabled();
 
   const {
     userIsPresenter,
@@ -188,8 +187,8 @@ const PresentationToolbarContainer = (props) => {
         question,
         multipleResponse,
         answers,
-        isQuiz: QUIZ_ENABLED ? isQuiz : false,
-        correctAnswer: QUIZ_ENABLED ? correctAnswer : '',
+        isQuiz: isQuizEnabled ? isQuiz : false,
+        correctAnswer: isQuizEnabled ? correctAnswer : '',
       });
     } else {
       createPoll({
@@ -201,8 +200,8 @@ const PresentationToolbarContainer = (props) => {
           multipleResponse,
           quiz: false,
           answers,
-          isQuiz: QUIZ_ENABLED ? isQuiz : false,
-          correctAnswer: QUIZ_ENABLED ? correctAnswer : '',
+          isQuiz: isQuizEnabled ? isQuiz : false,
+          correctAnswer: isQuizEnabled ? correctAnswer : '',
         },
       });
     }
