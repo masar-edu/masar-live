@@ -37,6 +37,8 @@ import { CHAT_DELETE_REACTION_MUTATION, CHAT_SEND_REACTION_MUTATION } from './pa
 import logger from '/imports/startup/client/logger';
 import { ChatLoading } from '../component';
 import Storage from '/imports/ui/services/storage/in-memory';
+import browserInfo from '/imports/utils/browserInfo';
+import deviceInfo from '/imports/utils/deviceInfo';
 
 const PAGE_SIZE = 50;
 const CLEANUP_TIMEOUT = 3000;
@@ -516,6 +518,88 @@ const ChatMessageList: React.FC<ChatListProps> = ({
     setLockLoadingNewPages(loadingPages.size !== 0);
   }, [loadingPages]);
 
+  const scrollEndFrameRef = React.useRef<number>();
+  const userStartedScrollingAt = React.useRef<number | null>(null);
+  const scrollEventCount = React.useRef(0);
+  const scrollActivityCheckInterval = React.useRef<ReturnType<typeof setInterval>>();
+
+  const pollScrollEndEvent = useCallback((
+    setFrameId: (id: number) => void,
+    onScrollEnd: () => void,
+    {
+      stabilityFrames,
+      currentFrame,
+    } = {
+      stabilityFrames: 20,
+      currentFrame: 0,
+    },
+  ) => {
+    if (currentFrame < stabilityFrames) {
+      const frameId = requestAnimationFrame(() => {
+        pollScrollEndEvent(setFrameId, onScrollEnd, {
+          stabilityFrames,
+          currentFrame: currentFrame + 1,
+        });
+      });
+      setFrameId(frameId);
+      return;
+    }
+
+    onScrollEnd();
+  }, []);
+
+  const startScrollEndEventPolling = useCallback((onScrollEnd: () => void) => {
+    if (scrollEndFrameRef.current != null) {
+      cancelAnimationFrame(scrollEndFrameRef.current);
+      scrollEndFrameRef.current = undefined;
+    }
+    scrollEndFrameRef.current = requestAnimationFrame(() => {
+      pollScrollEndEvent((frameId) => {
+        scrollEndFrameRef.current = frameId;
+      }, onScrollEnd);
+    });
+  }, []);
+
+  const startScrollActivityCheck = useCallback(() => {
+    userStartedScrollingAt.current = Date.now();
+
+    scrollActivityCheckInterval.current = setInterval(() => {
+      if (userStartedScrollingAt.current === null) return;
+      const now = Date.now();
+      const timeEllapsedInSeconds = (now - userStartedScrollingAt.current) / 1000;
+      const scrollRatio = scrollEventCount.current / timeEllapsedInSeconds;
+      if (scrollRatio > 50) {
+        const messageElements = Array.from(document.querySelectorAll('#chat-list [data-message-type]')) as HTMLElement[];
+        const messageTypeCount = messageElements.reduce((acc, element) => {
+          const { messageType } = element.dataset;
+          if (messageType) {
+            if (acc[messageType]) {
+              acc[messageType] += 1;
+            } else {
+              acc[messageType] = 1;
+            }
+          }
+          return acc;
+        }, {} as Record<string, number | undefined>);
+
+        logger.warn({
+          logCode: 'high_scroll_activity_in_chat',
+          extraInfo: {
+            userLoadedMessagesByType: {
+              totalMessages: messageElements.length,
+              ...messageTypeCount,
+            },
+            userId: currentUser?.userId,
+            browserName: browserInfo.browserName,
+            browserVersion: browserInfo.browserVersion,
+            deviceName: deviceInfo.osName,
+            deviceVersion: deviceInfo.osVersion,
+          },
+        }, 'User performed high scroll activity in chat');
+      }
+    }, 1000);
+  }, [currentUser?.userId]);
+
   return (
     <>
       {
@@ -530,10 +614,25 @@ const ChatMessageList: React.FC<ChatListProps> = ({
               setScrollToTailEventHandler();
             }}
             onScroll={(e) => {
-              if (e.target instanceof HTMLDivElement) {
-                const userScrolledUp = Math.ceil(e.target.scrollTop + e.target.clientHeight) < e.target.scrollHeight;
+              const {
+                scrollTop,
+                clientHeight,
+                scrollHeight,
+              } = e.currentTarget;
+              const userScrolledUp = Math.ceil(scrollTop + clientHeight) < scrollHeight;
+              if (userScrolledUp !== showStartSentinel) {
                 setShowStartSentinel(userScrolledUp);
               }
+              if (scrollActivityCheckInterval.current == null) {
+                startScrollActivityCheck();
+              }
+              startScrollEndEventPolling(() => {
+                userStartedScrollingAt.current = null;
+                scrollEventCount.current = 0;
+                clearInterval(scrollActivityCheckInterval.current);
+                scrollActivityCheckInterval.current = undefined;
+              });
+              scrollEventCount.current += 1;
             }}
             onWheel={(e) => {
               if (e.deltaY < 0 && isStartSentinelVisible && !lockLoadingNewPages) {
