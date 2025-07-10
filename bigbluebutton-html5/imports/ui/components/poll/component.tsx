@@ -28,7 +28,6 @@ import SessionStorage from '/imports/ui/services/storage/session';
 import { useStorageKey } from '../../services/storage/hooks';
 import QuizAndPollTabSelector from './components/QuizAndPollTabSelector';
 import { useIsQuizEnabled } from '../../services/features';
-import { set } from 'ramda';
 
 const intlMessages = defineMessages({
   pollPaneTitle: {
