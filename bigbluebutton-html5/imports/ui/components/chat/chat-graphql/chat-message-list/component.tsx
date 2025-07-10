@@ -711,8 +711,8 @@ const ChatMessageList: React.FC<ChatListProps> = ({
               tabIndex={-1}
               aria-hidden
             />
+            {renderUnreadNotification}
           </MessageList>,
-          renderUnreadNotification,
           <ChatReplyIntention key="chatReplyIntention" />,
           <ChatEditingWarning key="chatEditingWarning" />,
         ]

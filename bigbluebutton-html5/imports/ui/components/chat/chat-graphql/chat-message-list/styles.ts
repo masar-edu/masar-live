@@ -35,6 +35,8 @@ export const UnreadButton = styled(ButtonElipsis)`
   text-transform: uppercase;
   margin-bottom: .25rem;
   z-index: 3;
+  position: sticky;
+  bottom: 0;
 `;
 
 export const PageWrapper = styled.div``;
