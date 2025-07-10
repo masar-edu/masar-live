@@ -318,13 +318,12 @@ object Polls {
       for {
         answer <- result.answers
       } yield {
-        if (showAnswer && answer.key == result.correctAnswer.getOrElse("")) {
-          // temporarily adding a check mark to the correct answer
-          // while the whiteboard doesn't know how to handle the correct answer
-          answer.copy(key = s"✅ ${answer.key}")
-        } else {
-          answer
-        }
+        Map(
+          "id" -> answer.id,
+          "key" -> answer.key,
+          "numVotes" -> answer.numVotes,
+          "isCorrectAnswer" -> (showAnswer && answer.isCorrectAnswer)
+        )
       }
     }
 
@@ -732,7 +731,9 @@ class Poll(
   }
 
   def toSimplePollResultOutVO(): SimplePollResultOutVO = {
-    new SimplePollResultOutVO(id, questions(0).questionType, questions(0).text, questions(0).toSimpleVotesOutVO(), questions(0).correctAnswer, numRespondents, _numResponders)
+    new SimplePollResultOutVO(id, questions(0).questionType, questions(0).text,
+      questions(0).toSimpleVotesOutVO(questions(0).correctAnswer.getOrElse("")),
+      questions(0).quiz, questions(0).correctAnswer, numRespondents, _numResponders)
   }
 }
 
@@ -790,10 +791,10 @@ class Question(
     rvos.toArray
   }
 
-  def toSimpleVotesOutVO(): Array[SimpleVoteOutVO] = {
+  def toSimpleVotesOutVO(correctAnswer: String): Array[SimpleVoteOutVO] = {
     val rvos = new ArrayBuffer[SimpleVoteOutVO]
     answers.foreach(answer => {
-      rvos += answer.toSimpleVoteOutVO()
+      rvos += answer.toSimpleVoteOutVO(correctAnswer)
     })
 
     rvos.toArray
@@ -823,8 +824,8 @@ class Answer(val id: Int, val key: String, val text: Option[String]) {
     new SimpleAnswerOutVO(id, key)
   }
 
-  def toSimpleVoteOutVO(): SimpleVoteOutVO = {
-    new SimpleVoteOutVO(id, key, numResponders)
+  def toSimpleVoteOutVO(correctAnswer: String): SimpleVoteOutVO = {
+    new SimpleVoteOutVO(id, key, numResponders, (key == correctAnswer))
   }
 }
 

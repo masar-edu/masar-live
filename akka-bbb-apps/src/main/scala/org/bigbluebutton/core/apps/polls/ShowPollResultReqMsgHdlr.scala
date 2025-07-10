@@ -16,7 +16,7 @@ trait ShowPollResultReqMsgHdlr extends RightsManagementTrait {
 
   def handle(msg: ShowPollResultReqMsg, state: MeetingState2x, liveMeeting: LiveMeeting, bus: MessageBus): Unit = {
 
-    def broadcastEvent(msg: ShowPollResultReqMsg, result: SimplePollResultOutVO): Unit = {
+    def broadcastEvent(msg: ShowPollResultReqMsg, result: SimplePollResultOutVO, isQuiz: Boolean): Unit = {
       // PollShowResultEvtMsg
       val routing = Routing.addMsgToClientRouting(MessageTypes.BROADCAST_TO_MEETING, liveMeeting.props.meetingProp.intId, msg.header.userId)
       val envelope = BbbCoreEnvelope(PollShowResultEvtMsg.NAME, routing)
@@ -63,7 +63,7 @@ trait ShowPollResultReqMsgHdlr extends RightsManagementTrait {
           "numResponders" -> result.numResponders,
         )
 
-        broadcastEvent(msg, result)
+        broadcastEvent(msg, result, poll.questions(0).quiz)
 
         //Send notification
         val notifyEvent = MsgBuilder.buildNotifyAllInMeetingEvtMsg(
