@@ -28,6 +28,7 @@ import SessionStorage from '/imports/ui/services/storage/session';
 import { useStorageKey } from '../../services/storage/hooks';
 import QuizAndPollTabSelector from './components/QuizAndPollTabSelector';
 import { useIsQuizEnabled } from '../../services/features';
+import { set } from 'ramda';
 
 const intlMessages = defineMessages({
   pollPaneTitle: {
@@ -394,10 +395,12 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
       secretPoll,
       warning,
       type,
+      isQuiz,
+      correctAnswer,
     };
   }, [
     customInput, question, questionAndOptions, optList,
-    multipleResponse, secretPoll, warning, type, error,
+    multipleResponse, secretPoll, warning, type, error, isQuiz, correctAnswer,
   ]);
 
   useEffect(() => () => {
@@ -415,6 +418,11 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
       secretPoll: boolean;
       warning: string;
       type: string;
+      isQuiz: boolean;
+      correctAnswer: {
+        text: string;
+        index: number;
+      };
     };
 
     if (pollSavedState) {
@@ -428,6 +436,8 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
         secretPoll,
         type,
         warning,
+        isQuiz = false,
+        correctAnswer = { text: '', index: -1 },
       } = pollSavedState;
 
       setCustomInput(customInput);
@@ -439,6 +449,8 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
       setSecretPoll(secretPoll);
       setType(type);
       setWarning(warning);
+      setIsQuiz(isQuiz);
+      setCorrectAnswer(correctAnswer);
     }
   }, []);
 
