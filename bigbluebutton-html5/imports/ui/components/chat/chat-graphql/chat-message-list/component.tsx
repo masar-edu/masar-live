@@ -207,6 +207,7 @@ const ChatMessageList: React.FC<ChatListProps> = ({
   const [focusedMessageElement, setFocusedMessageElement] = React.useState<HTMLElement | null>();
   const [loadingPages, setLoadingPages] = useState(new Set<number>());
   const [lockLoadingNewPages, setLockLoadingNewPages] = useState(true);
+  const [isScrollingDisabled, setIsScrollingDisabled] = useState(false);
   const allPagesLoaded = loadingPages.size === 0;
   const {
     childRefProxy: endSentinelRefProxy,
@@ -399,6 +400,8 @@ const ChatMessageList: React.FC<ChatListProps> = ({
     let initialTimestamp = 0;
     let scrollPositionDiff = 0;
 
+    setIsScrollingDisabled(true);
+
     const animateScrollPosition = (timestamp: number) => {
       const value = (timestamp - initialTimestamp) / 300;
       if (value <= 1) {
@@ -406,6 +409,7 @@ const ChatMessageList: React.FC<ChatListProps> = ({
         requestAnimationFrame(animateScrollPosition);
       } else {
         container.scrollTop = container.scrollHeight - container.offsetHeight;
+        setIsScrollingDisabled(false);
       }
     };
 
@@ -614,6 +618,10 @@ const ChatMessageList: React.FC<ChatListProps> = ({
               setScrollToTailEventHandler();
             }}
             onScroll={(e) => {
+              if (isScrollingDisabled) {
+                e.preventDefault();
+                return;
+              }
               const {
                 scrollTop,
                 clientHeight,
@@ -635,6 +643,10 @@ const ChatMessageList: React.FC<ChatListProps> = ({
               scrollEventCount.current += 1;
             }}
             onWheel={(e) => {
+              if (isScrollingDisabled) {
+                e.preventDefault();
+                return;
+              }
               if (e.deltaY < 0 && isStartSentinelVisible && !lockLoadingNewPages) {
                 setUserLoadedBackUntilPage((prev) => {
                   if (typeof prev === 'number' && prev > 0) {
