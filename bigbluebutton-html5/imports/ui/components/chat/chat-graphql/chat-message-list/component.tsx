@@ -600,6 +600,7 @@ const ChatMessageList: React.FC<ChatListProps> = ({
             browserVersion: browserInfo.browserVersion,
             deviceName: deviceInfo.osName,
             deviceVersion: deviceInfo.osVersion,
+            scrollRatio,
           },
         }, 'User performed high scroll activity in chat');
       }
