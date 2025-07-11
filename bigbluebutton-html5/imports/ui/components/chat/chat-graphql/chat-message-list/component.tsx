@@ -574,7 +574,7 @@ const ChatMessageList: React.FC<ChatListProps> = ({
       const now = Date.now();
       const timeEllapsedInSeconds = (now - userStartedScrollingAt.current) / 1000;
       const scrollRatio = scrollEventCount.current / timeEllapsedInSeconds;
-      if (scrollRatio > 50) {
+      if (scrollRatio > 100) {
         const messageElements = Array.from(document.querySelectorAll('#chat-list [data-message-type]')) as HTMLElement[];
         const messageTypeCount = messageElements.reduce((acc, element) => {
           const { messageType } = element.dataset;
