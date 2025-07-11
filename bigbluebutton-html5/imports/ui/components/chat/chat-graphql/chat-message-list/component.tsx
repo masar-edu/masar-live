@@ -607,11 +607,20 @@ const ChatMessageList: React.FC<ChatListProps> = ({
     }, 1000);
   }, [currentUser?.userId]);
 
+  useEffect(() => () => {
+    if (scrollActivityCheckInterval.current) {
+      clearInterval(scrollActivityCheckInterval.current);
+    }
+    if (scrollEndFrameRef.current) {
+      cancelAnimationFrame(scrollEndFrameRef.current);
+    }
+  }, []);
+
   return (
     <>
       {
         [
-          <Content>
+          <Content key="message-list-content">
             <MessageList
               id="chat-list"
               key="message-list-wrapper"
