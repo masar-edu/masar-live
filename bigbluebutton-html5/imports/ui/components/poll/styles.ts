@@ -352,6 +352,7 @@ const Question = styled.div`
 const OptionWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  align-items: center;
 `;
 
 const ResponseArea = styled.div`
@@ -398,6 +399,7 @@ const ResultLeft = styled.td`
 
 const ResultRight = styled.td`
   padding-bottom: .25rem;
+  padding-right: 0.5rem;
   word-break: break-all;
 `;
 
@@ -540,6 +542,7 @@ const ButtonsActions = styled.div`
   display: flex;
   width: 100%;
   justify-content: space-between;
+  align-items: center;
 `;
 
 // @ts-ignore - Button is a JS Component
@@ -588,6 +591,41 @@ const DndTextArea = styled.textarea<{ active: boolean }>`
   ${({ active }) => !active && `
     background: ${colorWhite};
   `}
+`;
+
+const CorrectAnswerCheckbox = styled.input`
+  width: 1.5rem;
+  height: 1.5rem;
+`;
+
+const TabSelectorWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+`;
+
+const ShowCorrectAnswerLabel = styled.label`
+  font-size: ${fontSizeSmall};
+  font-weight: bolder;
+  display: flex;
+  align-items: center;
+  font-size: ${fontSizeSmall};
+  margin-bottom: 1rem;
+
+  & > * {
+    margin: 0 .5rem 0 0;
+
+    [dir="rtl"] & {
+      margin: 0 0 0 .5rem;
+    }
+  }
+`;
+
+const LiveResultTable = styled.table`
+  width: 100%;
 `;
 
 export default {
@@ -642,4 +680,8 @@ export default {
   Separator,
   THeading,
   DndTextArea,
+  CorrectAnswerCheckbox,
+  TabSelectorWrapper,
+  ShowCorrectAnswerLabel,
+  LiveResultTable,
 };

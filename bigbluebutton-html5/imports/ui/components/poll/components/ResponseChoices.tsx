@@ -21,9 +21,9 @@ const intlMessages = defineMessages({
 
 interface ResponseChoicesProps {
   type: string | null;
-  toggleIsMultipleResponse: () => void;
-  isMultipleResponse: boolean;
-  optList: Array<{ val: string }>;
+  toggleMultipleResponse: () => void;
+  multipleResponse: boolean;
+  optList: Array<{ key: string; val: string }>;
   handleAddOption: () => void;
   secretPoll: boolean;
   question: string | string[];
@@ -35,12 +35,18 @@ interface ResponseChoicesProps {
   handleRemoveOption: (i: number) => void;
   customInput: boolean;
   questionAndOptions: string[] | string;
+  isQuiz: boolean;
+  correctAnswer: {
+    text: string;
+    index: number;
+  };
+  setCorrectAnswer: (param: {text: string, index: number }) => void;
 }
 
 const ResponseChoices: React.FC<ResponseChoicesProps> = ({
   type,
-  toggleIsMultipleResponse,
-  isMultipleResponse,
+  toggleMultipleResponse,
+  multipleResponse,
   optList,
   handleAddOption,
   secretPoll,
@@ -53,6 +59,9 @@ const ResponseChoices: React.FC<ResponseChoicesProps> = ({
   handleRemoveOption,
   customInput,
   questionAndOptions,
+  isQuiz,
+  correctAnswer,
+  setCorrectAnswer,
 }) => {
   const intl = useIntl();
   if ((!customInput && type) || (questionAndOptions && customInput)) {
@@ -79,8 +88,8 @@ const ResponseChoices: React.FC<ResponseChoicesProps> = ({
         <ResponseArea
           error={error}
           type={type}
-          toggleIsMultipleResponse={toggleIsMultipleResponse}
-          isMultipleResponse={isMultipleResponse}
+          toggleMultipleResponse={toggleMultipleResponse}
+          multipleResponse={multipleResponse}
           optList={optList}
           handleAddOption={handleAddOption}
           secretPoll={secretPoll}
@@ -90,6 +99,9 @@ const ResponseChoices: React.FC<ResponseChoicesProps> = ({
           handleToggle={handleToggle}
           handleInputChange={handleInputChange}
           handleRemoveOption={handleRemoveOption}
+          isQuiz={isQuiz}
+          correctAnswer={correctAnswer}
+          setCorrectAnswer={setCorrectAnswer}
         />
       </div>
     );

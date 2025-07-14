@@ -137,6 +137,10 @@ const intlMessages = defineMessages({
     id: 'app.chat.toolbar.delete.confirmationDescription',
     description: '',
   },
+  quizResult: {
+    id: 'app.chat.quizResult',
+    description: 'Quiz result label in chat',
+  },
 });
 
 function isInViewport(el: HTMLDivElement) {
@@ -386,9 +390,11 @@ const ChatMessage = React.forwardRef<ChatMessageRef, ChatMessageProps>(({
     showToolbar: boolean;
   } = useMemo(() => {
     switch (message.messageType) {
-      case ChatMessageType.POLL:
+      case ChatMessageType.POLL: {
+        const pollData = JSON.parse(message.messageMetadata) as { quiz: boolean;};
         return {
-          name: intl.formatMessage(intlMessages.pollResult),
+          name: pollData.quiz
+            ? intl.formatMessage(intlMessages.quizResult) : intl.formatMessage(intlMessages.pollResult),
           color: '#3B48A9',
           isModerator: true,
           component: (
@@ -400,6 +406,7 @@ const ChatMessage = React.forwardRef<ChatMessageRef, ChatMessageProps>(({
           showToolbar: false,
           isSystemSender: true,
         };
+      }
       case ChatMessageType.PRESENTATION:
         return {
           name: '',
@@ -487,8 +494,11 @@ const ChatMessage = React.forwardRef<ChatMessageRef, ChatMessageProps>(({
       case ChatMessageType.USER_IS_PRESENTER_MSG: {
         const { assignedBy } = JSON.parse(message.messageMetadata);
         const userIsPresenterMsg = (assignedBy)
-          ? `${intl.formatMessage(intlMessages.userIsPresenterSetBy, { 0: message.senderName, 1: assignedBy })}`
-          : `${intl.formatMessage(intlMessages.userIsPresenter, { 0: message.senderName })}`;
+          ? `${intl.formatMessage(intlMessages.userIsPresenterSetBy, {
+            presenterName: message.senderName,
+            assignedByName: assignedBy,
+          })}`
+          : `${intl.formatMessage(intlMessages.userIsPresenter, { presenterName: message.senderName })}`;
         return {
           name: message.senderName,
           color: '#0F70D7',
@@ -734,7 +744,7 @@ const ChatMessage = React.forwardRef<ChatMessageRef, ChatMessageProps>(({
       )}
       {deleteTime && (
         <DeleteMessage>
-          {intl.formatMessage(intlMessages.deleteMessage, { 0: message.deletedBy?.name })}
+          {intl.formatMessage(intlMessages.deleteMessage, { userName: message.deletedBy?.name })}
         </DeleteMessage>
       )}
     </ChatContent>
@@ -791,6 +801,7 @@ const ChatMessage = React.forwardRef<ChatMessageRef, ChatMessageProps>(({
       ref={containerRef}
       $sequence={message.messageSequence}
       data-sequence={message.messageSequence}
+      data-message-type={message.messageType}
       data-focusable={focusable}
       onKeyDown={(e) => {
         const isTargetElement = e.target === e.currentTarget;

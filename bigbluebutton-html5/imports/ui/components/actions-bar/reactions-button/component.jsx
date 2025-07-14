@@ -150,6 +150,7 @@ const ReactionsButton = (props) => {
       isMobile={isMobile}
       isEmoji
       roundButtons
+      minContent={isMobile}
       keepOpen={!autoCloseReactionsBar}
       opts={{
         id: 'reactions-dropdown-menu',

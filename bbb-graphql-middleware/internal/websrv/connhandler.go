@@ -324,7 +324,7 @@ func invalidateBrowserConnectionForSessionToken(bc *common.BrowserConnection, se
 
 func refreshUserSessionVariables(browserConnection *common.BrowserConnection) (error, string) {
 	// Check authorization
-	sessionVariables, err, errorId := akka_apps.AkkaAppsGetSessionVariablesFrom(browserConnection.Id, browserConnection.SessionToken)
+	sessionVariables, err, errorId := akka_apps.AkkaAppsGetSessionVariablesFrom(browserConnection.Id, browserConnection.SessionToken, browserConnection.ClientSessionUUID)
 	if err != nil {
 		browserConnection.Logger.Error(err)
 		return fmt.Errorf("error on checking sessionToken authorization: %s", err.Error()), errorId
@@ -382,6 +382,7 @@ func connectionInitHandler(browserConnection *common.BrowserConnection) (error, 
 			if !existsClientSessionUUID {
 				return fmt.Errorf("X-ClientSessionUUID header missing on init connection"), "param_missing"
 			}
+			browserConnection.Logger = browserConnection.Logger.WithField("clientSessionUUID", clientSessionUUID)
 
 			var clientType, existsClientType = headersAsMap["X-ClientType"].(string)
 			if !existsClientType {
@@ -399,7 +400,7 @@ func connectionInitHandler(browserConnection *common.BrowserConnection) (error, 
 			// Check authorization
 			var numOfAttempts = 0
 			for {
-				meetingId, userId, errCheckAuthorization = bbb_web.BBBWebCheckAuthorization(browserConnection.Id, sessionToken, browserConnection.BrowserRequestCookies)
+				meetingId, userId, errCheckAuthorization = bbb_web.BBBWebCheckAuthorization(browserConnection.Id, sessionToken, clientSessionUUID, browserConnection.BrowserRequestCookies)
 				if errCheckAuthorization != nil {
 					browserConnection.Logger.Error(errCheckAuthorization)
 				}
@@ -412,11 +413,11 @@ func connectionInitHandler(browserConnection *common.BrowserConnection) (error, 
 			}
 
 			if errCheckAuthorization != nil {
-				return fmt.Errorf("error on trying to check authorization"), "user_not_found"
+				return fmt.Errorf("error on trying to check authorization"), "check_authorization_error"
 			}
 
 			if meetingId == "" {
-				return fmt.Errorf("error on trying to check authorization"), "user_not_found"
+				return fmt.Errorf("error on trying to check authorization"), "meeting_not_found"
 			}
 			browserConnection.Logger = browserConnection.Logger.WithField("meetingId", meetingId)
 

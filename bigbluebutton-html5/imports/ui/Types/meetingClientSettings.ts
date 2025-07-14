@@ -470,6 +470,10 @@ export interface Poll {
   maxTypedAnswerLength: number
   chatMessage: boolean
   quickPollConfirmationStep: boolean
+  quiz: {
+    enabled: boolean
+    quickPollCorrectAnswerSuffix: string
+  }
 }
 
 export interface Captions {
@@ -780,6 +784,7 @@ export interface Text {
 
 export interface Toolbar {
   multiUserPenOnly: boolean
+  initialSelectedTool: string
   presenterTools: string[]
   multiUserTools: string[]
 }

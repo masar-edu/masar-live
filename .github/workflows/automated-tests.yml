@@ -93,7 +93,7 @@ jobs:
         id: cache-action
         uses: actions/cache@v4
         with:
-          path: artifacts.tar
+          path: artifacts/
           key: ${{ runner.os }}-${{ matrix.package }}-${{ env.BIGBLUEBUTTON_RELEASE }}-commits-${{ env.CACHE_KEY_FILES }}-urls-${{ env.CACHE_KEY_URLS }}
       - if: ${{ steps.cache-action.outputs.cache-hit != 'true' }}
         name: Generate artifacts
@@ -101,14 +101,125 @@ jobs:
         run: |
           ./build/get_external_dependencies.sh
           echo "${{ matrix.build-list || matrix.package }}" | xargs -n 1 ./build/setup.sh
-          tar cvf artifacts.tar artifacts/
+      - name: Sanitize artifact filenames
+        shell: bash
+        run: |
+          if [ -d "artifacts" ]; then
+            echo "Sanitizing filenames to remove problematic characters..."
+            find artifacts -name "*:*" -type f | while read -r file; do
+              # Replace colons with underscores
+              newfile=$(echo "$file" | sed 's/:/_/g')
+              echo "Renaming: $file -> $newfile"
+              mv "$file" "$newfile"
+            done
+            echo "Final artifacts contents:"
+            ls -la artifacts/
+          fi
       - name: Archive packages
         uses: actions/upload-artifact@v4
         with:
-          name: artifacts_${{ matrix.package }}.tar
-          path: artifacts.tar
-  install-and-run-bbb-tests:
+          name: artifacts_${{ matrix.package }}
+          path: artifacts/
+  unify-artifacts:
     needs: build-package
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Create all-artifacts directory
+        run: mkdir -p all-artifacts
+      - name: Download artifacts_bbb-apps-akka
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-apps-akka
+          path: all-artifacts
+      - name: Download artifacts_bbb-config
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-config
+          path: all-artifacts
+      - name: Download artifacts_bbb-export-annotations
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-export-annotations
+          path: all-artifacts
+      - name: Download artifacts_bbb-learning-dashboard
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-learning-dashboard
+          path: all-artifacts
+      - name: Download artifacts_bbb-playback-record
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-playback-record
+          path: all-artifacts
+      - name: Download artifacts_bbb-graphql-server
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-graphql-server
+          path: all-artifacts
+      - name: Download artifacts_bbb-etherpad
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-etherpad
+          path: all-artifacts
+      - name: Download artifacts_bbb-freeswitch
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-freeswitch
+          path: all-artifacts
+      - name: Download artifacts_bbb-webrtc
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-webrtc
+          path: all-artifacts
+      - name: Download artifacts_bbb-web
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-web
+          path: all-artifacts
+      - name: Download artifacts_bbb-fsesl-akka
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-fsesl-akka
+          path: all-artifacts
+      - name: Download artifacts_bbb-html5
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_bbb-html5
+          path: all-artifacts
+      - name: Download artifacts_others
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts_others
+          path: all-artifacts
+      - name: List final artifacts
+        run: |
+          echo "Final contents of all-artifacts:"
+          ls -la all-artifacts/
+      - name: Upload unified all-artifacts directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-bbb-artifacts
+          path: all-artifacts/
+      - name: Remove individual artifacts
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: |
+            artifacts_bbb-apps-akka
+            artifacts_bbb-config
+            artifacts_bbb-export-annotations
+            artifacts_bbb-learning-dashboard
+            artifacts_bbb-playback-record
+            artifacts_bbb-graphql-server
+            artifacts_bbb-etherpad
+            artifacts_bbb-freeswitch
+            artifacts_bbb-webrtc
+            artifacts_bbb-web
+            artifacts_bbb-fsesl-akka
+            artifacts_bbb-html5
+            artifacts_others
+          failOnError: false
+  install-and-run-bbb-tests:
+    needs: unify-artifacts
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -184,7 +295,7 @@ jobs:
           name: bbb-logs-${{ env.MATRIX_SHARD_UNDERSCORED }}
           path: ./bbb-logs.tar.gz
   install-and-run-plugin-tests:
-    needs: build-package
+    needs: unify-artifacts
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -309,13 +420,19 @@ jobs:
       hasReportData: ${{ needs.install-and-run-bbb-tests.result == 'success' || needs.install-and-run-bbb-tests.result == 'failure' && needs.install-and-run-plugin-tests.result == 'success' || needs.install-and-run-plugin-tests.result == 'failure' }}
     steps:
       - uses: actions/checkout@v4
-      - name: Merge and upload the blob reports
-        if: ${{ env.hasReportData }}
-        uses: ./.github/actions/merge-and-upload-blob-reports
-      - name: Remove unnecessary artifact
+      # temporarily disabled as merged blob reports are not being used
+      # - name: Merge and upload the blob reports
+      # if: ${{ env.hasReportData }}
+      #   uses: ./.github/actions/merge-and-upload-blob-reports
+      # - name: Remove unnecessary artifact
+      #   uses: geekyeggo/delete-artifact@v5
+      #   with:
+      #     name: all-blob-reports
+      #     failOnError: false
+      - name: Remove unnecessary blob artifacts
         uses: geekyeggo/delete-artifact@v5
         with:
-          name: all-blob-reports
+          name: blob-report-*
           failOnError: false
       - name: Write PR data for auto-comment
         if: github.event_name == 'pull_request'

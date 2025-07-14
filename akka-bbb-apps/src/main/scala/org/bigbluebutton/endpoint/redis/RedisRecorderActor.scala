@@ -773,6 +773,8 @@ class RedisRecorderActor(
     ev.setPollId(msg.body.pollId)
     ev.setQuestion(msg.body.poll.questionText.getOrElse(""))
     ev.setAnswers(msg.body.poll.answers)
+    ev.setIsQuiz(msg.body.poll.quiz)
+    ev.setShowCorrectAnswer(msg.body.showAnswer)
     ev.setNumRespondents(msg.body.poll.numRespondents)
     ev.setNumResponders(msg.body.poll.numResponders)
 

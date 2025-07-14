@@ -23,7 +23,6 @@ import '@bigbluebutton/tldraw/tldraw.css';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { compressToBase64, decompressFromBase64 } from 'lz-string';
 import SlideCalcUtil, { HUNDRED_PERCENT } from '/imports/utils/slideCalcUtils';
-import meetingClientSettingsInitialValues from '/imports/ui/core/initial-values/meetingClientSettings';
 import getFromUserSettings from '/imports/ui/services/users-settings';
 import KEY_CODES from '/imports/utils/keyCodes';
 import { debounce } from '/imports/utils/debounce';
@@ -209,15 +208,15 @@ const Whiteboard = React.memo((props) => {
 
       const bbbMultiUserPenOnly = getFromUserSettings(
         'bbb_multi_user_pen_only',
-        false,
+        window.meetingClientSettings.public.whiteboard.toolbar.multiUserPenOnly,
       );
       const bbbPresenterTools = getFromUserSettings(
         'bbb_presenter_tools',
-        meetingClientSettingsInitialValues.public.whiteboard.toolbar.presenterTools,
+        window.meetingClientSettings.public.whiteboard.toolbar.presenterTools,
       );
       const bbbMultiUserTools = getFromUserSettings(
         'bbb_multi_user_tools',
-        meetingClientSettingsInitialValues.public.whiteboard.toolbar.multiUserTools,
+        window.meetingClientSettings.public.whiteboard.toolbar.multiUserTools,
       );
 
       if (tools.deleteAll) {
@@ -380,7 +379,16 @@ const Whiteboard = React.memo((props) => {
     if (!hasWBAccess && !isPresenter) {
       tlEditorRef?.current?.setCurrentTool('noop');
     } else if (hasWBAccess && !isPresenter) {
-      tlEditorRef?.current?.setCurrentTool('draw');
+      const {
+        initialSelectedTool: initialSelectedToolFromConfig,
+        multiUserTools,
+      } = window.meetingClientSettings.public.whiteboard.toolbar;
+      const initialSelectedTool = getFromUserSettings(
+        'bbb_initial_selected_tool',
+        initialSelectedToolFromConfig,
+      );
+      const initialTool = multiUserTools.includes(initialSelectedTool) ? initialSelectedTool : 'draw';
+      tlEditorRef?.current?.setCurrentTool(initialTool);
     }
   }, [hasWBAccess]);
 
@@ -653,6 +661,34 @@ const Whiteboard = React.memo((props) => {
         '!': () => {
           zoomChanger(HUNDRED_PERCENT);
         },
+        '@': () => {
+          const selectionBounds = tlEditorRef.current?.getSelectionPageBounds();
+          const selectionAspectRatio = selectionBounds.w / selectionBounds.h;
+          const presentationAreaAspectRatio = presentationWidth / presentationHeight;
+
+          let baseZoomToFitIn;
+
+          if (
+            selectionAspectRatio > presentationAreaAspectRatio
+            || (fitToWidthRef.current && isPresenterRef.current)
+          ) {
+            baseZoomToFitIn = presentationWidth / selectionBounds.w;
+          } else {
+            baseZoomToFitIn = presentationHeight / selectionBounds.h;
+          }
+
+          const adjustedBaseZoomToFitIn = (Math.max(baseZoomToFitIn, initialZoomRef.current)) / initialZoomRef.current;
+          const zoomPercentage = adjustedBaseZoomToFitIn * 100;
+          zoomChanger(zoomPercentage);
+
+          const nextCamera = {
+            x: selectionBounds.x,
+            y: selectionBounds.y,
+            z: adjustedBaseZoomToFitIn,
+          };
+
+          tlEditorRef.current.setCamera(nextCamera, { duration: 175 });
+        },
       };
 
       if (shiftKeyMap[key]) {
@@ -750,7 +786,7 @@ const Whiteboard = React.memo((props) => {
     }
   }, [
     tlEditorRef, isPresenterRef, hasWBAccessRef, previousTool, handleCut, handleCopy, handlePaste,
-    isInfiniteWhiteboard, zoomChanger,
+    isInfiniteWhiteboard, zoomChanger, presentationHeight, presentationWidth,
   ]);
 
   const createPage = (currentPageId) => [
@@ -771,9 +807,11 @@ const Whiteboard = React.memo((props) => {
     }
 
     return () => {
-      whiteboardRef.current?.removeEventListener('keydown', handleKeyDown);
+      whiteboardRef.current?.removeEventListener('keydown', handleKeyDown, {
+        capture: true,
+      });
     };
-  }, [whiteboardRef.current]);
+  }, [whiteboardRef.current, handleKeyDown]);
 
   const language = React.useMemo(() => mapLanguage(locale?.toLowerCase() || 'en'), [locale]);
 
@@ -1443,7 +1481,22 @@ const Whiteboard = React.memo((props) => {
       if (!isPresenterRef.current && !hasWBAccessRef.current) {
         editor?.setCurrentTool('noop');
       } else {
-        editor?.setCurrentTool('draw');
+        const {
+          initialSelectedTool: initialSelectedToolFromConfig,
+          presenterTools,
+          multiUserTools,
+        } = window.meetingClientSettings.public.whiteboard.toolbar;
+        const initialSelectedTool = getFromUserSettings(
+          'bbb_initial_selected_tool',
+          initialSelectedToolFromConfig,
+        );
+        if (isPresenterRef.current) {
+          const initialPresenterTool = presenterTools.includes(initialSelectedTool) ? initialSelectedTool : 'noop';
+          editor?.setCurrentTool(initialPresenterTool);
+        } else {
+          const initialTool = multiUserTools.includes(initialSelectedTool) ? initialSelectedTool : 'noop';
+          editor?.setCurrentTool(initialTool);
+        }
       }
     }
 
@@ -1699,7 +1752,7 @@ const Whiteboard = React.memo((props) => {
       && isPresenter
       && !isWheelZoomRef.current
     ) {
-      if (!isMounting && prevZoomValueRef.current !== zoomValue) {
+      if (!isMounting) {
         syncCameraOnPresenterZoom();
       }
     }

@@ -2,6 +2,7 @@ import React from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import { pollTypes } from '../service';
 import Styled from '../styles';
+import Tooltip from '/imports/ui/components/common/tooltip/container';
 
 const intlMessages = defineMessages({
   customPlaceholder: {
@@ -20,14 +21,24 @@ const intlMessages = defineMessages({
     id: 'app.poll.emptyPollOpt',
     description: 'screen reader for blank poll option',
   },
+  correctAnswerSelectionTooltip: {
+    id: 'app.poll.quiz.options.tooltip',
+    description: 'Tooltip for the correct answer option selection in a quiz',
+  },
 });
 
 interface PollInputsProps {
-  optList: Array<{ val: string }>;
+  optList: Array<{ key: string; val: string }>;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>, i: number) => void;
   handleRemoveOption: (i: number) => void;
   type: string | null;
   error: string | null;
+  isQuiz: boolean;
+  correctAnswer: {
+    text: string;
+    index: number;
+  };
+  setCorrectAnswer: (param: {text: string, index: number }) => void;
 }
 
 const PollInputs: React.FC<PollInputsProps> = ({
@@ -36,6 +47,9 @@ const PollInputs: React.FC<PollInputsProps> = ({
   handleRemoveOption,
   type,
   error,
+  isQuiz,
+  correctAnswer,
+  setCorrectAnswer,
 }) => {
   const POLL_SETTINGS = window.meetingClientSettings.public.poll;
   const MAX_CUSTOM_FIELDS = POLL_SETTINGS.maxCustom;
@@ -43,7 +57,7 @@ const PollInputs: React.FC<PollInputsProps> = ({
   const MIN_OPTIONS_LENGTH = 2;
   const intl = useIntl();
   let hasVal = false;
-  return optList.slice(0, MAX_CUSTOM_FIELDS).map((o: { val: string }, i: number) => {
+  return optList.slice(0, MAX_CUSTOM_FIELDS).map((o: { key: string; val: string }, i: number) => {
     const pollOptionKey = `poll-option-${i}`;
     if (o.val && o.val.length > 0) hasVal = true;
     return (
@@ -60,6 +74,24 @@ const PollInputs: React.FC<PollInputsProps> = ({
             onCut={(e) => { e.stopPropagation(); }}
             onCopy={(e) => { e.stopPropagation(); }}
           />
+          {isQuiz && (
+            <Tooltip title={intl.formatMessage(intlMessages.correctAnswerSelectionTooltip)}>
+              <Styled.CorrectAnswerCheckbox
+                type="radio"
+                id={`correct-answer-${i}`}
+                checked={correctAnswer.index === i}
+                disabled={o.val.length === 0}
+                onChange={(ev: React.ChangeEvent<HTMLInputElement>) => {
+                  if (ev.target.checked) {
+                    setCorrectAnswer({
+                      text: o.key,
+                      index: i,
+                    });
+                  }
+                }}
+              />
+            </Tooltip>
+          )}
           {optList.length > MIN_OPTIONS_LENGTH && (
             <Styled.DeletePollOptionButton
               label={intl.formatMessage(intlMessages.delete)}
@@ -77,7 +109,7 @@ const PollInputs: React.FC<PollInputsProps> = ({
           <span className="sr-only" id={`option-${i}`}>
             {intl.formatMessage(
               intlMessages.deleteRespDesc,
-              { 0: o.val || intl.formatMessage(intlMessages.emptyPollOpt) },
+              { option: o.val || intl.formatMessage(intlMessages.emptyPollOpt) },
             )}
           </span>
         </Styled.OptionWrapper>
