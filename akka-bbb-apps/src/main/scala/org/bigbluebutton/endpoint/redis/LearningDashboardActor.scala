@@ -38,6 +38,7 @@ case class User(
                  name:               String,
                  isModerator:        Boolean,
                  isDialIn:           Boolean = false,
+                 avatar:             String = null,
                  currentIntId:       String = null,
                  answers:            Map[String,Vector[String]] = Map(),
                  genericData:        Map[String, Vector[GenericData]] = Map(),
@@ -337,21 +338,30 @@ class LearningDashboardActor(
         }))
 
         //Flagged user must be reactivated, once UserJoinedMeetingEvtMsg won't be sent
-        if(userLeftFlagged.size > 0) {
+        if(userLeftFlagged.nonEmpty) {
           this.addUserToMeeting(
             msg.header.meetingId,
             msg.body.userId,
             userLeftFlagged.last.extId,
             userLeftFlagged.last.name,
             userLeftFlagged.last.isModerator,
-            userLeftFlagged.last.isDialIn)
+            userLeftFlagged.last.isDialIn,
+            userLeftFlagged.last.avatar,
+          )
         }
       }
     }
   }
 
   private def handleUserJoinedMeetingEvtMsg(msg: UserJoinedMeetingEvtMsg): Unit = {
-    this.addUserToMeeting(msg.header.meetingId, msg.body.intId, msg.body.extId, msg.body.name, (msg.body.role == Roles.MODERATOR_ROLE), false)
+    this.addUserToMeeting(
+      msg.header.meetingId,
+      msg.body.intId,
+      msg.body.extId,
+      msg.body.name,
+      (msg.body.role == Roles.MODERATOR_ROLE),
+      isDialIn = false,
+      msg.body.avatar)
   }
 
   private def handleUserLeaveReqMsg(msg: UserLeaveReqMsg): Unit = {
@@ -487,11 +497,18 @@ class LearningDashboardActor(
   private def handleUserJoinedVoiceConfToClientEvtMsg(msg: UserJoinedVoiceConfToClientEvtMsg): Unit = {
     //Create users for Dial-in connections
     if(msg.body.intId.startsWith(IntIdPrefixType.DIAL_IN)) {
-      this.addUserToMeeting(msg.header.meetingId, msg.body.intId, msg.body.callerName, msg.body.callerName, false, true)
+      this.addUserToMeeting(
+        msg.header.meetingId,
+        msg.body.intId,
+        msg.body.callerName,
+        msg.body.callerName,
+        isModerator = false,
+        isDialIn = true,
+        avatar = null)
     }
   }
 
-  private def handleUserLeftVoiceConfToClientEvtMsg(msg: UserLeftVoiceConfToClientEvtMsg) {
+  private def handleUserLeftVoiceConfToClientEvtMsg(msg: UserLeftVoiceConfToClientEvtMsg): Unit = {
     for {
       meeting <- meetings.values.find(m => m.intId == msg.header.meetingId)
       user <- findUserByIntId(meeting, msg.body.intId)
@@ -750,16 +767,16 @@ class LearningDashboardActor(
     )
   }
 
-  private def addUserToMeeting(meetingIntId: String, intId: String, extId: String, name: String, isModerator: Boolean, isDialIn: Boolean): Unit = {
+  private def addUserToMeeting(meetingIntId: String, intId: String, extId: String, name: String, isModerator: Boolean, isDialIn: Boolean, avatar: String): Unit = {
     for {
       meeting <- meetings.values.find(m => m.intId == meetingIntId)
     } yield {
-      if(!meetingExcludedUserIds.get(meeting.intId).getOrElse(Vector()).contains(extId)) {
+      if(!meetingExcludedUserIds.getOrElse(meeting.intId, Vector()).contains(extId)) {
         val currentTime = System.currentTimeMillis();
 
         val user: User = userWithLeftProps(
           findUserByIntId(meeting, intId).getOrElse(
-            findUserByExtId(meeting, extId, true).getOrElse({
+            findUserByExtId(meeting, extId, filterUserLeft = true).getOrElse({
               User(
                 getNextKey(meeting, extId),
                 extId,
@@ -767,11 +784,15 @@ class LearningDashboardActor(
                 name,
                 isModerator,
                 isDialIn,
+                avatar match {
+                  case "" => null
+                  case a => a
+                },
                 currentIntId = intId,
               )
             })
           )
-          , currentTime, false)
+          , currentTime, forceFlaggedIdsToLeft = false)
 
         val currentUserId = user.intIds.get(intId).getOrElse(UserId(intId, sessions = Vector()))
 
