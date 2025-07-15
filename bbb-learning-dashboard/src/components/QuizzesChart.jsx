@@ -105,17 +105,16 @@ const QuizzesChart = (props) => {
             content={(tooltipProps) => {
               const { active, payload } = tooltipProps;
               const isVisible = active && payload?.length;
-              const avatars = payload?.[0]?.payload?.users?.map((user) => user.avatar) || [];
               return (
                 <Paper style={{ visibility: isVisible ? 'visible' : 'hidden' }} className="p-2">
                   {isVisible && (
                     <>
-                      <p className="font-bold">
-                        {[payload[0].payload.users.map((user) => (
-                          <div key={user.name} className="flex items-center">
-                            {avatars[0] ? (
+                      <p className="font-bold space-y-2">
+                        {payload[0]?.payload.users.map((user) => (
+                          <div key={user.userKey} className="flex items-center">
+                            {user.avatar ? (
                               <div
-                                style={{ backgroundImage: `url(${avatars[0]})` }}
+                                style={{ backgroundImage: `url(${user.avatar})` }}
                                 alt={user.name}
                                 className="inline-block w-6 h-6 rounded-full mr-2 bg-cover bg-center"
                               />
@@ -126,7 +125,7 @@ const QuizzesChart = (props) => {
                             )}
                             <span>{user.name}</span>
                           </div>
-                        ))]}
+                        ))}
                       </p>
                       <p className="text-gray-600">
                         {`${intl.formatMessage({
