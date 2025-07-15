@@ -140,13 +140,13 @@ and prepend the mount point of bbb-html5 in all location sections:
 # running in production (static assets)
 location /bbb-01/html5client {
     gzip_static on;
-    alias /var/bigbluebutton/html5-client/;
+    alias /usr/share/bigbluebutton/html5-client/;
     index index.html;
     try_files $uri $uri/ =404;
 }
 
 location /bbb-01/html5client/locales {
-  alias /var/bigbluebutton/html5-client/locales;
+  alias /usr/share/bigbluebutton/html5-client/locales;
   autoindex on;
   autoindex_format json;
 }
