@@ -59,7 +59,7 @@ const QuizzesChart = (props) => {
           defaultMessage: 'Quiz Performance vs Activity Level',
         })}
       </h2>
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer width="100%" height={450}>
         <ScatterChart
           margin={{
             top: 20,
@@ -72,6 +72,8 @@ const QuizzesChart = (props) => {
           <XAxis
             type="number"
             dataKey="x"
+            height={50}
+            tickMargin={18}
             name={intl.formatMessage({
               id: 'app.learningDashboard.quizzes.activityLevel',
               defaultMessage: 'Activity Level',
@@ -87,6 +89,8 @@ const QuizzesChart = (props) => {
           <YAxis
             type="number"
             dataKey="y"
+            width={80}
+            tickMargin={18}
             name={intl.formatMessage({
               id: 'app.learningDashboard.quizzes.quizScore',
               defaultMessage: 'Quiz Score',
@@ -116,10 +120,10 @@ const QuizzesChart = (props) => {
                               <div
                                 style={{ backgroundImage: `url(${user.avatar})` }}
                                 alt={user.name}
-                                className="inline-block w-6 h-6 rounded-full mr-2 bg-cover bg-center"
+                                className="inline-block w-8 h-8 rounded-full mr-2 bg-cover bg-center"
                               />
                             ) : (
-                              <div className="relative hidden w-6 h-6 rounded-full md:block mr-2">
+                              <div className="relative hidden w-8 h-8 rounded-full md:block mr-2">
                                 <UserAvatar user={user} />
                               </div>
                             )}
@@ -154,7 +158,7 @@ const QuizzesChart = (props) => {
             fill="#f97316"
             shape={(data) => {
               const IMAGE_SIZE = 36;
-              const FALLBACK_IMAGE_SIZE = 18;
+              const FALLBACK_IMAGE_SIZE = 32;
 
               const {
                 x, y, width, height,
@@ -173,7 +177,7 @@ const QuizzesChart = (props) => {
                     y={adjustedY}
                     width={IMAGE_SIZE}
                     height={IMAGE_SIZE}
-                    clipPath="circle(22.5%)"
+                    clipPath="circle(38.5%)"
                   />
                 </>
               ) : (
