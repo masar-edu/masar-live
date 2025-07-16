@@ -81,6 +81,7 @@ const QuickPollDropdown = (props) => {
   } = currentSlide;
 
   const questionPattern = /^[a-zA-Z0-9][.)]\s+.*/;
+  const basicQuestionPattern = /^.*\?\s*$/;
 
   const yesNoPatt = createPattern([yesValue, noValue]);
   const trueFalsePatt = createPattern([trueValue, falseValue]);
@@ -103,6 +104,7 @@ const QuickPollDropdown = (props) => {
       // We've found explicit options (e.g., "a) Yes" or "Yes / No")
       isOptionSection = true;
       options.push(trimmedLine);
+      if (basicQuestionPattern.test(trimmedLine)) questionLines.push(trimmedLine);
     } else if (!isOptionSection && trimmedLine.length > 0) {
       // Any non-empty line before options is considered question text
       questionLines.push(trimmedLine);
