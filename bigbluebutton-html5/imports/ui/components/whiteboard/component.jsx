@@ -315,10 +315,6 @@ const Whiteboard = React.memo((props) => {
       prevShapesRef.current = shapes;
       tlEditorRef.current?.store.mergeRemoteChanges(() => {
         const remoteShapesArray = Object.values(prevShapesRef.current).reduce((acc, shape) => {
-          const isOwnerUpdate = shape.meta?.updatedBy === currentUser?.userId;
-          // if the remote shape was last updated by the owner, skip because it is already in the tldraw store.
-          if (isOwnerUpdate) return acc
-
           if (
             shape.meta?.presentationId === presentationIdRef.current
             || shape?.whiteboardId?.includes(presentationIdRef.current)
