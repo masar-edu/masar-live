@@ -1508,7 +1508,7 @@
     "app.learningDashboard.userDetails.talkTime": "Talk Time",
     "app.learningDashboard.userDetails.messages": "Messages",
     "app.learningDashboard.userDetails.raiseHands": "Raise Hands",
-    "app.learningDashboard.userDetails.pollVotes": "Poll Votes",
+    "app.learningDashboard.userDetails.pollVotes": "Poll/Quiz Votes",
     "app.learningDashboard.userDetails.onlineIndicator": "{userName} online time",
     "app.learningDashboard.userDetails.quiz": "Quiz",
     "app.learningDashboard.usersTable.title": "Overview",
