@@ -1188,7 +1188,7 @@ mediasoup:
 
 #### Apply custom settings for TURN server
 
-If you always want a specific TURN server configuration, add the following to [apply-config.sh](#preserving-customizations-using-apply-confsh) and modify `aaa.bbb.ccc.ddd` and `secret` with your values.
+If you always want a specific TURN server configuration, add the following to [apply-config.sh](#preserving-customizations-using-apply-configsh) and modify `aaa.bbb.ccc.ddd` and `secret` with your values.
 
 ```bash
 echo "  - Update TURN server configuration turn-stun-servers.xml"
