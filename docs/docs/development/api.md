@@ -538,9 +538,9 @@ http&#58;//yourserver.com/bigbluebutton/api/join?[parameters]&checksum=[checksum
 
 **Example Requests:**
 
-- http&#58;//yourserver.com/bigbluebutton/api/join?meetingID=test01&password=mp&fullName=John&checksum=1234
-- http&#58;//yourserver.com/bigbluebutton/api/join?meetingID=test01&password=ap&fullName=Mark&checksum=wxyz
-- http&#58;//yourserver.com/bigbluebutton/api/join?meetingID=test01&password=ap&fullName=Chris&createTime=273648&checksum=abcd
+- http&#58;//yourserver.com/bigbluebutton/api/join?meetingID=test01&role=moderator&fullName=John&checksum=1234
+- http&#58;//yourserver.com/bigbluebutton/api/join?meetingID=test01&role=viewer&fullName=Mark&checksum=wxyz
+- http&#58;//yourserver.com/bigbluebutton/api/join?meetingID=test01&role=viewer&fullName=Chris&createTime=273648&checksum=abcd
 
 **Example Response:**
 
@@ -658,7 +658,7 @@ Use this to forcibly end a meeting and kick all participants out of the meeting.
 
 **Example Requests:**
 
-- http&#58;//yourserver.com/bigbluebutton/api/end?meetingID=1234567890&password=mp&checksum=1234
+- http&#58;//yourserver.com/bigbluebutton/api/end?meetingID=1234567890&checksum=1234
 
 **Example Response:**
 
@@ -680,7 +680,6 @@ curl --request POST \
 	--url https://<your-host>/bigbluebutton/api/end \
 	--header 'Content-Type: application/x-www-form-urlencoded' \
 	--data meetingID=Test+Meeting \
-	--data password=mp \
 	--data checksum=1234
 ```
 
