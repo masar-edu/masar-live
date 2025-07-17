@@ -88,6 +88,24 @@ const PluginsTable = (props) => {
                   {children}
                 </a>
               ),
+              img: ({
+                node, src, alt, ...restProps
+              }) => (
+                <a href={src} target="_blank" rel="noopener noreferrer" className="block border border-gray-300">
+                  <img
+                    src={src}
+                    alt={alt}
+                    {...restProps}
+                    style={{
+                      maxHeight: '120px',
+                      height: 'auto',
+                      maxWidth: '120px',
+                      width: 'auto',
+                      cursor: 'pointer',
+                    }}
+                  />
+                </a>
+              ),
             }}
           >
             {value}
@@ -105,7 +123,7 @@ const PluginsTable = (props) => {
     disableColumnMenu: true,
     disableColumnSelector: true,
     disableSelectionOnClick: true,
-    rowHeight: 45,
+    rowHeight: 125,
   };
 
   return (
