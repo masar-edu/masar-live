@@ -442,7 +442,7 @@
     "app.poll.removePollOpt": "Entfernt die Option {option}",
     "app.poll.emptyPollOpt": "Leer",
     "app.poll.info": "Umfragemodus: Meinungen sammeln und Antwortverteilung sehen. Keine korrekten Antworten erforderlich.",
-    "app.poll.quiz.info": "Quizmodus: Wählen Sie für jede Frage die richtige Antwort aus. Die Ergebnisse zeigen, wer richtig lag.",
+    "app.poll.quiz.info": "Quizmodus: Für jede Frage muss die richtige Antwort ausgewählt werden. Die Ergebnisse zeigen, wer richtig lag.",
     "app.poll.quiz.answerChoices.label": "Auswahl an Antworten",
     "app.poll.quiz": "Quiz",
     "app.poll.quiz.error": "Für das Quiz wurden keine richtigen Antworten ausgewählt. Bitte mindestens eine richtige Antwort auswählen.",
