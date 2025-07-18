@@ -1157,12 +1157,12 @@ RETURNS TRIGGER AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         UPDATE "chat"
-        SET "totalMessages" = "totalMessages" + 1
+        SET "totalMessages" = COALESCE("totalMessages", 0) + 1
         WHERE "meetingId" = NEW."meetingId"
         AND "chatId" = NEW."chatId";
 	ELSIF TG_OP = 'DELETE' THEN
         UPDATE "chat"
-        SET "totalMessages" = "totalMessages" - 1
+        SET "totalMessages" = GREATEST(COALESCE("totalMessages", 0) - 1, 0)
         WHERE "meetingId" = OLD."meetingId"
         AND "chatId" = OLD."chatId";
 	END IF;
