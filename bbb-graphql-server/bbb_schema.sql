@@ -307,7 +307,6 @@ CREATE UNLOGGED TABLE "user" (
 );
 CREATE INDEX "idx_user_pk_reverse" on "user" ("userId", "meetingId");
 CREATE INDEX "idx_user_meetingId_extId" ON "user"("meetingId", "extId");
-CREATE INDEX "idx_user_waiting" ON "user"("meetingId", "userId") where "isWaiting" is true;
 
 -- user (on update raiseHand or away: set new time)
 CREATE OR REPLACE FUNCTION update_user_raiseHand_away_time_trigger_func()
@@ -346,8 +345,10 @@ ALTER TABLE "user" ADD COLUMN "isDialIn" boolean GENERATED ALWAYS AS ("clientTyp
 ALTER TABLE "user" ADD COLUMN "isWaiting" boolean GENERATED ALWAYS AS ("guestStatus" = 'WAIT') STORED;
 ALTER TABLE "user" ADD COLUMN "isAllowed" boolean GENERATED ALWAYS AS ("guestStatus" = 'ALLOW') STORED;
 ALTER TABLE "user" ADD COLUMN "isDenied" boolean GENERATED ALWAYS AS ("guestStatus" = 'DENY') STORED;
-
 ALTER TABLE "user" ADD COLUMN "registeredAt" timestamp with time zone GENERATED ALWAYS AS (to_timestamp("registeredOn"::double precision / 1000)) STORED;
+
+CREATE INDEX "idx_user_waiting" ON "user"("meetingId", "userId") where "isWaiting" is true;
+
 
 --Populate column `firstJoinedAt` to register if the user has joined in the meeting (once column `joined` turn false when user leaves)
 CREATE OR REPLACE FUNCTION "set_user_firstJoinedAt_trigger_func"()
