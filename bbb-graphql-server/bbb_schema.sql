@@ -1155,16 +1155,18 @@ EXECUTE FUNCTION "update_chatMessage_messageSequence"();
 CREATE OR REPLACE FUNCTION "update_chat_totalMessages"()
 RETURNS TRIGGER AS $$
 BEGIN
-    UPDATE "chat"
-    SET "totalMessages" = (
-    				SELECT count("messageId")
-    				FROM chat_message cm
-    				WHERE cm."meetingId" = chat."meetingId"
-    				AND cm."chatId" = chat."chatId"
-    )
-    WHERE chat."meetingId" = NEW."meetingId"
-    AND chat."chatId" = NEW."chatId";
-    RETURN NEW;
+    IF TG_OP = 'INSERT' THEN
+        UPDATE "chat"
+        SET "totalMessages" = "totalMessages" + 1
+        WHERE "meetingId" = NEW."meetingId"
+        AND "chatId" = NEW."chatId";
+	ELSIF TG_OP = 'DELETE' THEN
+        UPDATE "chat"
+        SET "totalMessages" = "totalMessages" - 1
+        WHERE "meetingId" = OLD."meetingId"
+        AND "chatId" = OLD."chatId";
+	END IF;
+    RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1631,7 +1633,7 @@ BEGIN
     IF TG_OP = 'UPDATE' or TG_OP = 'INSERT' THEN
         PERFORM "update_user_hasDrawPermissionOnCurrentPage"(NEW."userId", NEW."meetingId");
     ELSIF TG_OP = 'DELETE' THEN
-        PERFORM "update_user_hasDrawPermissionOnCurrentPage"(OLD."userId", NEW."meetingId");
+        PERFORM "update_user_hasDrawPermissionOnCurrentPage"(OLD."userId", OLD."meetingId");
     END IF;
     RETURN NEW;
 END;
