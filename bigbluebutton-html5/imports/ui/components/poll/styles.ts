@@ -14,6 +14,7 @@ import {
   pollResultWidth,
   borderSizeLarge,
   borderRadiusRounded,
+  mdPaddingY,
 } from '/imports/ui/stylesheets/styled-components/general';
 import {
   colorText,
@@ -143,11 +144,16 @@ const PollQuestionArea = styled.textarea<PollQuestionAreaProps>`
   font-size: ${fontSizeBase};
   border: 1px solid ${colorGrayLighter};
   box-shadow: 0 0 0 1px ${colorGrayLighter};
+  
 
   ${({ hasError }) => hasError && `
     border-color: ${colorDanger};
     box-shadow: 0 0 0 1px ${colorDanger};
   `}
+`;
+
+const PollQuestionAreaWrapper = styled.div`
+  margin-bottom: ${lgPaddingX};
 `;
 
 const SectionHeading = styled.h4`
@@ -658,8 +664,9 @@ const SegmentedButton = styled.button<TabSelectorButtonProps>`
   color: rgb(75 85 99 / 1);
   font-weight: 500;
   font-size: ${fontSizeBase};
-  line-height: ${lineHeightBase};
-  padding: ${smPaddingX} ${mdPaddingX};
+  line-height: ${lineHeightComputed};
+  padding: ${mdPaddingY} ${mdPaddingX};
+  min-height: 2.5rem;
   border-radius: .5rem;
   cursor: pointer;
 
@@ -745,7 +752,7 @@ type InfoBoxContainerProps = {
 };
 
 const InfoBoxContainer = styled.div<InfoBoxContainerProps>`
-  padding: 1rem;
+  padding: .5rem ${mdPaddingX};
   border-radius: .5rem;
   margin-bottom: 1rem;
 
@@ -866,4 +873,5 @@ export default {
   SelectedCorrectAnswerIndicator,
   CorrectLabel,
   PollInputContainer,
+  PollQuestionAreaWrapper,
 };
