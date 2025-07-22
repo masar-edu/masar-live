@@ -53,7 +53,6 @@ import {
   fontSizeBase,
   fontSizeSmall,
   fontSizeSmaller,
-  lineHeightBase,
   lineHeightComputed,
 } from '/imports/ui/stylesheets/styled-components/typography';
 
@@ -144,7 +143,6 @@ const PollQuestionArea = styled.textarea<PollQuestionAreaProps>`
   font-size: ${fontSizeBase};
   border: 1px solid ${colorGrayLighter};
   box-shadow: 0 0 0 1px ${colorGrayLighter};
-  
 
   ${({ hasError }) => hasError && `
     border-color: ${colorDanger};
