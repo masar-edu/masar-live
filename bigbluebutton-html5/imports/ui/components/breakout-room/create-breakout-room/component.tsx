@@ -301,7 +301,7 @@ const CreateBreakoutRoom: React.FC<CreateBreakoutRoomProps> = ({
     const fileNameDuplicatedCount = presentations.filter((pres) => pres.name?.startsWith(fileName)).length;
 
     return fileNameDuplicatedCount === 0 ? fileName : `${fileName}(${fileNameDuplicatedCount + 1})`;
-  }
+  };
 
   const createRoom = () => {
     const remainingTime = getRemainingMeetingTime(
