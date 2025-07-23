@@ -370,8 +370,6 @@ Added
 - `textFileCreationExecTimeoutInMs` added
 - `presDownloadReadTimeoutInMs` added
 - `pngCreationConversionTimeout` added
-- `pngCreationWait` added
-- `pdfToSvgTimeout` added
 - `imageResizeWait` added
 - `officeDocumentValidationTimeout` added
 - `presOfficeConversionTimeout` added
