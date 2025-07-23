@@ -683,7 +683,7 @@ curl --request POST \
 	--data checksum=1234
 ```
 
-**IMPORTANT NOTE:** You should note that when you call end meeting, it is simply sending a request to the backend (Red5) server that is handling all the conference traffic. That backend server will immediately attempt to send every connected client a logout event, kicking them from the meeting. It will then disconnect them, and the meeting will be ended. However, this may take several seconds, depending on network conditions. Therefore, the end meeting call will return a success as soon as the request is sent. But to be sure that it completed, you should then check back a few seconds later by using the `getMeetingInfo` or `isMeetingRunning` calls to verify that all participants have left the meeting and that it successfully ended.
+**IMPORTANT NOTE:** You should note that when you call end meeting, it is simply sending a request to the backend server that is handling all the conference traffic. That backend server will immediately attempt to send every connected client a logout event, kicking them from the meeting. It will then disconnect them, and the meeting will be ended. However, this may take several seconds, depending on network conditions. Therefore, the end meeting call will return a success as soon as the request is sent. But to be sure that it completed, you should then check back a few seconds later by using the `getMeetingInfo` or `isMeetingRunning` calls to verify that all participants have left the meeting and that it successfully ended.
 
 ### `GET` `POST` getMeetingInfo
 
