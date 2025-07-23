@@ -142,9 +142,9 @@ class Layouts extends MultiUsers {
 
     await this.modPage.hasElementCount(e.webcamVideoItem, 7, 'should display 7 webcams for the moderator');
     const nextPageVideoPaginationLocator = await this.modPage.getLocator(e.nextPageVideoPagination);
-    await expect(nextPageVideoPaginationLocator).toBeHidden();
-    const previousPageVideoPaginationLocator = await this.modPage.getLocator(e.nextPageVideoPagination);
-    await expect(previousPageVideoPaginationLocator).toBeHidden();
+    await expect(nextPageVideoPaginationLocator, 'should not display the next page button for the video pagination').toBeHidden();
+    const previousPageVideoPaginationLocator = await this.modPage.getLocator(e.previousPageVideoPagination);
+    await expect(previousPageVideoPaginationLocator, 'should not display the previous page button for the video pagination').toBeHidden();
 
     for (const page of pages) {
       await page.hasElement(e.nextPageVideoPagination, 'should display the next page button for the video pagination');
