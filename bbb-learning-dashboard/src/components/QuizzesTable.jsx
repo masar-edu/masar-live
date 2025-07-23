@@ -301,7 +301,7 @@ const QuizzesTable = (props) => {
   const anonGridRow = [];
   const gridRows = [];
 
-  Object.values(quizzes).map((v, i) => {
+  Object.values(quizzes).sort((a, b) => b.createdOn - a.createdOn).map((v, i) => {
     initQuizData[`${v?.pollId}`] = '';
     const headerName = v?.question?.length > 0 ? v?.question : `Quiz ${i + 1}`;
     if (v?.anonymous) {
