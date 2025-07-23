@@ -182,10 +182,10 @@ const ConnectionManager: React.FC<ConnectionManagerProps> = ({ children }): Reac
         throw new Error('Missing session token');
       }
       sessionStorage.setItem('sessionToken', sessionToken);
-      
+
       const clientSessionUUID = sessionStorage.getItem('clientSessionUUID');
       const { isMobile } = deviceInfo;
-      
+
       let wsLink;
       try {
         const subscription = createClient({
@@ -202,7 +202,7 @@ const ConnectionManager: React.FC<ConnectionManagerProps> = ({ children }): Reac
           shouldRetry: (error) => {
             const isDetailedError = isDetailedErrorObject(error);
             const terminated = isDetailedError && error.code === 4499;
-            
+
             if (terminated) {
               logger.info({
                 logCode: 'connection_terminated',
