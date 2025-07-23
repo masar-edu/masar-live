@@ -198,9 +198,8 @@ const PresentationToolbarContainer = (props) => {
           secretPoll: false,
           question,
           multipleResponse,
-          quiz: false,
           answers,
-          isQuiz: isQuizEnabled ? isQuiz : false,
+          quiz: isQuizEnabled ? isQuiz : false,
           correctAnswer: isQuizEnabled ? correctAnswer : '',
         },
       });
