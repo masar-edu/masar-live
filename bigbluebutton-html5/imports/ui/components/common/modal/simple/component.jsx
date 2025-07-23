@@ -139,7 +139,7 @@ class ModalSimple extends Component {
         style={modalStyles}
         {...otherProps}
       >
-        <FocusTrap active={modalIsOpen} focusTrapOptions={{ initialFocus: false }}>
+        <FocusTrap active={modalIsOpen} focusTrapOptions={{ initialFocus: false, fallbackFocus: '#fallback-element' }}>
           <div ref={this.modalRef}>
             <Styled.Header
               hideBorder={hideBorder}
@@ -156,6 +156,7 @@ class ModalSimple extends Component {
             </Styled.Header>
             <Styled.Content>
               {children}
+              <div id="fallback-element" tabIndex="-1" />
             </Styled.Content>
           </div>
         </FocusTrap>

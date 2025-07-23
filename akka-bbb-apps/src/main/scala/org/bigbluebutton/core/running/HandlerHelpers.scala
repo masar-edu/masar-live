@@ -347,9 +347,13 @@ trait HandlerHelpers extends SystemConfiguration {
   }
 
   def isUsingLiveKit(liveMeeting: LiveMeeting): Boolean = {
-    liveMeeting.props.meetingProp.audioBridge == "livekit" ||
+    isUsingLiveKitAudio(liveMeeting) ||
     liveMeeting.props.meetingProp.cameraBridge == "livekit" ||
     liveMeeting.props.meetingProp.screenShareBridge == "livekit"
+  }
+
+  def isUsingLiveKitAudio(liveMeeting: LiveMeeting): Boolean = {
+    liveMeeting.props.meetingProp.audioBridge == "livekit"
   }
 
   def buildLiveKitTokenGrant(

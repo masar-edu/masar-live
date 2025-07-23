@@ -1,14 +1,30 @@
 const base = require('@playwright/test');
 const { fullyParallel } = require('./playwright.config');
-const parameters = require('./core/parameters');
 const helpers = require('./core/helpers');
+const parameters = require('./core/parameters');
 
-base.test.beforeAll(async ({ request }) => {
-  // Validate environment variables and endpoints
-  const BBB_URL_PATTERN = /^https:\/\/[^/]+\/bigbluebutton\/(?:api\/?)?$/;
-  if (!parameters.secret) throw new Error('BBB_SECRET environment variable is not set');
-  if (!parameters.server) throw new Error('BBB_URL environment variable is not set');
-  if (!BBB_URL_PATTERN.test(parameters.server)) throw new Error('BBB_URL must follow the pattern "https://{{DOMAIN_NAME}}/bigbluebutton/api"');
+const { server, secret } = parameters;
+
+const testWithValidation = base.test.extend({
+  sharedEachTestHook: [async ({ browser }, use) => {
+    // before test
+    await use();
+    // after test
+    if (fullyParallel) {
+      while (browser.contexts().length > 0) {
+        await browser.contexts()[0].close();
+      }
+    }
+  }, { scope: 'test', auto: true }],
+});
+
+// beforeAll hook validating environment variables set
+testWithValidation.beforeAll(async ({ request }) => {
+  const BBB_URL_PATTERN = /^https:\/\/[^\/]+\/bigbluebutton\/?$/;
+
+  if (!secret) throw new Error('BBB_SECRET environment variable is not set');
+  if (!server) throw new Error('BBB_URL environment variable is not set');
+  if (!BBB_URL_PATTERN.test(server)) throw new Error('BBB_URL must follow the pattern "https://DOMAIN_NAME/bigbluebutton/"');
 
   try {
     // Test the /create endpoint with a temporary meeting
@@ -40,15 +56,4 @@ base.test.beforeAll(async ({ request }) => {
   }
 });
 
-exports.test = base.test.extend({
-  sharedEachTestHook: [async ({ browser }, use) => {
-    // before test
-    await use();
-    // after test
-    if (fullyParallel) {
-      while (browser.contexts().length > 0) {
-        await browser.contexts()[0].close();
-      }
-    }
-  }, { scope: 'test', auto: true }],
-});
+exports.test = testWithValidation;

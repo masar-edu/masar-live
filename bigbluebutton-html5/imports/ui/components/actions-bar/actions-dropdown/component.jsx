@@ -81,6 +81,10 @@ const intlMessages = defineMessages({
     id: 'app.actionsBar.actionsDropdown.pollBtnLabel',
     description: 'poll menu toggle button label',
   },
+  pollQuizBtnLabel: {
+    id: 'app.actionsBar.actionsDropdown.pollQuizBtnLabel',
+    description: 'poll/quiz menu toggle button label',
+  },
   pollBtnDesc: {
     id: 'app.actionsBar.actionsDropdown.pollBtnDesc',
     description: 'poll menu toggle button description',
@@ -183,9 +187,15 @@ class ActionsDropdown extends PureComponent {
       presentations,
       isPresentationEnabled,
       isPresentationManagementDisabled,
+      isQuizEnabled,
     } = this.props;
 
-    const { pollBtnLabel, presentationLabel, takePresenter } = intlMessages;
+    const {
+      pollBtnLabel,
+      presentationLabel,
+      takePresenter,
+      pollQuizBtnLabel,
+    } = intlMessages;
 
     const { formatMessage } = intl;
 
@@ -211,7 +221,7 @@ class ActionsDropdown extends PureComponent {
       actions.push({
         icon: 'polling',
         dataTest: 'polling',
-        label: formatMessage(pollBtnLabel),
+        label: isQuizEnabled ? formatMessage(pollQuizBtnLabel) : formatMessage(pollBtnLabel),
         key: this.pollId,
         onClick: () => {
           if (Session.equals('pollInitiated', true)) {
@@ -297,7 +307,7 @@ class ActionsDropdown extends PureComponent {
             key: actionButtonItem.id,
             allowed: actionButtonItem.allowed,
             isSeparator: true,
-            dataTest: 'pluginsSeparator',
+            dataTest: actionButtonItem.dataTest,
           });
           break;
         default:
