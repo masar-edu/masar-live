@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:file": "eslint",
-    "tscheck:staged": "tsc --noEmit"
+    "tscheck:staged": "tsc --noEmit --incremental"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
