@@ -43,7 +43,7 @@ is not:
 The following image visualizes the conceptual dependencies. Note that it is not
 a flow diagram.
 
-![Conceptual drawing of the cluster proxy setup](/docs/static/img/bbb-clusterproxy.png)
+![Conceptual drawing of the cluster proxy setup](/img/bbb-clusterproxy.png)
 
 Once a user starts or joins a meeting (1), Greenlight or another BigBlueButton
 frontend will initiate a new meeting by calling the `create` and `join` API
