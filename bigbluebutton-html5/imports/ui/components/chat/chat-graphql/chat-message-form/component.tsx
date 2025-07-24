@@ -11,12 +11,14 @@ import { useLazyQuery, useMutation, useReactiveVar } from '@apollo/client';
 import TextareaAutosize from 'react-autosize-textarea';
 import { ChatFormCommandsEnum } from 'bigbluebutton-html-plugin-sdk/dist/cjs/ui-commands/chat/form/enums';
 import { FillChatFormCommandArguments } from 'bigbluebutton-html-plugin-sdk/dist/cjs/ui-commands/chat/form/types';
-import { UI_DATA_LISTENER_SUBSCRIBED } from 'bigbluebutton-html-plugin-sdk/dist/cjs/ui-data-hooks/consts';
-import { ChatFormUiDataPayloads } from 'bigbluebutton-html-plugin-sdk/dist/cjs/ui-data-hooks/chat/form/types';
+import { UI_DATA_LISTENER_SUBSCRIBED } from 'bigbluebutton-html-plugin-sdk/dist/cjs/ui-data/hooks/consts';
+import { ChatFormUiDataPayloads } from 'bigbluebutton-html-plugin-sdk/dist/cjs/ui-data/domain/chat/form/types';
 import * as PluginSdk from 'bigbluebutton-html-plugin-sdk';
 import { layoutSelect } from '/imports/ui/components/layout/context';
 import { defineMessages, useIntl } from 'react-intl';
-import { useIsChatEnabled, useIsEditChatMessageEnabled } from '/imports/ui/services/features';
+import {
+  useIsEditChatMessageEnabled, useIsEmojiPickerEnabled,
+} from '/imports/ui/services/features';
 import { checkText } from 'smile2emoji';
 import { findDOMNode } from 'react-dom';
 
@@ -116,10 +118,6 @@ const messages = defineMessages({
     id: 'app.chat.titlePrivate',
     description: 'Private chat title',
   },
-  partnerDisconnected: {
-    id: 'app.chat.partnerDisconnected',
-    description: 'System chat message when the private chat partnet disconnect from the meeting',
-  },
 });
 
 type EditingMessage = { chatId: string; messageId: string, message: string };
@@ -173,7 +171,7 @@ const ChatMessageForm: React.FC<ChatMessageFormProps> = ({
   const PUBLIC_CHAT_ID = CHAT_CONFIG.public_id;
   const PUBLIC_GROUP_CHAT_ID = CHAT_CONFIG.public_group_id;
   const AUTO_CONVERT_EMOJI = window.meetingClientSettings.public.chat.autoConvertEmoji;
-  const ENABLE_EMOJI_PICKER = window.meetingClientSettings.public.chat.emojiPicker.enable;
+  const ENABLE_EMOJI_PICKER = useIsEmojiPickerEnabled();
   const ENABLE_TYPING_INDICATOR = CHAT_CONFIG.typingIndicator.enabled;
   const DISABLE_EMOJIS = CHAT_CONFIG.disableEmojis;
 
@@ -337,7 +335,7 @@ const ChatMessageForm: React.FC<ChatMessageFormProps> = ({
     if (newMessage.length > maxMessageLength) {
       newError = intl.formatMessage(
         messages.errorMaxMessageLength,
-        { 0: maxMessageLength },
+        { maxMessageLength },
       );
       newMessage = newMessage.substring(0, maxMessageLength);
     }
@@ -619,8 +617,8 @@ const ChatMessageForm: React.FC<ChatMessageFormProps> = ({
             <Styled.Input
               id="message-input"
               ref={textAreaRef}
-              placeholder={intl.formatMessage(messages.inputPlaceholder, { 0: title })}
-              aria-label={intl.formatMessage(messages.inputLabel, { 0: title })}
+              placeholder={intl.formatMessage(messages.inputPlaceholder, { chatName: title })}
+              aria-label={intl.formatMessage(messages.inputLabel, { chatName: title })}
               aria-invalid={hasErrors ? 'true' : 'false'}
               autoCorrect="off"
               autoComplete="off"
@@ -700,7 +698,6 @@ const ChatMessageFormContainer: React.FC = () => {
   const idChatOpen: string = layoutSelect((i: Layout) => i.idChatOpen);
   const isRTL = layoutSelect((i: Layout) => i.isRTL);
   const isConnected = useReactiveVar(connectionStatus.getConnectedStatusVar());
-  const isChatEnabled = useIsChatEnabled();
   const { data: chat } = useChat((c: Partial<Chat>) => ({
     participant: c?.participant,
     chatId: c?.chatId,
@@ -714,7 +711,7 @@ const ChatMessageFormContainer: React.FC = () => {
   }));
 
   const title = chat?.participant?.name
-    ? intl.formatMessage(messages.titlePrivate, { 0: chat?.participant?.name })
+    ? intl.formatMessage(messages.titlePrivate, { participantName: chat?.participant?.name })
     : intl.formatMessage(messages.titlePublic);
 
   const { data: meeting } = useMeeting((m) => ({
@@ -776,7 +773,6 @@ const ChatMessageFormContainer: React.FC = () => {
   const CHAT_CONFIG = window.meetingClientSettings.public.chat;
 
   const disabled = locked && !isModerator && disablePrivateChat && !isPublicChat && !chat?.participant?.isModerator;
-  if (!isChatEnabled) return null;
 
   return (
     <ChatMessageForm

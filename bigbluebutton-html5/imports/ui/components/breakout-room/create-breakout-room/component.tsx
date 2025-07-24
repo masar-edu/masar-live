@@ -184,10 +184,6 @@ const intlMessages = defineMessages({
     id: 'app.createBreakoutRoom.record',
     description: 'label for checkbox to allow record',
   },
-  roomTime: {
-    id: 'app.createBreakoutRoom.roomTime',
-    description: 'used to provide current room time for aria label',
-  },
   numberOfRoomsIsValid: {
     id: 'app.createBreakoutRoom.numberOfRoomsError',
     description: 'Label an error message',
@@ -211,10 +207,6 @@ const intlMessages = defineMessages({
   roomNameInputDesc: {
     id: 'app.createBreakoutRoom.roomNameInputDesc',
     description: 'aria description for room name change',
-  },
-  movedUserLabel: {
-    id: 'app.createBreakoutRoom.movedUserLabel',
-    description: 'screen reader alert when users are moved to rooms',
   },
   manageRooms: {
     id: 'app.createBreakoutRoom.manageRoomsLabel',
@@ -299,6 +291,18 @@ const CreateBreakoutRoom: React.FC<CreateBreakoutRoomProps> = ({
     return `${CURRENT_SLIDE_PREFIX}${currentPresentation}`;
   };
 
+  const getCaptureFilename = (roomName: string, slides: boolean = true) => {
+    const captureType = slides
+      ? intl.formatMessage(intlMessages.captureSlidesType)
+      : intl.formatMessage(intlMessages.captureNotesType);
+
+    const fileName = `${roomName.replace(/\s/g, '_')}_${captureType}`.replace(/ /g, '_');
+
+    const fileNameDuplicatedCount = presentations.filter((pres) => pres.name?.startsWith(fileName)).length;
+
+    return fileNameDuplicatedCount === 0 ? fileName : `${fileName}(${fileNameDuplicatedCount + 1})`;
+  };
+
   const createRoom = () => {
     const remainingTime = getRemainingMeetingTime(
       durationInSeconds,
@@ -319,10 +323,10 @@ const CreateBreakoutRoom: React.FC<CreateBreakoutRoomProps> = ({
         roomsArray.push({
           name: r.name,
           sequence: r.id,
-          captureNotesFilename: `${r.name.replace(/\s/g, '_')}_${intl.formatMessage(intlMessages.captureNotesType)}`,
-          captureSlidesFilename: `${r.name.replace(/\s/g, '_')}_${intl.formatMessage(intlMessages.captureSlidesType)}`,
+          captureNotesFilename: getCaptureFilename(r.name, false),
+          captureSlidesFilename: getCaptureFilename(r.name, true),
           isDefaultName: r.name === intl.formatMessage(intlMessages.breakoutRoom, {
-            0: r.id,
+            roomNumber: r.id,
           }),
           users: r.users.map((u) => u.userId),
           freeJoin,
@@ -332,14 +336,14 @@ const CreateBreakoutRoom: React.FC<CreateBreakoutRoomProps> = ({
         });
       } else {
         const defaultName = intl.formatMessage(intlMessages.breakoutRoom, {
-          0: roomNumber,
+          roomNumber,
         });
 
         roomsArray.push({
           name: defaultName,
           sequence: roomNumber,
-          captureNotesFilename: `${defaultName.replace(/\s/g, '_')}_${intl.formatMessage(intlMessages.captureNotesType)}`,
-          captureSlidesFilename: `${defaultName.replace(/\s/g, '_')}_${intl.formatMessage(intlMessages.captureSlidesType)}`,
+          captureNotesFilename: getCaptureFilename(defaultName, false),
+          captureSlidesFilename: getCaptureFilename(defaultName, true),
           isDefaultName: true,
           freeJoin,
           shortName: defaultName,
@@ -532,7 +536,7 @@ const CreateBreakoutRoom: React.FC<CreateBreakoutRoomProps> = ({
                   {
                     intl.formatMessage(
                       intlMessages.minimumDurationWarnBreakout,
-                      { 0: MIN_BREAKOUT_TIME },
+                      { timeInMinutes: MIN_BREAKOUT_TIME },
                     )
                   }
                 </Styled.SpanWarn>

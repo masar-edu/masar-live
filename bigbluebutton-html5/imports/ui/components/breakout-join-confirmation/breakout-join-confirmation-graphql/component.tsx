@@ -161,7 +161,7 @@ const BreakoutJoinConfirmation: React.FC<BreakoutJoinConfirmationProps> = ({
                 key={breakoutRoomId}
                 value={breakoutRoomId}
               >
-                {isDefaultName ? intl.formatMessage(intlMessages.breakoutRoom, { 0: sequence }) : shortName}
+                {isDefaultName ? intl.formatMessage(intlMessages.breakoutRoom, { roomNumber: sequence }) : shortName}
               </option>
             ))
           }
@@ -172,7 +172,7 @@ const BreakoutJoinConfirmation: React.FC<BreakoutJoinConfirmationProps> = ({
   }, [breakouts, waiting, selectValue]);
 
   const roomName = breakouts[0].isDefaultName
-    ? intl.formatMessage(intlMessages.breakoutRoom, { 0: breakouts[0].sequence })
+    ? intl.formatMessage(intlMessages.breakoutRoom, { roomNumber: breakouts[0].sequence })
     : breakouts[0].shortName;
 
   useEffect(() => {
