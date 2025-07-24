@@ -781,6 +781,86 @@ export interface GraphqlResponseWrapper<TData> {
 
 So we have the `data`, which is different for each hook, that's why it's a generic, the error, that will be set if, and only if, there is an error, otherwise it is undefined, and loading, which tells the developer if the query is still loading (being fetched) or not.
 
+
+### Realtime Data Creation
+
+**`useCustomMutation` Hook**
+
+The `useCustomMutation` hook enables you to post data to the backend (Postgres) using existing GraphQL mutations, respecting user permissions.
+
+It works similarly to Apollo Client’s `useMutation`, returning a *trigger function* and a *result object* with information about the mutation execution. These will be described in more detail below.
+
+One important difference is that the mutation query **must** be provided as a string. This is due to how the SDK communicates with the HTML5 client. As a consequence, you must explicitly define the type of the `variables` argument for the trigger function, as shown in the example below.
+
+```typescript
+interface MutationVariablesType {
+  reactionEmoji: string;
+}
+
+const [trigger, result] = pluginApi.useCustomMutation<MutationVariablesType>(`
+  mutation SetReactionEmoji($reactionEmoji: String!) {
+    userSetReactionEmoji(reactionEmoji: $reactionEmoji)
+  }
+`);
+
+// Later in the code, you can trigger the mutation:
+trigger({
+  variables: {
+    reactionEmoji: '👏',
+  },
+});
+```
+
+Note that the same type (`MutationVariablesType`) passed as the generic parameter to `useCustomMutation` is also the type of the `variables` object in the trigger function.
+
+The `result` object returned by the hook contains the following fields:
+
+```typescript
+const {
+  called,
+  data,
+  error,
+  loading,
+} = result;
+```
+
+which follow this interface:
+
+```typescript
+interface MutationResultObject {
+  called: boolean;   // Indicates if the trigger function has been called
+  data?: object;     // Response data after the mutation is triggered
+  error?: object;    // Error details from the mutation execution
+  loading: boolean;  // Whether the mutation is currently loading (triggered or in progress)
+}
+```
+
+Now, see a diagram with the communication flow of this hook and how it works under the hood:
+
+```mermaid
+sequenceDiagram
+  participant PLUGIN-SDK
+  participant HTML5
+
+  PLUGIN-SDK->>HTML5: CREATE_NEW_CUSTOM_MUTATION
+  HTML5->>PLUGIN-SDK: MUTATION_READY
+  PLUGIN-SDK->>HTML5: TRIGGER_MUTATION
+  HTML5->>PLUGIN-SDK: MUTATION_RESULT_SENT
+
+```
+
+Following on the diagram with some details:
+- At first, the SDK sends a `windowEvent` (`CREATE_NEW_CUSTOM_MUTATION`) to the HTML5 client and start waiting for an update from the client;
+- At the same, it starts listening to the `MUTATION_READY` event;
+- Once the client receives a request to create a new mutation, it will add this mutation along with its options to a list of active mutations;
+- With the list of active mutations in hand, it will call the handler of each mutation which will create the mutation itself for each of those in the list;
+- When the mutation is created in the HTML5 client, it sends a `windowEvent` (`MUTATION_READY`) to the plugin-sdk to let it knowing that it is ready to be triggered and starts listening for the triggering event;
+- Once the SDK receives the `ready` event, it creates the trigger function and make it available for the plugin;
+- Now, once the plugin triggers the function, a `windowEvent` is sent to the HTML5;
+- HTML5 simply receives it and execute it returning the resulting data for the plugin via `MUTATION_RESULT_SENT` event.
+
+That's the current architecture of this feature
+
 ### Real time data exchange
 
 - `useDataChannel` hook: this will allow you to exchange information (Send and receive) amongst different users through the same plugin;

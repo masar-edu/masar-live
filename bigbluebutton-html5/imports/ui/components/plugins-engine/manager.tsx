@@ -8,6 +8,7 @@ import {
 import * as PluginSdk from 'bigbluebutton-html-plugin-sdk';
 import * as uuidLib from 'uuid';
 import PluginDataConsumptionManager from './data-consumption/manager';
+import PluginDataCreationManager from './data-creation/manager';
 import PluginsEngineComponent from './component';
 import { EffectivePluginConfig, PluginsEngineManagerProps } from './types';
 import PluginLoaderManager from './loader/manager';
@@ -60,6 +61,7 @@ const PluginsEngineManager = (props: PluginsEngineManagerProps) => {
           containerRef,
         }}
       />
+      <PluginDataCreationManager />
       <PluginDataConsumptionManager />
       <PluginServerCommandsHandler />
       <PluginUiCommandsHandler />
