@@ -282,6 +282,65 @@ const QuizzesTable = (props) => {
       default: 'bg-gray-500/10 text-gray-700 border border-gray-300 rounded-full px-2 font-bold',
     };
 
+    const symbols = {
+      success: (
+        <span
+          title={intl.formatMessage({
+            id: 'app.learningDashboard.quizzes.successIndicator',
+            defaultMessage: 'Correct answer',
+          })}
+          aria-label={intl.formatMessage({
+            id: 'app.learningDashboard.quizzes.successIndicator',
+            defaultMessage: 'Correct answer',
+          })}
+        >
+          &#9989;
+        </span>
+      ),
+      error: (
+        <span
+          title={intl.formatMessage({
+            id: 'app.learningDashboard.quizzes.errorIndicator',
+            defaultMessage: 'Incorrect answer',
+          })}
+          aria-label={intl.formatMessage({
+            id: 'app.learningDashboard.quizzes.errorIndicator',
+            defaultMessage: 'Incorrect answer',
+          })}
+        >
+          &#10060;
+        </span>
+      ),
+      unknown: (
+        <span
+          title={intl.formatMessage({
+            id: 'app.learningDashboard.quizzes.unknownIndicator',
+            defaultMessage: 'Results not published yet',
+          })}
+          aria-label={intl.formatMessage({
+            id: 'app.learningDashboard.quizzes.unknownIndicator',
+            defaultMessage: 'Results not published yet',
+          })}
+        >
+          &#9203;
+        </span>
+      ),
+      locked: (
+        <span
+          title={intl.formatMessage({
+            id: 'app.learningDashboard.quizzes.lockedIndicator',
+            defaultMessage: 'Correct answer not revealed',
+          })}
+          aria-label={intl.formatMessage({
+            id: 'app.learningDashboard.quizzes.lockedIndicator',
+            defaultMessage: 'Correct answer not revealed',
+          })}
+        >
+          &#128274;
+        </span>
+      ),
+    };
+
     return (
       <Box
         ref={wrapper}
@@ -306,19 +365,19 @@ const QuizzesTable = (props) => {
             display: 'block',
             position: 'absolute',
             top: 0,
+            zIndex: 1,
           }}
         />
         <Box
           ref={cellValue}
           sx={{
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%',
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%', zIndex: 2,
           }}
           className={variants[type]}
         >
-          {type === 'success' && <>&#9989;</>}
-          {type === 'error' && <>&#10060;</>}
-          {responses.length ? (
+          {['success', 'error', 'unknown', 'locked'].includes(type) && (
             <>
+              {symbols[type]}
               &nbsp;
               {responses.map((response) => {
                 const key = pollAnswerIds[response.toLowerCase()]
@@ -326,9 +385,14 @@ const QuizzesTable = (props) => {
                 return key;
               }).join(', ')}
             </>
-          ) : intl.formatMessage({
+          )}
+          {type === 'default' && intl.formatMessage({
             id: 'app.learningDashboard.quizzes.noResponse',
             defaultMessage: 'No response',
+          })}
+          {type === 'waiting' && intl.formatMessage({
+            id: 'app.learningDashboard.quizzes.waitingResponse',
+            defaultMessage: 'Waiting user response',
           })}
         </Box>
         {showPopper && (
@@ -388,14 +452,28 @@ const QuizzesTable = (props) => {
       ...commonColProps,
       sortable: true,
       valueGetter: (params) => {
-        const [, userAnswers] = params?.value;
+        const { userAnswers } = params?.value;
         return userAnswers || [];
       },
       renderCell: (params) => {
         let type = 'default';
-        const [isCorrect] = params?.row[params?.field];
-        if (isCorrect != null) {
-          type = isCorrect ? 'success' : 'error';
+        const {
+          published, userAnswers, correctOption,
+        } = params?.row[params?.field];
+        const userResponded = !!userAnswers.length;
+        const hasCorrectOption = !!correctOption;
+        if (userResponded && published) {
+          if (hasCorrectOption) {
+            type = userAnswers.includes(correctOption) ? 'success' : 'error';
+          } else {
+            type = 'locked';
+          }
+        } else if (userResponded && !published) {
+          type = 'unknown';
+        } else if (!userResponded && published) {
+          type = 'default';
+        } else if (!userResponded && !published) {
+          type = 'waiting';
         }
         return (
           <GridCellExpand
@@ -416,9 +494,15 @@ const QuizzesTable = (props) => {
     const result = Object
       .entries(quizzes || {})
       .map(([quizId, quiz]) => {
-        const userAnswers = u.answers[quizId];
-        const isCorrect = userAnswers ? userAnswers.includes(quiz.correctOption) : null;
-        return [quizId, [isCorrect, userAnswers ?? []]];
+        const userAnswers = u.answers[quizId] ?? [];
+        return [
+          quizId,
+          {
+            userAnswers,
+            published: quiz.published,
+            correctOption: quiz.correctOption,
+          },
+        ];
       });
 
     gridRows.push({
