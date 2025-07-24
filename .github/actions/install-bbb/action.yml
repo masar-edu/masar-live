@@ -7,89 +7,15 @@ runs:
       uses: ./.github/actions/merge-branches
     - run: ./build/get_external_dependencies.sh
       shell: bash
-    - name: Download artifacts_bbb-apps-akka
+    - name: Download all BBB artifacts
       uses: actions/download-artifact@v4
       with:
-        name: artifacts_bbb-apps-akka.tar
-    - run: tar xf artifacts.tar
-      shell: bash
-    - name: Download artifacts_bbb-config
-      uses: actions/download-artifact@v4
-      with:
-        name: artifacts_bbb-config.tar
-    - run: tar xf artifacts.tar
-      shell: bash
-    - name: Download artifacts_bbb-export-annotations
-      uses: actions/download-artifact@v4
-      with:
-        name: artifacts_bbb-export-annotations.tar
-    - run: tar xf artifacts.tar
-      shell: bash
-    - name: Download artifacts_bbb-learning-dashboard
-      uses: actions/download-artifact@v4
-      with:
-        name: artifacts_bbb-learning-dashboard.tar
-    - run: tar xf artifacts.tar
-      shell: bash
-    - name: Download artifacts_bbb-playback-record
-      uses: actions/download-artifact@v4
-      with:
-        name: artifacts_bbb-playback-record.tar
-    - run: tar xf artifacts.tar
-      shell: bash
-    - name: Download artifacts_bbb-graphql-server
-      uses: actions/download-artifact@v4
-      with:
-        name: artifacts_bbb-graphql-server.tar
-    - run: tar xf artifacts.tar
-      shell: bash
-    - name: Download artifacts_bbb-etherpad
-      uses: actions/download-artifact@v4
-      with:
-        name: artifacts_bbb-etherpad.tar
-    - run: tar xf artifacts.tar
-      shell: bash
-    - name: Download artifacts_bbb-freeswitch
-      uses: actions/download-artifact@v4
-      with:
-        name: artifacts_bbb-freeswitch.tar
-    - run: tar xf artifacts.tar
-      shell: bash
-    - name: Download artifacts_bbb-webrtc
-      uses: actions/download-artifact@v4
-      with:
-        name: artifacts_bbb-webrtc.tar
-    - run: tar xf artifacts.tar
-      shell: bash
-    - name: Download artifacts_bbb-web
-      uses: actions/download-artifact@v4
-      with:
-        name: artifacts_bbb-web.tar
-    - run: tar xf artifacts.tar
-      shell: bash
-    - name: Download artifacts_bbb-fsesl-akka
-      uses: actions/download-artifact@v4
-      with:
-        name: artifacts_bbb-fsesl-akka.tar
-    - run: tar xf artifacts.tar
-      shell: bash
-    - name: Download artifacts_bbb-html5
-      uses: actions/download-artifact@v4
-      with:
-        name: artifacts_bbb-html5.tar
-    - run: tar xf artifacts.tar
-      shell: bash
-    - name: Download artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: artifacts_others.tar
-    - run: tar xf artifacts.tar
-      shell: bash
-    - name: Extracting files .tar
+        name: all-bbb-artifacts
+        path: artifacts
+    - name: List downloaded artifacts
       shell: bash
       run: |
         set -e
-        pwd
         echo "----ls artifacts/----"
         ls artifacts/
         echo "Done"

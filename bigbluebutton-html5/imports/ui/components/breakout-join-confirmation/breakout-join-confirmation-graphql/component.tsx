@@ -161,7 +161,7 @@ const BreakoutJoinConfirmation: React.FC<BreakoutJoinConfirmationProps> = ({
                 key={breakoutRoomId}
                 value={breakoutRoomId}
               >
-                {isDefaultName ? intl.formatMessage(intlMessages.breakoutRoom, { 0: sequence }) : shortName}
+                {isDefaultName ? intl.formatMessage(intlMessages.breakoutRoom, { roomNumber: sequence }) : shortName}
               </option>
             ))
           }

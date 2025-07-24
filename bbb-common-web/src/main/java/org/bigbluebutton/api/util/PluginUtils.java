@@ -6,6 +6,7 @@ import org.bigbluebutton.api.ParamsProcessorUtil;
 import org.bigbluebutton.api.domain.PluginManifest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.github.zafarkhaja.semver.Version;
 
 import java.lang.reflect.MalformedParametersException;
 import java.util.Map;
@@ -15,15 +16,24 @@ import java.util.regex.Pattern;
 public class PluginUtils {
     private static Logger log = LoggerFactory.getLogger(PluginUtils.class);
     private static final String HTML5_PLUGIN_SDK_VERSION = "%%HTML5_PLUGIN_SDK_VERSION%%";
+    private static final String HTML5_PLUGIN_SDK_MAIN_VERSION = "%%HTML5_PLUGIN_SDK_MAIN_VERSION%%";
     private static final String BBB_VERSION = "%%BBB_VERSION%%";
+    private static final String BBB_MAIN_VERSION = "%%BBB_MAIN_VERSION%%";
     private static final String MEETING_ID = "%%MEETING_ID%%";
     private static final Pattern METADATA_PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{([\\w-]+)(?::([^}]*))?\\}");
     private static String bbbVersion;
     private String html5PluginSdkVersion;
 
+    private String getMainVersion(String version) {
+        Version parsedVersion = Version.parse(version);
+        return parsedVersion.majorVersion() + "." + parsedVersion.minorVersion();
+    }
+
     public String replaceAllPlaceholdersInManifestUrls(String url, String meetingId) {
         return url.replace(HTML5_PLUGIN_SDK_VERSION, html5PluginSdkVersion)
+                .replace(HTML5_PLUGIN_SDK_MAIN_VERSION, getMainVersion(html5PluginSdkVersion))
                 .replace(BBB_VERSION, bbbVersion)
+                .replace(BBB_MAIN_VERSION, getMainVersion(bbbVersion))
                 .replace(MEETING_ID, meetingId);
     }
 

@@ -77,6 +77,7 @@ location /bbb-01/html5client/ {
   proxy_set_header Upgrade $http_upgrade;
   proxy_set_header Connection "Upgrade";
 }
+
 location /bbb-01/bigbluebutton/api {
   proxy_pass https://bbb-01.example.com/bigbluebutton/api;
   proxy_http_version 1.1;
@@ -132,24 +133,24 @@ public:
     url: 'https://bbb-01.example.com/pad'
 ```
 
-Copy `/usr/share/bigbluebutton/nginx/bbb-html5.nginx.static` to
-`/usr/share/bigbluebutton/nginx/bbb-html5-cluster.nginx` and prepend the mount
-point of bbb-html5 in all location sections:
+Create a new file in `/etc/bigbluebutton/nginx/bbb-cluster.nginx` 
+and prepend the mount point of bbb-html5 in all location sections:
 
 ```
 # running in production (static assets)
 location /bbb-01/html5client {
     gzip_static on;
-    alias /var/bigbluebutton/html5-client/;
+    alias /usr/share/bigbluebutton/html5-client/;
     index index.html;
     try_files $uri $uri/ =404;
 }
 
 location /bbb-01/html5client/locales {
-  alias /var/bigbluebutton/html5-client/locales;
+  alias /usr/share/bigbluebutton/html5-client/locales;
   autoindex on;
   autoindex_format json;
 }
+
 ```
 
 **Note:** It is important that the location configuration is equal between the
@@ -158,7 +159,7 @@ BigBlueButton server and the proxy.
 Add a route for the locales handler for the guest lobby. The guest lobby is served directly from the BBB node.
 
 ```
-# /usr/share/bigbluebutton/nginx/bbb-html5.nginx
+# /etc/bigbluebutton/nginx/bbb-cluster.nginx
 location =/html5client/locale {
   return 301 /bbb-01$request_uri;
 }
@@ -174,10 +175,11 @@ Create the file `/etc/bigbluebutton/etherpad.json` with the following content:
 }
 ```
 
-Adjust the CORS settings in `/etc/default/bbb-web`:
+Create the file `/etc/systemd/system/bbb-web.service.d/override.conf` and add the following Environment setting:
 
 ```shell
-JDK_JAVA_OPTIONS="-Dgrails.cors.enabled=true -Dgrails.cors.allowCredentials=true -Dgrails.cors.allowedOrigins=https://bbb-proxy.example.com,https://https://bbb-01.example.com"
+[Service]
+Environment="JDK_JAVA_OPTIONS=-Dgrails.cors.enabled=true -Dgrails.cors.allowCredentials=true -Dgrails.cors.allowedOrigins=https://bbb-proxy.example.com,https://bbb-01.example.com"
 ```
 
 Create the file `/etc/bigbluebutton/bbb-graphql-middleware.yml` with the following content:
@@ -191,7 +193,7 @@ server:
 
 Pay attention that this one is without protocol, just the hostname.
 
-Adjust the CORS setting in `/etc/default/bbb-graphql-server`:
+Adjust the CORS setting in `/etc/bigbluebutton/bbb-graphql-server.env`:
 
 ```shell
 HASURA_GRAPHQL_CORS_DOMAIN="https://bbb-proxy.example.com"

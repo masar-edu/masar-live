@@ -1,7 +1,7 @@
 package org.bigbluebutton.core.models
 
 import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.{JsonMappingException, ObjectMapper}
+import com.fasterxml.jackson.databind.{DeserializationFeature, JsonMappingException, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.bigbluebutton.ClientSettings
 import org.bigbluebutton.ClientSettings.getPluginsFromConfig
@@ -11,15 +11,8 @@ import com.github.zafarkhaja.semver.Version
 
 import java.util
 
-case class RateLimiting(
-    messagesAllowedPerSecond: Int,
-    messagesAllowedPerMinute: Int
-)
-
 case class EventPersistence(
     isEnabled:                 Boolean,
-    maximumPayloadSizeInBytes: Int,
-    rateLimiting:              RateLimiting
 )
 
 case class DataChannel(
@@ -70,6 +63,7 @@ object PluginModel {
   private val objectMapper: ObjectMapper = new ObjectMapper()
 
   objectMapper.registerModule(new DefaultScalaModule())
+  objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
   def getPluginByName(instance: PluginModel, pluginName: String): Option[Plugin] = {
     instance.plugins.get(pluginName)
   }

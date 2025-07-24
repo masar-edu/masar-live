@@ -23,7 +23,6 @@ import '@bigbluebutton/tldraw/tldraw.css';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { compressToBase64, decompressFromBase64 } from 'lz-string';
 import SlideCalcUtil, { HUNDRED_PERCENT } from '/imports/utils/slideCalcUtils';
-import meetingClientSettingsInitialValues from '/imports/ui/core/initial-values/meetingClientSettings';
 import getFromUserSettings from '/imports/ui/services/users-settings';
 import KEY_CODES from '/imports/utils/keyCodes';
 import { debounce } from '/imports/utils/debounce';
@@ -39,8 +38,28 @@ import { useMouseEvents, useCursor } from './hooks';
 import { notifyShapeNumberExceeded, getCustomEditorAssetUrls, getCustomAssetUrls } from './service';
 import NoopTool from './custom-tools/noop-tool/component';
 import DeleteSelectedItemsTool from './custom-tools/delete-selected-items/component';
+import SessionStorage from '/imports/ui/services/storage/session';
 
 const CAMERA_TYPE = 'camera';
+
+const colorStyles = [
+  'black',
+  'blue',
+  'green',
+  'grey',
+  'light-blue',
+  'light-green',
+  'light-red',
+  'light-violet',
+  'orange',
+  'red',
+  'violet',
+  'yellow',
+];
+const dashStyles = ['dashed', 'dotted', 'draw', 'solid'];
+const fillStyles = ['none', 'pattern', 'semi', 'solid'];
+const fontStyles = ['draw', 'mono', 'sans', 'serif'];
+const sizeStyles = ['l', 'm', 's', 'xl'];
 
 // Helper functions
 const deleteLocalStorageItemsWithPrefix = (prefix) => {
@@ -213,11 +232,11 @@ const Whiteboard = React.memo((props) => {
       );
       const bbbPresenterTools = getFromUserSettings(
         'bbb_presenter_tools',
-        meetingClientSettingsInitialValues.public.whiteboard.toolbar.presenterTools,
+        window.meetingClientSettings.public.whiteboard.toolbar.presenterTools,
       );
       const bbbMultiUserTools = getFromUserSettings(
         'bbb_multi_user_tools',
-        meetingClientSettingsInitialValues.public.whiteboard.toolbar.multiUserTools,
+        window.meetingClientSettings.public.whiteboard.toolbar.multiUserTools,
       );
 
       if (tools.deleteAll) {
@@ -377,10 +396,31 @@ const Whiteboard = React.memo((props) => {
   React.useEffect(() => {
     hasWBAccessRef.current = hasWBAccess;
 
+    const toolbarSavedState = SessionStorage.getItem('whiteboardToolbarSavedState');
+
     if (!hasWBAccess && !isPresenter) {
       tlEditorRef?.current?.setCurrentTool('noop');
     } else if (hasWBAccess && !isPresenter) {
-      tlEditorRef?.current?.setCurrentTool('draw');
+      const {
+        initialSelectedTool: initialSelectedToolFromConfig,
+        multiUserTools,
+      } = window.meetingClientSettings.public.whiteboard.toolbar;
+      let initialSelectedTool = getFromUserSettings(
+        'bbb_initial_selected_tool',
+        initialSelectedToolFromConfig,
+      );
+
+      if (toolbarSavedState) {
+        const {
+          selectedTool: savedSelectedTool,
+        } = toolbarSavedState;
+
+        if (savedSelectedTool && multiUserTools.includes(savedSelectedTool)) {
+          initialSelectedTool = savedSelectedTool;
+        }
+      }
+
+      tlEditorRef?.current?.setCurrentTool(initialSelectedTool);
     }
   }, [hasWBAccess]);
 
@@ -1100,6 +1140,57 @@ const Whiteboard = React.memo((props) => {
     setTldrawAPI(editor);
     setEditor(editor);
 
+    let initialColorStyle = colorStyle;
+    let initialDashStyle = dashStyle;
+    let initialFillStyle = fillStyle;
+    let initialFontStyle = fontStyle;
+    let initialSizeStyle = sizeStyle;
+
+    const toolbarSavedState = SessionStorage.getItem('whiteboardToolbarSavedState');
+
+    if (toolbarSavedState) {
+      const {
+        colorStyle: savedColorStyle,
+        dashStyle: savedDashStyle,
+        fillStyle: savedFillStyle,
+        fontStyle: savedFontStyle,
+        sizeStyle: savedSizeStyle,
+        selectedTool: savedSelectedTool,
+      } = toolbarSavedState;
+
+      if (savedColorStyle) {
+        if (colorStyles.includes(savedColorStyle)) {
+          initialColorStyle = savedColorStyle;
+        }
+      }
+      if (savedDashStyle) {
+        if (dashStyles.includes(savedDashStyle)) {
+          initialDashStyle = savedDashStyle;
+        }
+      }
+      if (savedFillStyle) {
+        if (fillStyles.includes(savedFillStyle)) {
+          initialFillStyle = savedFillStyle;
+        }
+      }
+      if (savedFontStyle) {
+        if (fontStyles.includes(savedFontStyle)) {
+          initialFontStyle = savedFontStyle;
+        }
+      }
+      if (savedSizeStyle) {
+        if (sizeStyles.includes(savedSizeStyle)) {
+          initialSizeStyle = savedSizeStyle;
+        }
+      }
+      if (savedSelectedTool) {
+        const { multiUserTools } = window.meetingClientSettings.public.whiteboard.toolbar;
+        if (multiUserTools.includes(savedSelectedTool)) {
+          editor.setCurrentTool(savedSelectedTool);
+        }
+      }
+    }
+
     DefaultHorizontalAlignStyle.defaultValue = isRTL ? 'end' : 'start';
     DefaultVerticalAlignStyle.defaultValue = 'start';
 
@@ -1108,39 +1199,20 @@ const Whiteboard = React.memo((props) => {
       editor?.updateInstanceState({ isToolLocked: true });
     }
 
-    const colorStyles = [
-      'black',
-      'blue',
-      'green',
-      'grey',
-      'light-blue',
-      'light-green',
-      'light-red',
-      'light-violet',
-      'orange',
-      'red',
-      'violet',
-      'yellow',
-    ];
-    const dashStyles = ['dashed', 'dotted', 'draw', 'solid'];
-    const fillStyles = ['none', 'pattern', 'semi', 'solid'];
-    const fontStyles = ['draw', 'mono', 'sans', 'serif'];
-    const sizeStyles = ['l', 'm', 's', 'xl'];
-
-    if (colorStyles.includes(colorStyle)) {
-      editor.setStyleForNextShapes(DefaultColorStyle, colorStyle);
+    if (colorStyles.includes(initialColorStyle)) {
+      editor.setStyleForNextShapes(DefaultColorStyle, initialColorStyle);
     }
-    if (dashStyles.includes(dashStyle)) {
-      editor.setStyleForNextShapes(DefaultDashStyle, dashStyle);
+    if (dashStyles.includes(initialDashStyle)) {
+      editor.setStyleForNextShapes(DefaultDashStyle, initialDashStyle);
     }
-    if (fillStyles.includes(fillStyle)) {
-      editor.setStyleForNextShapes(DefaultFillStyle, fillStyle);
+    if (fillStyles.includes(initialFillStyle)) {
+      editor.setStyleForNextShapes(DefaultFillStyle, initialFillStyle);
     }
-    if (fontStyles.includes(fontStyle)) {
-      editor.setStyleForNextShapes(DefaultFontStyle, fontStyle);
+    if (fontStyles.includes(initialFontStyle)) {
+      editor.setStyleForNextShapes(DefaultFontStyle, initialFontStyle);
     }
-    if (sizeStyles.includes(sizeStyle)) {
-      editor.setStyleForNextShapes(DefaultSizeStyle, sizeStyle);
+    if (sizeStyles.includes(initialSizeStyle)) {
+      editor.setStyleForNextShapes(DefaultSizeStyle, initialSizeStyle);
     }
 
     editor.store.listen(
@@ -1473,7 +1545,33 @@ const Whiteboard = React.memo((props) => {
       if (!isPresenterRef.current && !hasWBAccessRef.current) {
         editor?.setCurrentTool('noop');
       } else {
-        editor?.setCurrentTool('draw');
+        const {
+          initialSelectedTool: initialSelectedToolFromConfig,
+          presenterTools,
+          multiUserTools,
+        } = window.meetingClientSettings.public.whiteboard.toolbar;
+        let initialSelectedTool = getFromUserSettings(
+          'bbb_initial_selected_tool',
+          initialSelectedToolFromConfig,
+        );
+
+        if (toolbarSavedState) {
+          const {
+            selectedTool: savedSelectedTool,
+          } = toolbarSavedState;
+
+          if (savedSelectedTool && multiUserTools.includes(savedSelectedTool)) {
+            initialSelectedTool = savedSelectedTool;
+          }
+        }
+
+        if (isPresenterRef.current) {
+          const initialPresenterTool = presenterTools.includes(initialSelectedTool) ? initialSelectedTool : 'noop';
+          editor?.setCurrentTool(initialPresenterTool);
+        } else {
+          const initialTool = multiUserTools.includes(initialSelectedTool) ? initialSelectedTool : 'noop';
+          editor?.setCurrentTool(initialTool);
+        }
       }
     }
 
@@ -1977,6 +2075,24 @@ const Whiteboard = React.memo((props) => {
     const newCursor = hasWBAccessRef.current || currentUser?.presenter ? TOOL_CURSORS[currentTool] || '' : 'inherit';
     setCursorType(newCursor);
   }, [tlEditorRef.current?.getCurrentToolId()]);
+
+  const getToolbarCurrentState = useCallback(() => {
+    return {
+      colorStyle: tlEditorRef.current?.getInstanceState().stylesForNextShape[DefaultColorStyle.id],
+      dashStyle: tlEditorRef.current?.getInstanceState().stylesForNextShape[DefaultDashStyle.id],
+      fillStyle: tlEditorRef.current?.getInstanceState().stylesForNextShape[DefaultFillStyle.id],
+      fontStyle: tlEditorRef.current?.getInstanceState().stylesForNextShape[DefaultFontStyle.id],
+      sizeStyle: tlEditorRef.current?.getInstanceState().stylesForNextShape[DefaultSizeStyle.id],
+      selectedTool: tlEditorRef.current?.getCurrentToolId(),
+    };
+  }, [
+    tlEditorRef.current?.getInstanceState().stylesForNextShape,
+    tlEditorRef.current?.getCurrentToolId(),
+  ]);
+
+  React.useEffect(() => () => {
+    SessionStorage.setItem('whiteboardToolbarSavedState', getToolbarCurrentState());
+  }, [getToolbarCurrentState]);
 
   return (
     <div
