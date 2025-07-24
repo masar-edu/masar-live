@@ -7,6 +7,49 @@ import Paper from '@mui/material/Paper';
 import Popper from '@mui/material/Popper';
 import UserAvatar from './UserAvatar';
 
+const pollAnswerIds = {
+  true: {
+    id: 'app.poll.answer.true',
+    description: 'label for poll answer True',
+  },
+  false: {
+    id: 'app.poll.answer.false',
+    description: 'label for poll answer False',
+  },
+  yes: {
+    id: 'app.poll.answer.yes',
+    description: 'label for poll answer Yes',
+  },
+  no: {
+    id: 'app.poll.answer.no',
+    description: 'label for poll answer No',
+  },
+  abstention: {
+    id: 'app.poll.answer.abstention',
+    description: 'label for poll answer Abstention',
+  },
+  a: {
+    id: 'app.poll.answer.a',
+    description: 'label for poll answer A',
+  },
+  b: {
+    id: 'app.poll.answer.b',
+    description: 'label for poll answer B',
+  },
+  c: {
+    id: 'app.poll.answer.c',
+    description: 'label for poll answer C',
+  },
+  d: {
+    id: 'app.poll.answer.d',
+    description: 'label for poll answer D',
+  },
+  e: {
+    id: 'app.poll.answer.e',
+    description: 'label for poll answer E',
+  },
+};
+
 const QuizzesTable = (props) => {
   const {
     intl,
@@ -170,7 +213,7 @@ const QuizzesTable = (props) => {
 
   const GridCellExpand = React.memo((cellProps) => {
     const {
-      width, value, anonymous, responses, type = 'default',
+      width, anonymous, responses, type = 'default',
     } = cellProps;
     const wrapper = React.useRef(null);
     const cellDiv = React.useRef(null);
@@ -267,17 +310,26 @@ const QuizzesTable = (props) => {
         />
         <Box
           ref={cellValue}
-          sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+          sx={{
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%',
+          }}
           className={variants[type]}
         >
           {type === 'success' && <>&#9989;</>}
           {type === 'error' && <>&#10060;</>}
-          {responses ? (
+          {responses.length ? (
             <>
               &nbsp;
-              {responses}
+              {responses.map((response) => {
+                const key = pollAnswerIds[response.toLowerCase()]
+                  ? [intl.formatMessage(pollAnswerIds[response.toLowerCase()])] : response;
+                return key;
+              }).join(', ')}
             </>
-          ) : value}
+          ) : intl.formatMessage({
+            id: 'app.learningDashboard.quizzes.noResponse',
+            defaultMessage: 'No response',
+          })}
         </Box>
         {showPopper && (
           <Popper
@@ -286,7 +338,16 @@ const QuizzesTable = (props) => {
           >
             <Paper elevation={1}>
               <Typography variant="body2" style={{ padding: 8, whiteSpace: 'nowrap' }}>
-                {responses}
+                {responses.length ? (
+                  responses.map((response) => {
+                    const key = pollAnswerIds[response.toLowerCase()]
+                      ? [intl.formatMessage(pollAnswerIds[response.toLowerCase()])] : response;
+                    return key;
+                  }).join(', ')
+                ) : intl.formatMessage({
+                  id: 'app.learningDashboard.quizzes.noResponse',
+                  defaultMessage: 'No response',
+                })}
               </Typography>
             </Paper>
           </Popper>
@@ -318,40 +379,29 @@ const QuizzesTable = (props) => {
     anonGridCols.push({
       ...commonColProps,
       sortable: false,
-      renderCell: (params) => <GridCellExpand value={params?.value || ''} width={params?.colDef?.computedWidth} />,
+      renderCell: (params) => (
+        <GridCellExpand responses={params?.value || []} width={params?.colDef?.computedWidth} />
+      ),
     });
 
     gridCols.push({
       ...commonColProps,
       sortable: true,
       valueGetter: (params) => {
-        const [isCorrect] = params?.value;
-        if (isCorrect == null) {
-          return intl.formatMessage({
-            id: 'app.learningDashboard.quizzes.noResponse',
-            defaultMessage: 'No response',
-          });
-        }
-        return isCorrect ? intl.formatMessage({
-          id: 'app.learningDashboard.quizzes.correct',
-          defaultMessage: 'Correct',
-        }) : intl.formatMessage({
-          id: 'app.learningDashboard.quizzes.incorrect',
-          defaultMessage: 'Incorrect',
-        });
+        const [, userAnswers] = params?.value;
+        return userAnswers || [];
       },
       renderCell: (params) => {
         let type = 'default';
-        const [isCorrect, responses] = params?.row[params?.field];
+        const [isCorrect] = params?.row[params?.field];
         if (isCorrect != null) {
           type = isCorrect ? 'success' : 'error';
         }
         return (
           <GridCellExpand
-            responses={responses.join(', ')}
             type={type}
             anonymous={v?.anonymous}
-            value={params?.value || ''}
+            responses={params?.value || []}
             width={params?.colDef?.computedWidth}
           />
         );
@@ -387,7 +437,7 @@ const QuizzesTable = (props) => {
       user: {
         name: intl.formatMessage({
           id: 'app.learningDashboard.quizzes.anonymousRowName',
-          defaultMessage: 'Incorrect',
+          defaultMessage: 'Anonymous',
         }),
       },
       ...{ ...initQuizData, ...anonymousQuizData },
