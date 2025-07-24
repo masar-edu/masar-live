@@ -10,11 +10,12 @@
     "tscheck": "tsc",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "lint:file": "eslint"
+    "lint:file": "eslint",
+    "tscheck:staged": "tsc --noEmit --incremental"
   },
   "lint-staged": {
-    "*.{js,jsx}": [
-      "eslint --fix"
+    "*.{js,jsx,ts,tsx}": [
+      "eslint"
     ]
   },
   "overrides": {
@@ -172,7 +173,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged && npm run tscheck:staged"
     }
   }
 }
