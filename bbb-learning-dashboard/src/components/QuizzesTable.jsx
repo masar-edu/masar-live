@@ -285,6 +285,7 @@ const QuizzesTable = (props) => {
     const symbols = {
       success: (
         <span
+          className="select-none"
           title={intl.formatMessage({
             id: 'app.learningDashboard.quizzes.successIndicator',
             defaultMessage: 'Correct answer',
@@ -299,6 +300,7 @@ const QuizzesTable = (props) => {
       ),
       error: (
         <span
+          className="select-none"
           title={intl.formatMessage({
             id: 'app.learningDashboard.quizzes.errorIndicator',
             defaultMessage: 'Incorrect answer',
@@ -313,6 +315,7 @@ const QuizzesTable = (props) => {
       ),
       unknown: (
         <span
+          className="select-none"
           title={intl.formatMessage({
             id: 'app.learningDashboard.quizzes.unknownIndicator',
             defaultMessage: 'Results not published yet',
@@ -327,6 +330,7 @@ const QuizzesTable = (props) => {
       ),
       locked: (
         <span
+          className="select-none"
           title={intl.formatMessage({
             id: 'app.learningDashboard.quizzes.lockedIndicator',
             defaultMessage: 'Correct answer not revealed',
@@ -458,21 +462,21 @@ const QuizzesTable = (props) => {
       renderCell: (params) => {
         let type = 'default';
         const {
-          published, userAnswers, correctOption,
+          ended, userAnswers, correctOption,
         } = params?.row[params?.field];
         const userResponded = !!userAnswers.length;
         const hasCorrectOption = !!correctOption;
-        if (userResponded && published) {
+        if (userResponded && ended) {
           if (hasCorrectOption) {
             type = userAnswers.includes(correctOption) ? 'success' : 'error';
           } else {
             type = 'locked';
           }
-        } else if (userResponded && !published) {
+        } else if (userResponded && !ended) {
           type = 'unknown';
-        } else if (!userResponded && published) {
+        } else if (!userResponded && ended) {
           type = 'default';
-        } else if (!userResponded && !published) {
+        } else if (!userResponded && !ended) {
           type = 'waiting';
         }
         return (
@@ -499,7 +503,7 @@ const QuizzesTable = (props) => {
           quizId,
           {
             userAnswers,
-            published: quiz.published,
+            ended: quiz.ended,
             correctOption: quiz.correctOption,
           },
         ];
