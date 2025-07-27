@@ -850,7 +850,7 @@ class LearningDashboardActor(
         outGW.send(event)
         meetingsLastJsonHash += (meeting.intId -> activityJsonHash)
 
-        log.info("Learning Dashboard data sent for meeting {}", meeting.intId)
+        log.debug("Learning Dashboard data sent for meeting {}", meeting.intId)
       }
     }
   }
