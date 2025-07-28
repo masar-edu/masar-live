@@ -273,7 +273,7 @@ PresentationToolbarContainer.propTypes = {
     height: PropTypes.number.isRequired,
     id: PropTypes.string.isRequired,
     imageUri: PropTypes.string.isRequired,
-    isInfiniteWhiteboard: PropTypes.bool.isRequired,
+    isInfiniteWhiteboard: PropTypes.bool,
     num: PropTypes.number.isRequired,
     presentationId: PropTypes.string.isRequired,
     svgUri: PropTypes.string.isRequired,
