@@ -238,10 +238,6 @@ class UsersTable extends React.Component {
                     <td className={`flex items-center px-4 py-3 col-text-left text-sm ${opacity}`} data-test="userLabelDashboard">
                       <div className="inline-block relative w-8 h-8 rounded-full">
                         <UserAvatar user={user} />
-                        <div
-                          className="absolute inset-0 rounded-full shadow-inner"
-                          aria-hidden="true"
-                        />
                       </div>
                       &nbsp;&nbsp;&nbsp;
                       <div className="inline-block">
