@@ -268,5 +268,8 @@ PresentationToolbarContainer.propTypes = {
   presentationId: PropTypes.string,
   hasPoll: PropTypes.bool.isRequired,
   currentSlide: PropTypes.number.isRequired,
-  currentPresentationPage: PropTypes.number.isRequired,
+  currentPresentationPage: PropTypes.shape({
+    pageId: PropTypes.string.isRequired,
+    num: PropTypes.number.isRequired,
+  }).isRequired,
 };
