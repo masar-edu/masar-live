@@ -50,7 +50,15 @@ const PluginsEngineManager = (props: PluginsEngineManagerProps) => {
   window.React = React;
 
   useEffect(() => {
-    if (totalNumberOfPlugins) logger.info(`${numberOfLoadedPlugins}/${totalNumberOfPlugins} plugins loaded`);
+    if (totalNumberOfPlugins) {
+      logger.info({
+        logCode: 'PLUGINS_LOADED_STATUS',
+        extraInfo: {
+          numberOfLoadedPlugins,
+          totalNumberOfPlugins,
+        },
+      }, `${numberOfLoadedPlugins}/${totalNumberOfPlugins} plugins loaded`);
+    }
   },
   [numberOfLoadedPlugins, lastLoadedPlugin]);
 
