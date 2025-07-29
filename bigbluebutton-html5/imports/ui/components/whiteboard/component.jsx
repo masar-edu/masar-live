@@ -103,23 +103,23 @@ const customTools = [NoopTool, DeleteSelectedItemsTool];
 const intlMessages = defineMessages({
   yes: {
     id: 'app.poll.y',
-    description: '',
+    description: 'Poll option for affirmative response',
   },
   no: {
     id: 'app.poll.n',
-    description: '',
+    description: 'Poll option for negative response',
   },
   abstention: {
     id: 'app.poll.abstention',
-    description: '',
+    description: 'Poll option for abstaining from vote',
   },
   true: {
     id: 'app.poll.answer.true',
-    description: '',
+    description: 'Poll option for true/correct answer',
   },
   false: {
     id: 'app.poll.answer.false',
-    description: '',
+    description: 'Poll option for false/incorrect answer',
   },
 });
 
