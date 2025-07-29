@@ -20,6 +20,10 @@ export function useIsPollingEnabled() {
   return useDisabledFeatures().indexOf('polls') === -1 && window.meetingClientSettings.public.poll.enabled;
 }
 
+export function useIsQuizEnabled() {
+  return useDisabledFeatures().indexOf('quizzes') === -1 && window.meetingClientSettings.public.poll.quiz.enabled;
+}
+
 export function useIsPresentationEnabled() {
   return useDisabledFeatures().indexOf('presentation') === -1;
 }
@@ -146,4 +150,14 @@ export function useIsUserReactionsEnabled() {
   return useDisabledFeatures().indexOf('userReactions') === -1
     && REACTIONS_BUTTON_ENABLED
     && USER_REACTIONS_ENABLED;
+}
+
+/**
+ * This hook returns `true` if the chat input emoji picker is disabled. `false`, otherwise.
+ * @returns {boolean}
+ */
+export function useIsEmojiPickerEnabled() {
+  const EMOJI_PICKER_ENABLED = window.meetingClientSettings.public.chat.emojiPicker.enable;
+  return useDisabledFeatures().indexOf('chatEmojiPicker') === -1
+    && EMOJI_PICKER_ENABLED;
 }

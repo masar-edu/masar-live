@@ -14,9 +14,9 @@ import { ExternalVideoVolumeCommandsEnum } from 'bigbluebutton-html-plugin-sdk/d
 import { SetExternalVideoVolumeCommandArguments } from 'bigbluebutton-html-plugin-sdk/dist/cjs/ui-commands/external-video/volume/types';
 import { OnProgressProps } from 'react-player/base';
 import * as PluginSdk from 'bigbluebutton-html-plugin-sdk';
-import { UI_DATA_LISTENER_SUBSCRIBED } from 'bigbluebutton-html-plugin-sdk/dist/cjs/ui-data-hooks/consts';
+import { UI_DATA_LISTENER_SUBSCRIBED } from 'bigbluebutton-html-plugin-sdk/dist/cjs/ui-data/hooks/consts';
 import { ExternalVideoVolumeUiDataNames } from 'bigbluebutton-html-plugin-sdk';
-import { ExternalVideoVolumeUiDataPayloads } from 'bigbluebutton-html-plugin-sdk/dist/cjs/ui-data-hooks/external-video/volume/types';
+import { ExternalVideoVolumeUiDataPayloads } from 'bigbluebutton-html-plugin-sdk/dist/cjs/ui-data/domain/external-video/volume/types';
 
 import useMeeting from '/imports/ui/core/hooks/useMeeting';
 import {
@@ -45,7 +45,7 @@ import { ArcPlayer } from '../custom-players/arc-player';
 import getStorageSingletonInstance from '/imports/ui/services/storage';
 
 const AUTO_PLAY_BLOCK_DETECTION_TIMEOUT_SECONDS = 5;
-const UPDATE_INTERVAL_THRESHOLD_MS = 500;
+const TWITCH_VIDEO_SEEK_TIME_WINDOW = 1; // Twitch video seek time in seconds
 
 const intlMessages = defineMessages({
   autoPlayWarning: {
@@ -86,7 +86,7 @@ interface ExternalVideoPlayerProps {
     time: number;
     state?: string;
   }) => void;
-  getCurrentTime(): number;
+  getServerCurrentTime(): number;
   updatedAt: string;
 }
 
@@ -113,7 +113,7 @@ const ExternalVideoPlayer: React.FC<ExternalVideoPlayerProps> = ({
   playerKey,
   setPlayerKey,
   sendMessage,
-  getCurrentTime,
+  getServerCurrentTime,
   updatedAt,
 }) => {
   const intl = useIntl();
@@ -196,9 +196,11 @@ const ExternalVideoPlayer: React.FC<ExternalVideoPlayerProps> = ({
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const presenterRef = useRef(isPresenter);
   const [reactPlayerPlaying, setReactPlayerPlaying] = React.useState(false);
-  const clientReloadedRef = useRef(false);
+  const firstPlayRef = useRef(true);
+  const [playerUrl, setPlayerUrl] = React.useState('');
+  const lastCursorRef = useRef<{ position: number, updateAt: number }>({ position: 0, updateAt: 0 });
 
-  let currentTime = getCurrentTime();
+  let currentTime = getServerCurrentTime();
 
   const changeVolume = (newVolume: number) => {
     setVolume(newVolume);
@@ -206,6 +208,37 @@ const ExternalVideoPlayer: React.FC<ExternalVideoPlayerProps> = ({
     if (newVolume > 0) {
       const internalPlayer = playerRef.current?.getInternalPlayer();
       internalPlayer?.unMute?.();
+    }
+  };
+  // Work around for Twitch, because twitch doesn't have a no cookie domain
+  // causing the video star in the wrong position between sessions
+  const addTimeParamToTwitchUrl = (videoUrl: string, timeInSeconds: number) => {
+    const convertSecondsToHHMMSS = (seconds: number) => {
+      const totalSeconds = Math.floor(seconds);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const secs = totalSeconds % 60;
+
+      const hh = String(hours).padStart(2, '0');
+      const mm = String(minutes).padStart(2, '0');
+      const ss = String(secs).padStart(2, '0');
+
+      return `${hh}h${mm}m${ss}s`;
+    };
+
+    try {
+      const url = new URL(videoUrl);
+      const isTwitch = url.hostname === 'twitch.tv' || url.hostname === 'www.twitch.tv';
+      if (isTwitch) {
+        const formattedTime = convertSecondsToHHMMSS(timeInSeconds);
+        url.searchParams.set('t', formattedTime);
+        return url.toString();
+      }
+
+      return videoUrl;
+    } catch (e) {
+      // if the URL is invalid, return the original videoUrl
+      return videoUrl;
     }
   };
 
@@ -276,6 +309,14 @@ const ExternalVideoPlayer: React.FC<ExternalVideoPlayerProps> = ({
     }
     return 1;
   }, []);
+
+  useEffect(() => {
+    if (playerUrl !== videoUrl && isPresenter) {
+      setPlayerUrl(addTimeParamToTwitchUrl(videoUrl, getServerCurrentTime()));
+    } else {
+      setPlayerUrl(videoUrl);
+    }
+  }, [videoUrl, isPresenter]);
 
   useEffect(() => {
     const storedVolume = storage.getItem('externalVideoVolume');
@@ -355,13 +396,12 @@ const ExternalVideoPlayer: React.FC<ExternalVideoPlayerProps> = ({
         setVolume(playerVolume > 1 ? playerVolume / 100 : playerVolume);
       }
 
-      clientReloadedRef.current = true;
       presenterRef.current = isPresenter;
     }
   }, [isPresenter]);
 
   const handleOnStart = async () => {
-    const currentTime = getCurrentTime();
+    const currentTime = getServerCurrentTime();
     const playerCurrentTime = await getPlayerCurrentTime(playerRef.current as ReactPlayer);
     if (isPresenter && !playing) {
       const rate = internalPlayer instanceof HTMLVideoElement
@@ -371,37 +411,47 @@ const ExternalVideoPlayer: React.FC<ExternalVideoPlayerProps> = ({
       sendMessage('start', {
         rate,
         time: currentTime,
+        state: 'playing',
       });
     }
 
     if (currentTime > playerCurrentTime) {
-      playerRef?.current?.seekTo(currentTime);
+      playerRef?.current?.seekTo(currentTime, 'seconds');
     }
   };
 
   const handleOnPlay = async () => {
     setReactPlayerPlaying(true);
     const internalPlayer = playerRef.current?.getInternalPlayer();
-    if (isPresenter && !playing && !clientReloadedRef.current) {
+    const url = new URL(videoUrl);
+    const isTwitch = url.hostname === 'twitch.tv' || url.hostname === 'www.twitch.tv';
+    if (isPresenter && !playing) {
       const rate = internalPlayer instanceof HTMLVideoElement
         ? internalPlayer.playbackRate
         : internalPlayer?.getPlaybackRate?.() ?? 1;
 
-      const currentTime = await getPlayerCurrentTime(playerRef.current as ReactPlayer);
+      const currentTime = getServerCurrentTime();
+
+      const playerCurrentTime = await getPlayerCurrentTime(playerRef.current as ReactPlayer);
+      const playerSeekTime = isTwitch
+        && lastCursorRef.current.updateAt
+        && Date.now() - lastCursorRef.current.updateAt < TWITCH_VIDEO_SEEK_TIME_WINDOW * 1000
+        ? lastCursorRef.current.position
+        : playerCurrentTime;
       sendMessage('play', {
         rate,
-        time: currentTime,
+        // if currentTime is greater than playerCurrentTime, means the video was already played
+        // and the presenter refreshed his client
+        time: (currentTime > playerCurrentTime) && firstPlayRef.current ? currentTime : playerSeekTime,
+        state: 'playing',
       });
     }
-
     if (!playing && !isPresenter) {
       stopVideo(playerRef.current as ReactPlayer);
     }
-    if (clientReloadedRef.current) {
-      clientReloadedRef.current = false;
-      if (!mute && isPresenter) {
-        playerRef.current?.getInternalPlayer().unMute();
-      }
+
+    if (firstPlayRef.current) {
+      firstPlayRef.current = false;
     }
   };
 
@@ -433,7 +483,7 @@ const ExternalVideoPlayer: React.FC<ExternalVideoPlayerProps> = ({
     setPlayed(state.played);
     setLoaded(state.loaded);
     if (playing && isPresenter) {
-      currentTime = await getPlayerCurrentTime(playerRef.current as ReactPlayer);
+      currentTime = getServerCurrentTime();
     }
     const interPlayerPlaybackRate = getPlaybackRate(playerRef.current as ReactPlayer);
     if (isPresenter && interPlayerPlaybackRate !== playerPlaybackRate) {
@@ -453,7 +503,7 @@ const ExternalVideoPlayer: React.FC<ExternalVideoPlayerProps> = ({
     }
   };
 
-  const handleOnSeek = async (seconds: number) => {
+  const handleOnSeek = async (cursor: { position: number } | number) => {
     if (isPresenter) {
       const internalPlayer = playerRef.current?.getInternalPlayer();
       let rate = internalPlayer instanceof HTMLVideoElement
@@ -465,8 +515,14 @@ const ExternalVideoPlayer: React.FC<ExternalVideoPlayerProps> = ({
 
       sendMessage('seek', {
         rate,
-        time: seconds,
+        time: typeof cursor === 'number' ? cursor : cursor.position,
+        state: playing ? 'playing' : '',
       });
+
+      lastCursorRef.current = {
+        position: typeof cursor === 'number' ? cursor : cursor.position,
+        updateAt: Date.now(),
+      };
     } else {
       playVideo(playerRef.current as ReactPlayer);
     }
@@ -483,7 +539,7 @@ const ExternalVideoPlayer: React.FC<ExternalVideoPlayerProps> = ({
       }
       sendMessage('playbackRateChange', {
         rate,
-        time: getCurrentTime(),
+        time: getServerCurrentTime(),
         state: playing ? 'playing' : '',
       });
     }
@@ -540,29 +596,33 @@ const ExternalVideoPlayer: React.FC<ExternalVideoPlayerProps> = ({
             )
             : ''
         }
-        <Styled.VideoPlayer
-          config={videoPlayConfig}
-          autoPlay
-          playsInline
-          url={videoUrl}
-          playing={playing}
-          playbackRate={playerPlaybackRate}
-          key={playerKey}
-          height="100%"
-          width="100%"
-          ref={playerRef}
-          volume={volume}
-          onStart={handleOnStart}
-          onPlay={handleOnPlay}
-          onSeek={handleOnSeek}
-          onProgress={handleProgress}
-          onPause={handleOnStop}
-          onEnded={handleOnStop}
-          muted={mute || isEchoTest}
-          controls
-          previewTabIndex={isPresenter ? 0 : -1}
-          onPlaybackRateChange={handlePlaybackRateChange}
-        />
+
+        {
+          playerUrl ? (
+            <Styled.VideoPlayer
+              config={videoPlayConfig}
+              autoPlay
+              url={playerUrl}
+              playing={playing}
+              playbackRate={playerPlaybackRate}
+              key={playerKey}
+              height="100%"
+              width="100%"
+              ref={playerRef}
+              volume={volume}
+              onStart={handleOnStart}
+              onPlay={handleOnPlay}
+              onSeek={handleOnSeek}
+              onProgress={handleProgress}
+              onPause={handleOnStop}
+              onEnded={handleOnStop}
+              muted={mute || isEchoTest}
+              controls
+              previewTabIndex={isPresenter ? 0 : -1}
+              onPlaybackRateChange={handlePlaybackRateChange}
+            />
+          ) : null
+        }
         {
           shouldShowTools() ? (
             <ExternalVideoPlayerToolbar
@@ -616,15 +676,6 @@ const ExternalVideoPlayerContainer: React.FC = () => {
 
   const sendMessage = async (event: string, data: { rate: number | Promise<number>; time: number; state?: string }) => {
     const resolvedRate = data.rate instanceof Promise ? await data.rate : data.rate;
-
-    // don't re-send repeated update messages
-    if (
-      lastMessageRef.current.event === event
-      && event !== 'playbackRateChange' // playback rate change is always sent
-      && Math.abs(lastMessageRef.current.time - data.time) < UPDATE_INTERVAL_THRESHOLD_MS
-    ) {
-      return;
-    }
 
     // don't register to redis a viewer joined message
     if (event === 'viewerJoined') {
@@ -745,8 +796,7 @@ const ExternalVideoPlayerContainer: React.FC = () => {
     playerPlaying: playing = false,
     externalVideoUrl: videoUrl = '',
   } = currentMeeting.externalVideo;
-
-  const getCurrentTime = () => calculateCurrentTime(timeSync, currentMeeting.externalVideo);
+  const getServerCurrentTime = () => calculateCurrentTime(timeSync, currentMeeting.externalVideo);
 
   return (
     <ExternalVideoPlayer
@@ -762,7 +812,7 @@ const ExternalVideoPlayerContainer: React.FC = () => {
       isResizing={isResizing}
       fullscreenContext={fullscreenContext}
       externalVideo={externalVideo}
-      getCurrentTime={getCurrentTime}
+      getServerCurrentTime={getServerCurrentTime}
       playerKey={key}
       setPlayerKey={setKey}
       sendMessage={sendMessage}

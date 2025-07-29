@@ -251,6 +251,7 @@ class PresentationToolbar extends PureComponent {
               label={ppb.label}
               onClick={ppb.onClick}
               tooltipLabel={ppb.tooltip}
+              dataTest={ppb.dataTest}
             />
           );
           break;
@@ -310,7 +311,7 @@ class PresentationToolbar extends PureComponent {
     for (let i = 1; i <= numberOfSlides; i += 1) {
       optionList.push(
         <option value={i} key={i}>
-          {intl.formatMessage(intlMessages.goToSlide, { 0: i })}
+          {intl.formatMessage(intlMessages.goToSlide, { slideNumber: i })}
         </option>,
       );
     }
@@ -372,7 +373,7 @@ class PresentationToolbar extends PureComponent {
     if (disableStartingMultiUser) {
       multiUserLabel = intl.formatMessage(
         intlMessages.multiUserLimitHasBeenReached,
-        { 0: maxNumberOfActiveUsers },
+        { numberOfUsers: maxNumberOfActiveUsers },
       );
     } else if (multiUser) {
       multiUserLabel = intl.formatMessage(intlMessages.toolbarMultiUserOff);

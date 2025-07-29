@@ -416,6 +416,7 @@ exports.userBannedMessage2 = 'div[id="app"] >> div >> div:nth-child(2)';
 exports.meetingEndedModalTitle = 'div[data-test="meetingEndedModal"]';
 exports.unmuteUser = 'li[data-test="unmuteUser"]';
 exports.ejectCamera = 'li[data-test="ejectCamera"]';
+exports.clearStatus = 'li[data-test="clearStatus"]';
 
 // Lock Viewers
 exports.lockViewersButton = 'li[data-test="lockViewersButton"]';
@@ -469,6 +470,8 @@ exports.dropAreaRight = 'div[data-test="dropArea-contentRight"]';
 exports.dropAreaTop = 'div[data-test="dropArea-contentTop"]';
 exports.dropAreaSidebarBottom = 'div[data-test="dropArea-sidebarContentBottom"]';
 exports.selfViewDisableBtn = 'li[data-test="selfViewDisableBtn"]';
+exports.nextPageVideoPagination = 'button[data-test="nextPageVideoPaginationBtn"]';
+exports.previousPageVideoPagination = 'button[data-test="previousPageVideoPaginationBtn"]';
 
 exports.videoQualitySelector = 'select[id="setQuality"]';
 exports.webcamItemTalkingUser = 'div[data-test="webcamItemTalkingUser"]';

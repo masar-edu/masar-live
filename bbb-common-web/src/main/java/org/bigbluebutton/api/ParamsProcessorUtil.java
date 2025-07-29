@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 
 import com.google.gson.*;
 import org.bigbluebutton.api.domain.*;
+import org.bigbluebutton.api.util.PluginUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.safety.Safelist;
@@ -157,6 +158,8 @@ public class ParamsProcessorUtil {
     private Integer defaultMaxNumPages;
     private String getJoinUrlUserdataBlocklist;
 
+    private PluginUtils pluginUtils;
+
   	private String formatConfNum(String s) {
   		if (s.length() > 5) {
   			/* Reverse conference number.
@@ -266,9 +269,18 @@ public class ParamsProcessorUtil {
 		return false;
 	}
 
-	public static String removeMetaString(String param) {
-		return StringUtils.removeStart(param, "meta_");
+    private static final Pattern PLUGIN_PREFIX_PATTERN = Pattern.compile("plugin_[a-zA-Z][a-zA-Z0-9-_]*$");
+	public static Boolean isPluginParameterValid(String param) {
+		Matcher pluginPrefixMatcher = PLUGIN_PREFIX_PATTERN.matcher(param);
+        if (pluginPrefixMatcher.matches()) {
+            return true;
+        }
+        return false;
 	}
+
+    public static String removePrefixString(String param, String prefix) {
+        return StringUtils.removeStart(param, prefix);
+    }
 
     public static Map<String, String> processMetaParam(Map<String, String> params) {
         Map<String, String> metas = new HashMap<>();
@@ -276,12 +288,26 @@ public class ParamsProcessorUtil {
             if (isMetaValid(entry.getKey())) {
                 // Need to lowercase to maintain backward compatibility with
                 // 0.81
-                String metaName = removeMetaString(entry.getKey()).toLowerCase();
+                String metaName = removePrefixString(entry.getKey(), "meta_").toLowerCase();
                 metas.put(metaName, entry.getValue());
             }
         }
 
         return metas;
+    }
+
+    public static Map<String, String> processPluginMetaParam(Map<String, String> params) {
+        Map<String, String> pluginParams  = new HashMap<>();
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            if (isPluginParameterValid(entry.getKey())) {
+                // Need to lowercase to maintain backward compatibility with
+                // 0.81
+                String pluginMetaName = removePrefixString(entry.getKey(), "plugin_").toLowerCase();
+                pluginParams.put(pluginMetaName, entry.getValue());
+            }
+        }
+
+        return pluginParams;
     }
 
 		private BreakoutRoomsParams processBreakoutRoomsParams(Map<String, String> params) {
@@ -439,23 +465,17 @@ public class ParamsProcessorUtil {
         return groups;
     }
 
-    private ArrayList<PluginManifest> processPluginManifests(JsonElement pluginManifestsJsonElement) {
+    private ArrayList<PluginManifest> processPluginManifests(JsonElement pluginManifestsJsonElement, String meetingId) {
         ArrayList<PluginManifest> pluginManifests = new ArrayList<PluginManifest>();
         try {
             if (pluginManifestsJsonElement != null && pluginManifestsJsonElement.isJsonArray()) {
                 JsonArray pluginManifestsJson = pluginManifestsJsonElement.getAsJsonArray();
                 for (JsonElement pluginManifestJson : pluginManifestsJson) {
-                    if (pluginManifestJson.isJsonObject()) {
-                        JsonObject pluginManifestJsonObj = pluginManifestJson.getAsJsonObject();
-                        if (pluginManifestJsonObj.has("url")) {
-                            String url = pluginManifestJsonObj.get("url").getAsString();
-                            PluginManifest newPlugin = new PluginManifest(url);
-                            if (pluginManifestJsonObj.has("checksum")) {
-                                newPlugin.setChecksum(pluginManifestJsonObj.get("checksum").getAsString());
-                            }
-                            pluginManifests.add(newPlugin);
-                        }
-                    }
+                    PluginManifest newPluginManifest = pluginUtils.createPluginManifestFromJson(
+                        pluginManifestJson,
+                        meetingId
+                    );
+                    if (newPluginManifest != null) pluginManifests.add(newPluginManifest);
                 }
             }
         } catch(JsonSyntaxException err){
@@ -465,9 +485,9 @@ public class ParamsProcessorUtil {
         return pluginManifests;
     }
 
-    private ArrayList<PluginManifest> processPluginManifests(String pluginManifestsParam) {
+    private List<PluginManifest> processPluginManifests(String pluginManifestsParam, String meetingId) throws JsonSyntaxException {
         JsonElement pluginManifestsJsonElement = new Gson().fromJson(pluginManifestsParam, JsonElement.class);
-        return processPluginManifests(pluginManifestsJsonElement);
+        return processPluginManifests(pluginManifestsJsonElement, meetingId);
     }
 
     private JsonElement processPluginManifestsFetchUrl(String urlStr) {
@@ -655,23 +675,37 @@ public class ParamsProcessorUtil {
         if (!isBreakout){
             //Process plugins from config
             if (defaultPluginManifests != null && !defaultPluginManifests.isEmpty()) {
-                ArrayList<PluginManifest> pluginManifestsFromConfig = processPluginManifests(defaultPluginManifests);
-                listOfPluginManifests.addAll(pluginManifestsFromConfig);
+                try {
+                    List<PluginManifest> pluginManifestsFromConfig = processPluginManifests(
+                            defaultPluginManifests,
+                            externalMeetingId
+                    );
+                    listOfPluginManifests.addAll(pluginManifestsFromConfig);
+                } catch (JsonSyntaxException err) {
+                    log.error("PluginManifests json from the properties file is malformed: {}", err.getMessage());
+                }
             }
             // Process plugins from /create params
             String pluginManifestsParam = params.get(ApiParams.PLUGIN_MANIFESTS);
             if (!StringUtils.isEmpty(pluginManifestsParam)) {
-                ArrayList<PluginManifest> pluginManifestsFromParam = processPluginManifests(pluginManifestsParam);
-                listOfPluginManifests.addAll(pluginManifestsFromParam);
+                try {
+                    List<PluginManifest> pluginManifestsFromParam = processPluginManifests(
+                            pluginManifestsParam,
+                            externalMeetingId
+                    );
+                    listOfPluginManifests.addAll(pluginManifestsFromParam);
+                } catch (JsonSyntaxException err) {
+                    log.error("PluginManifests json from the create parameter is malformed: {}", err.getMessage());
+                }
             }
             String pluginManifestsFetchUrlParam = params.get(ApiParams.PLUGIN_MANIFESTS_FETCH_URL);
             if (!StringUtils.isEmpty(pluginManifestsFetchUrlParam)) {
                 JsonElement pluginManifestsFromFetchUrlParam = processPluginManifestsFetchUrl(
-                        pluginManifestsFetchUrlParam
+                    pluginUtils.replaceAllPlaceholdersInManifestUrls(pluginManifestsFetchUrlParam, externalMeetingId)
                 );
                 if (pluginManifestsFromFetchUrlParam != null) {
                     ArrayList<PluginManifest> pluginManifestsFromParam = processPluginManifests(
-                            pluginManifestsFromFetchUrlParam
+                            pluginManifestsFromFetchUrlParam, externalMeetingId
                     );
                     listOfPluginManifests.addAll(pluginManifestsFromParam);
                 }
@@ -836,6 +870,10 @@ public class ParamsProcessorUtil {
         // store if meeting is recorded.
         Map<String, String> meetingInfo = processMetaParam(params);
 
+        // Collect plugin metadata for this meeting that the third-party app wants to
+        // replace manifest.json placeholders.
+        Map<String, String> pluginMetadataParameters = processPluginMetaParam(params);
+
         // Create a unique internal id by appending the current time. This way,
         // the 3rd-party
         // app can reuse the external meeting id.
@@ -893,6 +931,7 @@ public class ParamsProcessorUtil {
                 .withScreenShareBridge(screenShareBridge)
                 .withAudioBridge(audioBridge)
                 .withMetadata(meetingInfo)
+                .withPluginMetadataParameters(pluginMetadataParameters)
                 .withWelcomeMessageTemplate(welcomeMessageTemplate)
                 .withWelcomeMessage(welcomeMessage)
                 .withIsBreakout(isBreakout)
@@ -1764,9 +1803,9 @@ public class ParamsProcessorUtil {
 		this.defaultPresentationUploadExternalUrl = presentationUploadExternalUrl;
 	}
 
-	public void setBbbVersion(String version) {
-      this.bbbVersion = this.allowRevealOfBBBVersion ? version : "";
-	}
+    public void setBbbVersion(String version) {
+        this.bbbVersion = this.allowRevealOfBBBVersion ? version : "";
+    }
 
 	public void setAllowRevealOfBBBVersion(Boolean allowVersion) {
 		this.allowRevealOfBBBVersion = allowVersion;
@@ -1789,5 +1828,8 @@ public class ParamsProcessorUtil {
 	public void setGetJoinUrlUserdataBlocklist(String getJoinUrlUserdataBlocklist) {
 		this.getJoinUrlUserdataBlocklist = getJoinUrlUserdataBlocklist;
 	}
-  
+
+    public void setPluginUtils(PluginUtils pluginUtils) {
+        this.pluginUtils = pluginUtils;
+    }
 }

@@ -89,7 +89,7 @@ trait HandlerHelpers extends SystemConfiguration {
               "user",
               "app.notification.userJoinPushAlert",
               "Notification for a user joins the meeting",
-              Vector(s"${newUser.name}")
+              Map("userName"->s"${newUser.name}")
             )
             outGW.send(notifyEvent)
             NotificationDAO.insert(notifyEvent)
@@ -347,9 +347,13 @@ trait HandlerHelpers extends SystemConfiguration {
   }
 
   def isUsingLiveKit(liveMeeting: LiveMeeting): Boolean = {
-    liveMeeting.props.meetingProp.audioBridge == "livekit" ||
+    isUsingLiveKitAudio(liveMeeting) ||
     liveMeeting.props.meetingProp.cameraBridge == "livekit" ||
     liveMeeting.props.meetingProp.screenShareBridge == "livekit"
+  }
+
+  def isUsingLiveKitAudio(liveMeeting: LiveMeeting): Boolean = {
+    liveMeeting.props.meetingProp.audioBridge == "livekit"
   }
 
   def buildLiveKitTokenGrant(
