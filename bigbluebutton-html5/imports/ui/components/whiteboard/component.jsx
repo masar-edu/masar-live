@@ -39,9 +39,9 @@ import { notifyShapeNumberExceeded, getCustomEditorAssetUrls, getCustomAssetUrls
 import NoopTool from './custom-tools/noop-tool/component';
 import DeleteSelectedItemsTool from './custom-tools/delete-selected-items/component';
 import SessionStorage from '/imports/ui/services/storage/session';
+import { defineMessages } from 'react-intl';
 
 const CAMERA_TYPE = 'camera';
-
 const colorStyles = [
   'black',
   'blue',
@@ -99,6 +99,29 @@ const defaultUser = {
 };
 
 const customTools = [NoopTool, DeleteSelectedItemsTool];
+
+const intlMessages = defineMessages({
+  yes: {
+    id: 'app.poll.y',
+    description: '',
+  },
+  no: {
+    id: 'app.poll.n',
+    description: '',
+  },
+  abstention: {
+    id: 'app.poll.abstention',
+    description: '',
+  },
+  true: {
+    id: 'app.poll.answer.true',
+    description: '',
+  },
+  false: {
+    id: 'app.poll.answer.false',
+    description: '',
+  },
+});
 
 const Whiteboard = React.memo((props) => {
   const {
@@ -225,7 +248,6 @@ const Whiteboard = React.memo((props) => {
     },
     toolbar: (_editor, toolbarItems, { tools }) => {
       const isTestEnv = typeof navigator !== 'undefined' && navigator.webdriver;
-
       const bbbMultiUserPenOnly = getFromUserSettings(
         'bbb_multi_user_pen_only',
         window.meetingClientSettings.public.whiteboard.toolbar.multiUserPenOnly,
@@ -238,22 +260,18 @@ const Whiteboard = React.memo((props) => {
         'bbb_multi_user_tools',
         window.meetingClientSettings.public.whiteboard.toolbar.multiUserTools,
       );
-
       if (tools.deleteAll) {
         toolbarItems.splice(7, 0, toolbarItem(tools.deleteAll));
       }
-
       const hasRestrictions =
-        bbbMultiUserPenOnly ||
-        (Array.isArray(bbbPresenterTools) && bbbPresenterTools.length > 0) ||
-        (Array.isArray(bbbMultiUserTools) && bbbMultiUserTools.length > 0);
-
+      bbbMultiUserPenOnly ||
+      (Array.isArray(bbbPresenterTools) && bbbPresenterTools.length > 0) ||
+      (Array.isArray(bbbMultiUserTools) && bbbMultiUserTools.length > 0);
       const shouldBypassFiltering = isTestEnv && !hasRestrictions;
 
       if (shouldBypassFiltering) {
         return toolbarItems;
       }
-
       // PEN-ONLY for everyone who's NOT mod or presenter
       if (bbbMultiUserPenOnly && !isModerator && !isPresenter) {
         return toolbarItems.filter((item) => item.id === 'draw');
@@ -268,10 +286,23 @@ const Whiteboard = React.memo((props) => {
       if (bbbMultiUserTools.length >= 1 && !isModerator) {
         return toolbarItems.filter((item) => bbbMultiUserTools.includes(item.id));
       }
-
       // full toolbar
       return toolbarItems;
     },
+    // Add locale translations for poll options
+    // this way is adding support to regional and non regional languages
+    // "en" is a fallback for not supported languages
+    // TLdraw is only supporting 35 while bbb supports 63
+    translations: ['en', intl.locale, intl.locale.split('-')[0]].reduce((acc, locale) => {
+      acc[locale] = {
+        'app.poll.t': intl.formatMessage(intlMessages.true),
+        'app.poll.f': intl.formatMessage(intlMessages.false),
+        'app.poll.y': intl.formatMessage(intlMessages.yes),
+        'app.poll.n': intl.formatMessage(intlMessages.no),
+        'app.poll.abstention': intl.formatMessage(intlMessages.abstention),
+      };
+      return acc;
+    }, {}),
   }), [intl, currentUser?.presenter, currentUser?.userId, isModerator]);
 
   const presenterChanged = usePrevious(isPresenter) !== isPresenter;
