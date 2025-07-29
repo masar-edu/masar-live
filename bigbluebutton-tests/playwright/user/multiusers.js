@@ -371,6 +371,19 @@ class MultiUsers {
     await this.modPage.hasText(e.moderatorAvatar, 'mo', 'should not display the emoji after clearing all icons');
     await this.modPage2.hasText(e.moderatorAvatar, 'mo', 'should not display the emoji after clearing all icons');
   }
+
+  async endMeeting() {
+    await this.modPage.waitAndClick(e.leaveMeetingDropdown);
+    await this.modPage.waitAndClick(e.endMeetingButton);
+    
+    await this.modPage.hasElement(e.confirmEndMeetingModal, 'should display the confirm meeting end modal');        
+    await this.modPage.waitAndClick(e.confirmEndMeetingButton);
+    
+    // If other users exist, verify they also see the meeting ended modal
+    if (this.userPage) {
+      await this.userPage.hasElement(e.meetingEndedModal, 'should display the meeting ended modal for the attendee');
+    }
+  }
 }
 
 exports.MultiUsers = MultiUsers;
