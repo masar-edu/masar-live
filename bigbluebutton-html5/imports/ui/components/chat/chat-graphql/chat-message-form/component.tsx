@@ -6,6 +6,7 @@ import React, {
   useRef,
   useMemo,
   useCallback,
+  useState,
 } from 'react';
 import { useLazyQuery, useMutation, useReactiveVar } from '@apollo/client';
 import TextareaAutosize from 'react-autosize-textarea';
@@ -413,6 +414,7 @@ const ChatMessageForm: React.FC<ChatMessageFormProps> = ({
   const renderForm = () => {
     const formRef = useRef<HTMLFormElement | null>(null);
     const CHAT_EDIT_ENABLED = useIsEditChatMessageEnabled();
+    const [hasSelectedTextInChat, setHasSelectedTextInChat] = useState(false);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLInputElement> | Event) => {
       e.preventDefault();
@@ -562,15 +564,37 @@ const ChatMessageForm: React.FC<ChatMessageFormProps> = ({
       };
     }, []);
 
-    document.addEventListener('click', (event) => {
-      const chatList = document.getElementById('chat-list');
-      if (chatList?.contains(event.target as Node)) {
-        const selection = window.getSelection()?.toString();
-        if (selection?.length === 0) {
-          textAreaRef.current?.textarea.focus();
+    useEffect(() => {
+      const handleClick = (event: MouseEvent) => {
+        const chatList = document.getElementById('chat-list');
+        if (chatList?.contains(event.target as Node)) {
+          const selection = window.getSelection()?.toString();
+          if (selection?.length === 0 && !hasSelectedTextInChat) {
+            textAreaRef.current?.textarea.focus();
+          }
         }
-      }
-    });
+      };
+
+      /**
+       * Workaround for Firefox. `Selection.toString()` always returns empty string.
+       */
+      const handleSelectionChange = () => {
+        const selection = window.getSelection();
+        const chatList = document.getElementById('chat-list');
+        setHasSelectedTextInChat(
+          selection?.direction !== 'none'
+          && Boolean(chatList?.contains(selection?.anchorNode as Node)),
+        );
+      };
+
+      document.addEventListener('click', handleClick);
+      document.addEventListener('selectionchange', handleSelectionChange);
+
+      return () => {
+        document.removeEventListener('click', handleClick);
+        document.removeEventListener('selectionchange', handleSelectionChange);
+      };
+    }, [hasSelectedTextInChat]);
 
     useEffect(() => {
       if (chatSendMessageError && error == null) {
