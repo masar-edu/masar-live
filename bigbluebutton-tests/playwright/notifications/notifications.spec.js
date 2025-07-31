@@ -3,7 +3,6 @@ const { Notifications } = require('./notifications');
 const { ChatNotifications } = require('./chatNotifications');
 const { PresenterNotifications } = require('./presenterNotifications');
 const { RecordingNotifications } = require('./recordingNotifications');
-const { UserNotifications } = require('./userNotifications');
 const { recordMeeting } = require('../parameters/constants');
 
 test.describe.parallel('Notifications', { tag: '@ci' }, () => {
@@ -29,6 +28,12 @@ test.describe.parallel('Notifications', { tag: '@ci' }, () => {
     const notifications = new Notifications(browser, context);
     await notifications.initModPage(page);
     await notifications.raiseAndLowerHandNotification();
+  });
+
+  test('Leave notification', async ({ browser, context, page }) => {
+    const notifications = new Notifications(browser, context);
+    await notifications.initModPage(page);
+    await notifications.userLeaveNotifications();
   });
 
   test.describe.parallel('Chat', () => {
@@ -101,13 +106,4 @@ test.describe.parallel('Notifications', { tag: '@ci' }, () => {
       await presenterNotifications.screenshareToast();
     });
   });
-
-  test.describe.parallel('User', () => {
-    test('Leave notification', async ({ browser, context, page }) => {
-      const notifications = new UserNotifications(browser, context);
-      await notifications.initModPage(page);
-      await notifications.userLeaveNotifications();
-    });
-  })
-
 });
