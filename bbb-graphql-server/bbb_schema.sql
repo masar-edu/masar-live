@@ -1264,7 +1264,6 @@ CREATE UNLOGGED TABLE "chat_message_reaction" (
 	"messageId" varchar(100) REFERENCES "chat_message"("messageId") ON DELETE CASCADE,
 	"userId" varchar(100) not null,
 	"reactionEmoji" varchar(25),
-    "reactionEmojiId" varchar(50),
 	"createdAt" timestamp with time zone,
     CONSTRAINT chat_message_reaction_pk PRIMARY KEY ("messageId", "userId", "reactionEmoji"),
     FOREIGN KEY ("meetingId", "userId") REFERENCES "user"("meetingId","userId") ON DELETE CASCADE

@@ -54,7 +54,7 @@ const messages = defineMessages({
 const { isChrome, isFirefox, isEdge } = browserInfo;
 
 interface EmojiProps {
-  emoji: { id: string; native: string; };
+  emoji: { native: string; };
   native: string;
   size: number;
 }
