@@ -22,7 +22,7 @@ trait RespondToPollReqMsgHdlr {
           poll <- Polls.getPoll(pollId, liveMeeting.polls)
         } yield {
           for {
-            answerId <- msg.body.answerIds
+            answerId <- msg.body.answerIds.distinct
           } yield {
             val answerText = poll.questions(0).answers.get(answerId).key
             PollHdlrHelpers.broadcastUserRespondedToPollRecordMsg(bus.outGW, liveMeeting.props.meetingProp.intId, msg.header.userId, pollId, answerId, answerText, poll.isSecret)
