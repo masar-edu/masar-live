@@ -113,6 +113,16 @@ const QuickPollDropdown = (props) => {
     }
   });
 
+  // Trim question to everything before the first '?'
+  if (questionLines.length > 0) {
+    const full = questionLines.join(' ').trim();
+    const cutoffIdx = full.indexOf('?');
+    if (cutoffIdx !== -1) {
+      questionLines.length = 0;
+      questionLines.push(full.slice(0, cutoffIdx + 1));
+    }
+  }
+
   // Join lines into a single question string
   const question = [questionLines.join(' ').trim()];
 
@@ -120,7 +130,8 @@ const QuickPollDropdown = (props) => {
   && !question.includes(line))?.slice(0, -QUICK_POLL_CORRECT_ANSWER_SUFFIX.length);
 
   // Check explicitly if options exist or if the question ends with '?'
-  const hasExplicitQuestionMark = /\?$/.test(question);
+  const hasExplicitQuestionMark = basicQuestionPattern.test(question);
+
   // Process standard lettered options
   const processedOptions = options
     .filter((opt) => questionPattern.test(opt))
