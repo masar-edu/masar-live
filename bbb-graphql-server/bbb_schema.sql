@@ -2276,6 +2276,8 @@ create unlogged table "plugin" (
     "localesBaseUrl" varchar(500),
 	"javascriptEntrypointUrl" varchar(500),
 	"javascriptEntrypointIntegrity" varchar(500),
+	"loadFailureReason" varchar(500),
+	"loadFailureSource" varchar(50),
     CONSTRAINT "plugin_pk" PRIMARY KEY ("meetingId","name"),
     FOREIGN KEY ("meetingId") REFERENCES "meeting"("meetingId") ON DELETE CASCADE
 );
