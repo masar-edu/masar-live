@@ -146,7 +146,7 @@ public class SvgImageCreatorImp implements SvgImageCreator {
 
             NuProcess process = convertImgToSvg.start();
             try {
-                process.waitFor(convPdfToSvgTimeout, TimeUnit.SECONDS);
+                process.waitFor(convPdfToSvgTimeout + 1, TimeUnit.SECONDS);
                 done = true;
             } catch (InterruptedException e) {
                 log.error("InterruptedException while converting to SVG {}", dest, e);
@@ -196,7 +196,7 @@ public class SvgImageCreatorImp implements SvgImageCreator {
 
             NuProcess process = convertPdfToSvg.start();
             try {
-                process.waitFor(convPdfToSvgTimeout, TimeUnit.SECONDS);
+                process.waitFor(convPdfToSvgTimeout + 1, TimeUnit.SECONDS);
                 done = true;
             } catch (InterruptedException e) {
                 log.error("Interrupted Exception while generating SVG slides {}", pres.getName(), e);
