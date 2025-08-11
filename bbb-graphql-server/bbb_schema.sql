@@ -675,6 +675,7 @@ CREATE UNLOGGED TABLE "user_voice" (
 	"callingWith" varchar(100),
 	"joined" boolean,
 	"listenOnly" boolean,
+	"listenOnlyInputDevice" boolean NOT NULL DEFAULT false,
 	"muted" boolean,
 	"deafened" boolean,
 	"spoke" boolean,
@@ -1264,7 +1265,6 @@ CREATE UNLOGGED TABLE "chat_message_reaction" (
 	"messageId" varchar(100) REFERENCES "chat_message"("messageId") ON DELETE CASCADE,
 	"userId" varchar(100) not null,
 	"reactionEmoji" varchar(25),
-    "reactionEmojiId" varchar(50),
 	"createdAt" timestamp with time zone,
     CONSTRAINT chat_message_reaction_pk PRIMARY KEY ("messageId", "userId", "reactionEmoji"),
     FOREIGN KEY ("meetingId", "userId") REFERENCES "user"("meetingId","userId") ON DELETE CASCADE
@@ -2277,6 +2277,8 @@ create unlogged table "plugin" (
     "localesBaseUrl" varchar(500),
 	"javascriptEntrypointUrl" varchar(500),
 	"javascriptEntrypointIntegrity" varchar(500),
+	"loadFailureReason" varchar(500),
+	"loadFailureSource" varchar(50),
     CONSTRAINT "plugin_pk" PRIMARY KEY ("meetingId","name"),
     FOREIGN KEY ("meetingId") REFERENCES "meeting"("meetingId") ON DELETE CASCADE
 );

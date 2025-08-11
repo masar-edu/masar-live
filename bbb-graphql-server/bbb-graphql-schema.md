@@ -152,7 +152,6 @@ Permission: Restricted to User Viewing Self-Related Data
 - `reactions: Array` **Type chat_message_reaction**
   - `createdAt`
   - `reactionEmoji`
-  - `reactionEmojiId`
   - `userId`
   - `user: Object` [Type User](#type-user)
 - `replyToMessage: Object` [Type chat_message_private](#type-chat_message_private)
@@ -179,7 +178,6 @@ Permission: Restricted to User Viewing Self-Related Data
 - `reactions: Array` **Type chat_message_reaction**
   - `createdAt`
   - `reactionEmoji`
-  - `reactionEmojiId`
   - `userId`
   - `user: Object` [Type User](#type-user)
 - `replyToMessage: Object` [Type type-chat_message_public](#type-chat_message_public)

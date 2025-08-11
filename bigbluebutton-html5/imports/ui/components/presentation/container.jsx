@@ -30,7 +30,7 @@ import { SETTINGS } from '/imports/ui/services/settings/enums';
 const fetchedpresentation = {};
 
 const PresentationContainer = (props) => {
-  const { presentationIsOpen } = props;
+  const presentationIsOpen = props?.presentationIsOpen ?? true;
   const layoutContextDispatch = layoutDispatch();
   const { selectedLayout } = useSettings(SETTINGS.APPLICATION);
 
@@ -278,7 +278,4 @@ export default PresentationContainer;
 
 PresentationContainer.propTypes = {
   presentationIsOpen: PropTypes.bool,
-};
-PresentationContainer.defaultProps = {
-  presentationIsOpen: true,
 };

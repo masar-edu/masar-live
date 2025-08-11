@@ -82,6 +82,7 @@ const QuickPollDropdown = (props) => {
   } = currentSlide;
 
   const questionPattern = /^[a-zA-Z0-9][.)]\s+.*/;
+  const basicQuestionPattern = /^.*\?\s*$/;
 
   const yesNoPatt = createPattern([yesValue, noValue]);
   const trueFalsePatt = createPattern([trueValue, falseValue]);
@@ -105,11 +106,22 @@ const QuickPollDropdown = (props) => {
       // We've found explicit options (e.g., "a) Yes" or "Yes / No")
       isOptionSection = true;
       options.push(trimmedLine);
+      if (basicQuestionPattern.test(trimmedLine)) questionLines.push(trimmedLine);
     } else if (!isOptionSection && trimmedLine.length > 0) {
       // Any non-empty line before options is considered question text
       questionLines.push(trimmedLine);
     }
   });
+
+  // Trim question to everything before the first '?'
+  if (questionLines.length > 0) {
+    const full = questionLines.join(' ').trim();
+    const cutoffIdx = full.indexOf('?');
+    if (cutoffIdx !== -1) {
+      questionLines.length = 0;
+      questionLines.push(full.slice(0, cutoffIdx + 1));
+    }
+  }
 
   // Join lines into a single question string
   const question = [questionLines.join(' ').trim()];
@@ -118,7 +130,8 @@ const QuickPollDropdown = (props) => {
   && !question.includes(line))?.slice(0, -QUICK_POLL_CORRECT_ANSWER_SUFFIX.length);
 
   // Check explicitly if options exist or if the question ends with '?'
-  const hasExplicitQuestionMark = /\?$/.test(question);
+  const hasExplicitQuestionMark = basicQuestionPattern.test(question);
+
   // Process standard lettered options
   const processedOptions = options
     .filter((opt) => questionPattern.test(opt))

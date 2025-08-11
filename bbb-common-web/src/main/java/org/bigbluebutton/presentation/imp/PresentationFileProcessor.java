@@ -19,6 +19,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
+// Presentation files are processed using two separate thread pools.
+// One thread pool handles the preparation of PDF and image documents
+// for conversion along with the actual conversion of image documents.
+// The second thread pool handles the conversion of PDF document pages.
+// A PDF with multiple pages that take a long time to convert may saturate
+// the second thread pool effectively blocking the upload of further PDF
+// documents. There is a trade-off between converting multiple pages at once
+// versus uploading multiple documents at once and BBB has chosen to convert
+// pages more quickly at the expense of possibly not being able to upload
+// multiple documents at once.
+
 public class PresentationFileProcessor {
     private static Logger log = LoggerFactory.getLogger(PresentationFileProcessor.class);
 
