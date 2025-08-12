@@ -373,6 +373,7 @@ class MultiUsers {
   }
 
   async endMeeting() {
+    await this.modPage.waitForSelector(e.whiteboard);
     await this.modPage.waitAndClick(e.leaveMeetingDropdown);
     await this.modPage.waitAndClick(e.endMeetingButton);
     
