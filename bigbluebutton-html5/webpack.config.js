@@ -67,7 +67,9 @@ const config = {
       'process.env.NODE_ENV': JSON.stringify(env),
       'process.env.DETAILED_LOGS': detailedLogs,
     }),
-    isDev && new ReactRefreshWebpackPlugin(),
+    isDev && new ReactRefreshWebpackPlugin({
+      overlay: false,
+    }),
   ],
   resolve: {
     modules: ['node_modules', 'src'],
