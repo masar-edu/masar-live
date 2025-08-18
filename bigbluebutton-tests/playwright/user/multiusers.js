@@ -377,8 +377,9 @@ class MultiUsers {
     await this.modPage.waitAndClick(e.leaveMeetingDropdown);
     await this.modPage.waitAndClick(e.endMeetingButton);
     
-    await this.modPage.hasElement(e.confirmEndMeetingModal, 'should display the confirm meeting end modal');        
+    await this.modPage.hasElement(e.simpleModal, 'should display the confirm meeting end modal');        
     await this.modPage.waitAndClick(e.confirmEndMeetingButton);
+    await this.modPage.hasElement(e.meetingEndedModal, 'should display the meeting ended modal for the moderator');
     
     // If other users exist, verify they also see the meeting ended modal
     if (this.userPage) {
