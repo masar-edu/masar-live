@@ -583,7 +583,7 @@ class ApiController {
 
     if (redirectClient) {
       log.info("Redirecting to ${destUrl}");
-      redirect(url: destUrl);
+      handleRedirectJoinedUser(destUrl, us);
     } else {
       log.info("Successfully joined. Sending XML response.");
       response.addHeader("Cache-Control", "no-cache")
@@ -709,7 +709,7 @@ class ApiController {
 
     if (redirectClient) {
       log.info("Redirecting to ${destUrl}");
-      redirect(url: destUrl);
+      handleRedirectJoinedUser(destUrl, us);
     } else {
       log.info("Successfully joined. Sending XML response.");
       response.addHeader("Cache-Control", "no-cache")
@@ -719,6 +719,12 @@ class ApiController {
         }
       }
     }
+  }
+
+  def handleRedirectJoinedUser(String destination, UserSession session) {
+    Boolean waitForLayoutLoadFlag = !StringUtils.isEmpty(session.getEnforceLayout())
+    String redirectUrl = destination + "&shouldWaitForLayout=" + String.valueOf(waitForLayoutLoadFlag)
+    redirect(url: redirectUrl)
   }
 
   /*******************************************
