@@ -14,7 +14,7 @@ import { useIsPresentationEnabled } from '/imports/ui/services/features';
 import Session from '/imports/ui/services/storage/in-memory';
 import MediaOnlyLayout from './mediaOnlyLayout';
 import { usePrevious } from '../../whiteboard/utils';
-import { getShouldWaitForLayout } from '../utils';
+import { getWaitLayout } from '../utils';
 
 const LayoutEngine = () => {
   const bannerBarInput = layoutSelectInput((i) => i.bannerBar);
@@ -31,7 +31,7 @@ const LayoutEngine = () => {
   const screenShareInput = layoutSelectInput((i) => i.screenShare);
   const sharedNotesInput = layoutSelectInput((i) => i.sharedNotes);
 
-  const shouldWaitForLayout = getShouldWaitForLayout();
+  const shouldWaitForLayout = getWaitLayout();
   const layoutLoading = layoutSelect((i) => i.layoutLoading);
   const skipLayoutEngineRender = shouldWaitForLayout && layoutLoading;
 

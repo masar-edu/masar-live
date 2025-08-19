@@ -8,7 +8,7 @@ import {
 const phoneUpperBoundary = 600;
 const tabletPortraitUpperBoundary = 900;
 const tabletLandscapeUpperBoundary = 1200;
-const SHOULD_WAIT_FOR_LAYOUT_PARAMETER = 'shouldWaitForLayout';
+const WAIT_LAYOUT_PARAMETER = 'waitLayout';
 
 const windowSize = () => window.document.documentElement.clientWidth;
 const isMobile = () => windowSize() <= (phoneUpperBoundary - 1);
@@ -20,9 +20,9 @@ const isTablet = () => windowSize() >= phoneUpperBoundary
   && windowSize() <= (tabletLandscapeUpperBoundary - 1);
 const isDesktop = () => windowSize() >= tabletLandscapeUpperBoundary;
 
-const getShouldWaitForLayout = () => {
+const getWaitLayout = () => {
   const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get(SHOULD_WAIT_FOR_LAYOUT_PARAMETER) || true;
+  return urlParams.get(WAIT_LAYOUT_PARAMETER) || false;
 };
 
 const device = {
@@ -130,4 +130,4 @@ const LAYOUTS_SYNC = {
     ],
   },
 };
-export { suportedLayouts, LAYOUTS_SYNC, getShouldWaitForLayout };
+export { suportedLayouts, LAYOUTS_SYNC, getWaitLayout };
