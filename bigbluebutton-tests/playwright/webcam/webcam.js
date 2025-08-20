@@ -37,6 +37,29 @@ class Webcam extends Page {
     await this.hasElement(e.webcamItemTalkingUser, 'should display the webcam item talking user');
   }
 
+  async mirrorWebcam() {
+    await this.waitAndClick(e.joinVideo);
+    await this.hasElement(e.webcamMirroredVideoPreview, 'should display the preview of the webcam video being mirrored');
+    await this.waitAndClick(e.startSharingWebcam);
+    await this.hasElement(e.webcamMirroredVideoContainer, 'should display the webcam mirrored video container after the camera is shared');
+
+    const dropdownWebcamButton = await this.getLocator(e.dropdownWebcamButton).filter({ hasText: this.username })
+
+    dropdownWebcamButton.click();
+    await this.hasElement(e.mirrorWebcamBtn, 'should display the webcam mirror button');
+    await this.hasText(e.mirrorWebcamBtn, 'Disable webcam mirroring', 'should display the text to disable webcam mirroring');
+
+    await this.getVisibleLocator(e.mirrorWebcamBtn).click();
+    await this.hasElement(e.webcamContainer, 'should display the video container after disabling webcam mirroring');
+
+    dropdownWebcamButton.click();
+    await this.hasElement(e.mirrorWebcamBtn, 'should display the webcam mirror button');
+    await this.hasText(e.mirrorWebcamBtn, 'Enable webcam mirroring', 'should display the text to enable webcam mirroring');
+
+    await this.getVisibleLocator(e.mirrorWebcamBtn).click();
+    await this.hasElement(e.webcamMirroredVideoContainer, 'should display the video container after enabling webcam mirroring');
+  }
+
   async changeVideoQuality() {
     const { videoPreviewTimeout } = this.settings;
 

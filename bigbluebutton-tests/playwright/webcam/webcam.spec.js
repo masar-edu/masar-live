@@ -22,6 +22,12 @@ test.describe.parallel('Webcam', { tag: '@ci' }, () => {
     await webcam.talkingIndicator();
   });
 
+  test('Mirror webcam', async ({ browser, page, browserName }) => {
+    const webcam = new Webcam(browser, page);
+    await webcam.init(true, true);
+    await webcam.mirrorWebcam();
+  });
+
   test('Pinning and unpinning webcams', async ({ browser, context, page, browserName }) => {
     test.skip(browserName === 'firefox', 'It only works manually on Firefox');
     const webcam = new MultiUsers(browser, context);
@@ -31,7 +37,7 @@ test.describe.parallel('Webcam', { tag: '@ci' }, () => {
     await webcam.pinningWebcams();
   });
 
-  test('Change video quality', { tag: '@flaky' } , async ({ browser, page }) => {
+  test('Change video quality', { tag: '@flaky' }, async ({ browser, page }) => {
     // Current approach is not reliable enough to ensure the video quality is changed
     const webcam = new Webcam(browser, page);
     await webcam.init(true, true);
