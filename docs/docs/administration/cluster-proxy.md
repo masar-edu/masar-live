@@ -133,7 +133,7 @@ public:
     url: 'https://bbb-01.example.com/pad'
 ```
 
-Create a new file in `/etc/bigbluebutton/nginx/bbb-cluster.nginx` 
+Create a new file in `/etc/bigbluebutton/nginx/bbb-cluster.nginx`
 and prepend the mount point of bbb-html5 in all location sections:
 
 ```
@@ -200,6 +200,18 @@ HASURA_GRAPHQL_CORS_DOMAIN="https://bbb-proxy.example.com"
 ```
 
 This one includes the protocol.
+
+If your proxy server uses a different root domain than your BBB server, you’ll need an additional configuration.
+Add the following settings to `/usr/share/bbb-web/WEB-INF/classes/application.yml`:
+
+```yaml
+server:
+  servlet:
+    session:
+      cookie:
+        secure: true
+        SameSite: none
+```
 
 Reload systemd and restart BigBlueButton:
 
