@@ -26,6 +26,8 @@ exports.redirectButton = 'button[data-test="redirectButton"]';
 exports.leaveMeetingDropdown = 'button[data-test="leaveMeetingDropdown"]';
 exports.directLogoutButton = 'li[data-test="directLogoutButton"]';
 exports.optionsLogoutButton = 'li[data-test="optionsLogoutButton"]';
+exports.endMeetingButton = 'li[data-test="endMeetingButton"]';
+exports.confirmEndMeetingButton = 'button[data-test="confirmEndMeeting"]';
 exports.rating = 'div[data-test="rating"]';
 exports.sendFeedbackButton = 'button[data-test="sendFeedbackButton"]';
 exports.feedbackCommentInput = 'textarea#feedbackComment';
