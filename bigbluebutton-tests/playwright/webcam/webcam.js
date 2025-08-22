@@ -42,6 +42,7 @@ class Webcam extends Page {
     await this.waitAndClick(e.joinVideo);
     await this.hasElement(e.webcamMirroredVideoPreview, 'should display the preview of the webcam video, starts mirrored for self');
     await this.waitAndClick(e.startSharingWebcam);
+    await this.waitForSelector(e.leaveVideo, VIDEO_LOADING_WAIT_TIME);
     await this.hasElement(e.webcamMirroredVideoContainer, 'should display the webcam mirrored video container after the camera is shared');
 
     const mirroredWebcamLocator = await this.getLocator(e.webcamMirroredVideoContainer);
