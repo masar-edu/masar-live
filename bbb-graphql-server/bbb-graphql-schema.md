@@ -696,7 +696,6 @@ Permission: Restricted to User Viewing Self-Related Data
 
 ## Type: pres_page_writers
 ### Fields:
-- `changedModeOn`
 - `isCurrentPage`
 - `pageId`
 - `presentationId`
@@ -917,4 +916,3 @@ Permission: Restricted to User Viewing Self-Related Data
 - `enforceLayout`
 - `sessionName`
 - `sessionToken`
-
