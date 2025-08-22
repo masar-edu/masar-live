@@ -3,6 +3,7 @@ package streamingserver
 import (
 	"bytes"
 	"encoding/json"
+	"maps"
 	"sync"
 
 	"bbb-graphql-middleware/internal/common"
@@ -44,10 +45,12 @@ func HandleSendCursorPositionEvtMsg(receivedMessage common.RedisMessage, browser
 			userHasViewersCursorLocked := browserConnection.BBBWebSessionVariables["x-hasura-cursorlockeduserid"] == browserConnection.UserId
 
 			if !receivedCursorIsFromViewer || !userHasViewersCursorLocked { // check for lock settings "See other viewers cursors"
+				browserConnection.ActiveStreamingsMutex.RLock()
 				if queryId, exists := browserConnection.ActiveStreamings["getCursorCoordinatesStream"]; exists {
 					queryIdInBytes := []byte(queryId)
 					browserConnection.FromHasuraToBrowserChannel.Send(bytes.Replace(jsonDataNext, QueryIdPlaceholderInBytes, queryIdInBytes, 1))
 				}
+				browserConnection.ActiveStreamingsMutex.RUnlock()
 			}
 		}
 	}
@@ -91,9 +94,19 @@ var (
 func GetCursorsCache(meetingId string) (map[string]map[string]any, bool) {
 	CursorsCacheMutex.RLock()
 	defer CursorsCacheMutex.RUnlock()
+	rows, ok := CursorsCache[meetingId]
+	if !ok {
+		return nil, false
+	}
+	// Deep copy the map
+	copyRows := make(map[string]map[string]any, len(rows))
+	for userId, row := range rows {
+		newRow := make(map[string]any, len(row))
+		maps.Copy(newRow, row)
+		copyRows[userId] = newRow
+	}
 
-	StreamingRows, StreamingRowsExists := CursorsCache[meetingId]
-	return StreamingRows, StreamingRowsExists
+	return copyRows, true
 }
 
 func StoreCursorsCache(meetingId string, userId string, row map[string]any) {
