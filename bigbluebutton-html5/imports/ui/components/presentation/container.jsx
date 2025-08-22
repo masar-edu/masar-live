@@ -62,7 +62,6 @@ const PresentationContainer = (props) => {
   const { data: whiteboardWritersData } = useDeduplicatedSubscription(
     CURRENT_PAGE_WRITERS_SUBSCRIPTION,
     {
-      variables: { pageId: currentPresentationPage?.pageId },
       skip: !currentPresentationPage?.pageId,
     },
   );
@@ -131,7 +130,7 @@ const PresentationContainer = (props) => {
   const isViewersAnnotationsLocked = meeting ? meeting.lockSettings?.hideViewersAnnotation : true;
 
   const multiUserData = {
-    active: whiteboardWriters?.length > 0,
+    active: whiteboardWriters?.filter((u) => !u.user.presenter).length > 0,
     size: whiteboardWriters?.length || 0,
     hasAccess: whiteboardWriters?.some((writer) => writer.userId === Auth.userID),
   };
@@ -245,7 +244,7 @@ const PresentationContainer = (props) => {
           slidePosition,
           hasWBAccess: multiUserData.hasAccess,
           downloadPresentationUri: `${APP_CONFIG.bbbWebBase}/${currentPresentationPage?.downloadFileUri}`,
-          multiUser: (multiUserData.hasAccess || multiUserData.active) && presentationIsOpen,
+          multiUser: multiUserData.active && presentationIsOpen,
           presentationIsDownloadable: currentPresentationPage?.downloadable,
           mountPresentation: !!currentSlide,
           currentPresentationId: currentPresentationPage?.presentationId,

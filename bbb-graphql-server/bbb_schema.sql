@@ -1506,11 +1506,25 @@ create index "idx_pres_page_writers_userID_rev" on "pres_page_writers"("userId",
 CREATE OR REPLACE VIEW "v_pres_page_writers" AS
 SELECT
 	"pres_presentation"."presentationId",
-	"pres_page_writers" .*,
+	"pres_page_writers"."meetingId",
+	"pres_page_writers"."pageId",
+	"pres_page_writers"."userId",
 	CASE WHEN pres_presentation."current" IS true AND pres_page."current" IS true THEN true ELSE false END AS "isCurrentPage"
 FROM "pres_page_writers"
 JOIN "pres_page" ON "pres_page"."pageId" = "pres_page_writers"."pageId"
-JOIN "pres_presentation" ON "pres_presentation"."presentationId"  = "pres_page"."presentationId" ;
+JOIN "pres_presentation" ON "pres_presentation"."presentationId"  = "pres_page"."presentationId"
+UNION
+SELECT
+	"pres_presentation"."presentationId",
+	"user"."meetingId",
+	"pres_page"."pageId",
+	"user"."userId",
+	CASE WHEN pres_presentation."current" IS true AND pres_page."current" IS true THEN true ELSE false END AS "isCurrentPage"
+FROM "user"
+JOIN "pres_page" ON "pres_page"."pageId" = "pres_page_writers"."pageId"
+JOIN "pres_presentation" ON "pres_presentation"."presentationId"  = "pres_page"."presentationId"
+WHERE "user"."presenter" is true;
+;
 
 CREATE OR REPLACE VIEW "v_pres_presentation_uploadToken" AS
 SELECT "meetingId", "presentationId", "uploadUserId", "uploadTemporaryId", "uploadToken"
