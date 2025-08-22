@@ -22,7 +22,7 @@ test.describe.parallel('Webcam', { tag: '@ci' }, () => {
     await webcam.talkingIndicator();
   });
 
-  test('Mirror webcam', async ({ browser, page, browserName }) => {
+  test('Mirror webcam', async ({ browser, page }) => {
     const webcam = new Webcam(browser, page);
     await webcam.init(true, true);
     await webcam.mirrorWebcam();
