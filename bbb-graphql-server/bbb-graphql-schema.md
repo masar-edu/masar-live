@@ -700,6 +700,8 @@ Permission: Restricted to User Viewing Self-Related Data
 - `pageId`
 - `presentationId`
 - `userId`
+### Relationships:
+- `user: Object` [Type User](#type-user)
 
 ## Type: screenshare
 ### Fields:

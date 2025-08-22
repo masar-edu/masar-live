@@ -35,9 +35,6 @@ export const useMergedCursorData = () => {
 
   const { data: cursorCoordinatesData } = useDeduplicatedSubscription<CursorCoordinatesResponse>(
     CURRENT_PAGE_CURSORS_COORDINATES_STREAM,
-    {
-      // skip: !cursorUsersSubscriptionData,
-    },
   );
   const cursorCoordinatesDataString = JSON.stringify(cursorCoordinatesData);
 

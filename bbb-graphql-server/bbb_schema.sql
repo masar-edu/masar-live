@@ -1516,14 +1516,14 @@ JOIN "pres_presentation" ON "pres_presentation"."presentationId"  = "pres_page".
 UNION
 SELECT
 	"pres_presentation"."presentationId",
-	"user"."meetingId",
+	"pres_presentation"."meetingId",
 	"pres_page"."pageId",
 	"user"."userId",
 	CASE WHEN pres_presentation."current" IS true AND pres_page."current" IS true THEN true ELSE false END AS "isCurrentPage"
-FROM "user"
-JOIN pres_presentation ON pres_presentation."meetingId"::text = "user"."meetingId"::text
+FROM pres_presentation
 JOIN pres_page ON pres_page."presentationId"::text = pres_presentation."presentationId"::text
-WHERE "user".presenter IS TRUE;
+JOIN "user" on "user"."meetingId" = "pres_presentation"."meetingId"
+            and "user".presenter IS TRUE;
 ;
 
 CREATE OR REPLACE VIEW "v_pres_presentation_uploadToken" AS
