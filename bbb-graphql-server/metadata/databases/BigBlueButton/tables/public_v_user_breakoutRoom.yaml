@@ -29,5 +29,8 @@ select_permissions:
         - userId
         - sequence
       filter:
-        meetingId:
-          _eq: X-Hasura-MeetingId
+        _and:
+          - meetingId:
+              _eq: X-Hasura-MeetingId
+          - userId:
+              _eq: X-Hasura-UserId

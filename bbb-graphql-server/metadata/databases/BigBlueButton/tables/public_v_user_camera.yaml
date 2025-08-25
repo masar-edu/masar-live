@@ -61,12 +61,6 @@ select_permissions:
         _and:
           - meetingId:
               _eq: X-Hasura-MeetingId
-          - _or:
-              - user:
-                  isModerator:
-                    _eq: true
-              - meetingId:
-                  _eq: X-Hasura-WebcamsNotLockedInMeeting
-              - userId:
-                  _eq: X-Hasura-WebcamsLockedUserId
+          - userId:
+              _eq: X-Hasura-UserId
       allow_aggregations: true
