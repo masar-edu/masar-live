@@ -17,3 +17,13 @@ select_permissions:
       query_root_fields: []
       subscription_root_fields: []
     comment: ""
+  - role: bbb_client_not_in_meeting
+    permission:
+      columns:
+        - disablePublicChat
+      filter:
+        meetingId:
+          _eq: X-Hasura-MeetingId
+      query_root_fields: []
+      subscription_root_fields: []
+    comment: ""
