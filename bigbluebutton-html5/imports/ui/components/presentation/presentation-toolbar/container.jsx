@@ -259,7 +259,6 @@ PresentationToolbarContainer.propTypes = {
 
   userIsPresenter: PropTypes.bool,
   presentationId: PropTypes.string,
-  hasPoll: PropTypes.bool.isRequired,
   currentSlide: PropTypes.shape({
     content: PropTypes.string.isRequired,
     current: PropTypes.bool.isRequired,

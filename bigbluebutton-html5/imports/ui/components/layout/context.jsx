@@ -1534,17 +1534,19 @@ const LayoutContextProvider = (props) => {
     );
   }, [layoutContextState, isPresentationEnabled]);
   useEffect(() => {
-    layoutContextDispatch({
-      type: ACTIONS.SET_NOTES_IS_PINNED,
-      value: isSharedNotesPinned,
-    });
-    layoutContextDispatch({
-      type: ACTIONS.SET_PILE_CONTENT_FOR_PRESENTATION_AREA,
-      value: {
-        content: PRESENTATION_AREA.PINNED_NOTES,
-        open: isSharedNotesPinned,
-      },
-    });
+    if (typeof isSharedNotesPinned === 'boolean') {
+      layoutContextDispatch({
+        type: ACTIONS.SET_NOTES_IS_PINNED,
+        value: isSharedNotesPinned,
+      });
+      layoutContextDispatch({
+        type: ACTIONS.SET_PILE_CONTENT_FOR_PRESENTATION_AREA,
+        value: {
+          content: PRESENTATION_AREA.PINNED_NOTES,
+          open: isSharedNotesPinned,
+        },
+      });
+    }
   }, [isSharedNotesPinned]);
   useUpdatePresentationAreaContentForPlugin(layoutContextState);
   return (

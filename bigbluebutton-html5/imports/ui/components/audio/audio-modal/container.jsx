@@ -31,6 +31,8 @@ const AudioModalContainer = (props) => {
   const { data: meeting } = useMeeting((m) => ({
     voiceSettings: m.voiceSettings,
     audioBridge: m.audioBridge,
+    isBreakout: m.isBreakout,
+    breakoutPolicies: m.breakoutPolicies,
   }));
   const { data: currentUserData } = useCurrentUser((user) => ({
     away: user.away,
