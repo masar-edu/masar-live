@@ -252,7 +252,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install BBB
-        timeout-minutes: 30
+        timeout-minutes: 60
         uses: ./.github/actions/install-bbb
       - uses: actions/setup-node@v4
         with:
@@ -338,6 +338,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install BBB
+        timeout-minutes: 60
         uses: ./.github/actions/install-bbb
       - name: Extract download URL of the SDK version information from bigbluebutton-html5/package.json
         working-directory: ./bigbluebutton-html5
