@@ -29,7 +29,7 @@ import {
 } from '../context';
 import { calculatePresentationVideoRate } from './service';
 import { useMeetingLayoutUpdater, usePushLayoutUpdater } from './hooks';
-import { changeEnforcedLayout } from '/imports/ui/components/plugins-engine/ui-commands/layout/handler';
+import { setEnforcedLayout } from '/imports/ui/components/plugins-engine/ui-commands/layout/handler';
 import { useIsChatEnabled } from '/imports/ui/services/features';
 import Auth from '/imports/ui/services/auth';
 import Storage from '/imports/ui/services/storage/session';
@@ -391,14 +391,14 @@ const PushLayoutEngineContainer = (props) => {
 
   const horizontalPosition = cameraPosition === 'contentLeft' || cameraPosition === 'contentRight';
 
-  const pluginLayoutChange = useReactiveVar(changeEnforcedLayout);
+  const currentPluginLayoutRaw = useReactiveVar(setEnforcedLayout);
 
   const validatePluginLayout = (layout) => {
     const layoutTypes = Object.keys(LAYOUT_TYPE);
     return layout && layoutTypes.includes(layout) ? layout : null;
   };
   const pluginEnforcedLayout = validatePluginLayout(
-    pluginLayoutChange.pluginEnforcedLayout,
+    currentPluginLayoutRaw.pluginEnforcedLayout,
   );
   const {
     data: currentMeeting,
