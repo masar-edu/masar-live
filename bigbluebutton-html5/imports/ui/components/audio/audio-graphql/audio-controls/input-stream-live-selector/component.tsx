@@ -16,7 +16,6 @@ import {
   notify,
 } from './service';
 import useMeeting from '/imports/ui/core/hooks/useMeeting';
-import { Meeting } from '/imports/ui/Types/meeting';
 import logger from '/imports/startup/client/logger';
 import MutedAlert from '/imports/ui/components/muted-alert/component';
 import MuteToggle from './buttons/muteToggle';
@@ -306,7 +305,7 @@ const InputStreamLiveSelectorContainer: React.FC<InputStreamLiveSelectorContaine
   const talking = Boolean(currentUser?.userId && talkingUsers[currentUser.userId]);
   const muted = Boolean(currentUser?.userId && !unmutedUsers[currentUser.userId]);
 
-  const { data: currentMeeting } = useMeeting((m: Partial<Meeting>) => {
+  const { data: currentMeeting } = useMeeting((m) => {
     return {
       lockSettings: m?.lockSettings,
       isBreakout: m?.isBreakout,
