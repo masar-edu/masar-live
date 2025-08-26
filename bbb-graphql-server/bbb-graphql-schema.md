@@ -696,11 +696,12 @@ Permission: Restricted to User Viewing Self-Related Data
 
 ## Type: pres_page_writers
 ### Fields:
-- `changedModeOn`
 - `isCurrentPage`
 - `pageId`
 - `presentationId`
 - `userId`
+### Relationships:
+- `user: Object` [Type User](#type-user)
 
 ## Type: screenshare
 ### Fields:
