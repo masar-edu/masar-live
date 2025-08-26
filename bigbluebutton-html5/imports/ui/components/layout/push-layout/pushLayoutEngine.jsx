@@ -418,11 +418,19 @@ const PushLayoutEngineContainer = (props) => {
 
   const { isOpen: presentationIsOpen } = presentationInput;
 
-  const { data: currentUserData } = useCurrentUser((user) => ({
+  const { data: currentUserData, loading: enforcedLayoutLoading } = useCurrentUser((user) => ({
     enforceLayout: user.sessionCurrent?.enforceLayout,
     isModerator: user.isModerator,
     presenter: user.presenter,
   }));
+
+  useEffect(() => {
+    layoutContextDispatch({
+      type: ACTIONS.SET_LAYOUT_LOADING,
+      value: enforcedLayoutLoading,
+    });
+  }, [enforcedLayoutLoading]);
+
   const isModerator = currentUserData?.isModerator;
   const isPresenter = currentUserData?.presenter;
 

@@ -48,6 +48,7 @@ const initState = {
   deviceType: null,
   isRTL: DEFAULT_VALUES.isRTL,
   layoutType: DEFAULT_VALUES.layoutType,
+  layoutLoading: true,
   fontSize: DEFAULT_VALUES.fontSize,
   idChatOpen: '',
   fullscreen: {
@@ -1228,6 +1229,18 @@ const reducer = (state, action) => {
             display,
           },
         },
+      };
+    }
+
+    // LAYOUT TYPE MANAGEMENT
+    case ACTIONS.SET_LAYOUT_LOADING: {
+      const { layoutLoading } = state;
+      if (layoutLoading === action.value) {
+        return state;
+      }
+      return {
+        ...state,
+        layoutLoading: action.value,
       };
     }
 
