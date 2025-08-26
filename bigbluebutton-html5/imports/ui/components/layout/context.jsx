@@ -2,7 +2,6 @@ import React, { useEffect, useReducer, useRef } from 'react';
 import { createContext, useContextSelector } from 'use-context-selector';
 import PropTypes from 'prop-types';
 import { clone, equals } from 'ramda';
-import { PINNED_PAD_SUBSCRIPTION } from '/imports/ui/components/notes/queries';
 import {
   ACTIONS, PRESENTATION_AREA, PANELS, LAYOUT_TYPE,
 } from '/imports/ui/components/layout/enums';
@@ -10,9 +9,9 @@ import DEFAULT_VALUES from '/imports/ui/components/layout/defaultValues';
 import { INITIAL_INPUT_STATE, INITIAL_OUTPUT_STATE } from './initState';
 import useUpdatePresentationAreaContentForPlugin from '/imports/ui/components/plugins-engine/ui-data-hooks/layout/presentation-area/utils';
 import { useIsPresentationEnabled } from '/imports/ui/services/features';
-import useDeduplicatedSubscription from '../../core/hooks/useDeduplicatedSubscription';
 import { usePrevious } from '../whiteboard/utils';
 import Session from '/imports/ui/services/storage/in-memory';
+import useMeeting from '../../core/hooks/useMeeting';
 
 // variable to debug in console log
 const debug = false;
@@ -1512,7 +1511,12 @@ const LayoutContextProvider = (props) => {
       },
     }],
   );
-  const { data: pinnedPadData } = useDeduplicatedSubscription(PINNED_PAD_SUBSCRIPTION);
+
+  const { data: currentMeeting } = useMeeting((m) => ({
+    componentsFlags: m.componentsFlags,
+  }));
+
+  const isSharedNotesPinned = currentMeeting?.componentsFlags?.isSharedNotesPinned;
 
   const [layoutContextState, layoutContextDispatch] = useReducer(reducer, initState);
   const isPresentationEnabled = useIsPresentationEnabled();
@@ -1530,20 +1534,20 @@ const LayoutContextProvider = (props) => {
     );
   }, [layoutContextState, isPresentationEnabled]);
   useEffect(() => {
-    const isSharedNotesPinned = !!pinnedPadData
-      && pinnedPadData.sharedNotes[0]?.pinned;
-    layoutContextDispatch({
-      type: ACTIONS.SET_NOTES_IS_PINNED,
-      value: isSharedNotesPinned,
-    });
-    layoutContextDispatch({
-      type: ACTIONS.SET_PILE_CONTENT_FOR_PRESENTATION_AREA,
-      value: {
-        content: PRESENTATION_AREA.PINNED_NOTES,
-        open: isSharedNotesPinned,
-      },
-    });
-  }, [pinnedPadData]);
+    if (typeof isSharedNotesPinned === 'boolean') {
+      layoutContextDispatch({
+        type: ACTIONS.SET_NOTES_IS_PINNED,
+        value: isSharedNotesPinned,
+      });
+      layoutContextDispatch({
+        type: ACTIONS.SET_PILE_CONTENT_FOR_PRESENTATION_AREA,
+        value: {
+          content: PRESENTATION_AREA.PINNED_NOTES,
+          open: isSharedNotesPinned,
+        },
+      });
+    }
+  }, [isSharedNotesPinned]);
   useUpdatePresentationAreaContentForPlugin(layoutContextState);
   return (
     <LayoutContextSelector.Provider value={
