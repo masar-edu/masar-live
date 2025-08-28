@@ -20,6 +20,7 @@ import deviceInfo from '/imports/utils/deviceInfo';
 import GuestWaitContainer, { GUEST_STATUSES } from '../guest-wait/component';
 import Legacy from '/imports/ui/components/legacy/component';
 import PluginTopLevelManager from '/imports/ui/components/plugin-top-level-manager/component';
+import meetingStaticData from '/imports/ui/core/singletons/meetingStaticData';
 
 const connectionTimeout = 60000;
 const MESSAGE_TIMEOUT = 3000;
@@ -223,6 +224,8 @@ const PresenceManager: React.FC<PresenceManagerProps> = ({
 const PresenceManagerContainer: React.FC<PresenceManagerContainerProps> = ({ children }) => {
   const { loading, error, data } = useDeduplicatedSubscription<GetUserCurrentResponse>(getUserCurrent);
 
+  const meetingStaticStore = meetingStaticData.getMeetingData();
+
   const {
     loading: userInfoLoading,
     error: userInfoError,
@@ -238,14 +241,13 @@ const PresenceManagerContainer: React.FC<PresenceManagerContainerProps> = ({ chi
 
   if (
     !userInfoLoading
-    && (userInfoData?.meeting.length === 0 && userInfoData?.user_current.length === 0)
+    && (userInfoData?.user_current.length === 0)
   ) {
     throw new Error('Meeting Not Found.', { cause: 'meeting_not_found' });
   }
 
-  if (!data || data.user_current.length === 0) return null;
+  if (!data || data.user_current.length === 0 || !meetingStaticStore) return null;
   if (!userInfoData
-      || userInfoData.meeting.length === 0
       || userInfoData.user_current.length === 0) return null;
   const {
     authToken,
@@ -258,6 +260,7 @@ const PresenceManagerContainer: React.FC<PresenceManagerContainerProps> = ({ chi
     guestStatusDetails,
     guestStatus,
   } = data.user_current[0];
+
   const {
     logoutUrl,
     meetingId,
@@ -266,7 +269,8 @@ const PresenceManagerContainer: React.FC<PresenceManagerContainerProps> = ({ chi
     bannerText,
     customLogoUrl,
     customDarkLogoUrl,
-  } = userInfoData.meeting[0];
+  } = meetingStaticStore;
+
   const { extId, name: userName, userId } = userInfoData.user_current[0];
 
   const MIN_BROWSER_CONFIG = window.meetingClientSettings.public.minBrowserVersions;
@@ -277,7 +281,7 @@ const PresenceManagerContainer: React.FC<PresenceManagerContainerProps> = ({ chi
   return (
     <PresenceManager
       authToken={authToken}
-      logoutUrl={logoutUrl}
+      logoutUrl={logoutUrl ?? ''}
       meetingId={meetingId}
       meetingName={meetingName}
       userName={userName}
@@ -290,11 +294,11 @@ const PresenceManagerContainer: React.FC<PresenceManagerContainerProps> = ({ chi
       endedReasonCode={meeting.endedReasonCode}
       endedBy={meeting.endedByUserName}
       ejectReasonCode={ejectReasonCode}
-      bannerColor={bannerColor}
-      bannerText={bannerText}
+      bannerColor={bannerColor ?? ''}
+      bannerText={bannerText ?? ''}
       loggedOut={loggedOut}
-      customLogoUrl={customLogoUrl}
-      customDarkLogoUrl={customDarkLogoUrl}
+      customLogoUrl={customLogoUrl ?? ''}
+      customDarkLogoUrl={customDarkLogoUrl ?? ''}
       guestLobbyMessage={guestStatusDetails?.guestLobbyMessage ?? null}
       positionInWaitingQueue={guestStatusDetails?.positionInWaitingQueue ?? null}
       guestStatus={guestStatus}

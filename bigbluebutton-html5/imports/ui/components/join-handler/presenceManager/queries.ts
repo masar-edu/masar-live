@@ -43,15 +43,6 @@ export interface GetUserInfoResponse {
 
 export const getUserInfo = gql`
 query getUserInfo {
-  meeting {
-    meetingId
-    name
-    logoutUrl
-    bannerColor
-    bannerText
-    customLogoUrl
-    customDarkLogoUrl
-  }
   user_current {
     extId
     name
