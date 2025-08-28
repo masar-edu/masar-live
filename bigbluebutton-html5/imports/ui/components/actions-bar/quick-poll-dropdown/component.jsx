@@ -126,7 +126,7 @@ const QuickPollDropdown = (props) => {
   // Join lines into a single question string
   const question = [questionLines.join(' ').trim()];
 
-  const correctAnswer = lines.find((line) => line.endsWith(QUICK_POLL_CORRECT_ANSWER_SUFFIX)
+  const correctAnswer = lines.map(line => line.trimStart()).find((line) => line.endsWith(QUICK_POLL_CORRECT_ANSWER_SUFFIX)
   && !question.includes(line))?.slice(0, -QUICK_POLL_CORRECT_ANSWER_SUFFIX.length);
 
   // Check explicitly if options exist or if the question ends with '?'
@@ -379,6 +379,17 @@ const QuickPollDropdown = (props) => {
         return c;
       }).join('/');
 
+      // if the poll is letter and it does not start with A then we skip it
+      // same if it does follow the order (if it starts with A it has to be followed by B, C, D...)
+      if (type.startsWith(_pollTypes.Letter)) {
+        if (!itemLabel.startsWith('A')) return null;
+
+        const letters = itemLabel.split('/');
+        for (let i = 0; i < letters.length; i += 1) {
+          if (letters[i] !== numChars[i + 1]) return null;
+        }
+      }
+
       return (
         <Dropdown.DropdownListItem
           label={itemLabel}
@@ -404,7 +415,7 @@ const QuickPollDropdown = (props) => {
           multiResp={pollData?.multiResp}
         />
       );
-    });
+    }).filter(Boolean);
 
     const sizes = [];
     return pollItemElements.filter((el) => {
@@ -419,7 +430,7 @@ const QuickPollDropdown = (props) => {
     slideId, quickPollOptions, startPoll, pollTypes, layoutContextDispatch,
   );
 
-  if (quickPollOptions.length === 0) return <Styled.QuickPollButtonPlaceholder aria-hidden />;
+  if (quickPolls.length === 0) return <Styled.QuickPollButtonPlaceholder aria-hidden />;
 
   let answers = null;
   let quickPollLabel = '';
