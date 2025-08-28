@@ -30,7 +30,6 @@ interface UsersListParticipantsPage {
   pageId: string;
   offset: number;
   isBreakout: boolean;
-  parentId: string;
 }
 
 const UsersListParticipantsPage: React.FC<UsersListParticipantsPage> = ({
@@ -40,7 +39,6 @@ const UsersListParticipantsPage: React.FC<UsersListParticipantsPage> = ({
   pageId,
   offset,
   isBreakout,
-  parentId,
 }) => {
   const [openUserAction, setOpenUserAction] = React.useState<string | null>(null);
   const isRTL = layoutSelect((i: Layout) => i.isRTL);
@@ -68,7 +66,6 @@ const UsersListParticipantsPage: React.FC<UsersListParticipantsPage> = ({
                 open={user.userId === openUserAction}
                 setOpenUserAction={setOpenUserAction}
                 isBreakout={isBreakout}
-                parentId={parentId}
               >
                 <ListItem index={offset + idx} user={user} lockSettings={meeting.lockSettings} />
               </UserActions>
@@ -191,7 +188,6 @@ const UserListParticipantsPageContainer: React.FC<UserListParticipantsContainerP
       pageId={pageId ?? ''}
       offset={offset}
       isBreakout={meetingInfo?.isBreakout ?? false}
-      parentId={meetingInfo?.breakoutPolicies?.parentId ?? ''}
     />
   );
 };
