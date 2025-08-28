@@ -44,17 +44,6 @@ subscription MeetingPermissions {
   }
 }`;
 
-export const CURRENT_USER_SUBSCRIPTION = gql`
-subscription UserListCurrUser {
-  user_current {
-    userId 
-    isModerator
-    guest
-    presenter
-    locked
-  }
-}`;
-
 export const USER_AGGREGATE_COUNT_SUBSCRIPTION = gql`
 subscription UsersCount {
   user_aggregate {
@@ -67,6 +56,5 @@ subscription UsersCount {
 
 export default {
   MEETING_PERMISSIONS_SUBSCRIPTION,
-  CURRENT_USER_SUBSCRIPTION,
   USER_AGGREGATE_COUNT_SUBSCRIPTION,
 };
