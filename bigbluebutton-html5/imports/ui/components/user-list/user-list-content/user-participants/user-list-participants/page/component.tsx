@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useRef } from 'react';
 import * as PluginSdk from 'bigbluebutton-html-plugin-sdk';
 import useDeduplicatedSubscription from '/imports/ui/core/hooks/useDeduplicatedSubscription';
-import { MEETING_PERMISSIONS_SUBSCRIPTION, MeetingPermission, MeetingPermissionsSubscriptionResponse } from '../queries';
 import { setLocalUserList, useLoadedUserList } from '/imports/ui/core/hooks/useLoadedUserList';
 import useCurrentUser from '/imports/ui/core/hooks/useCurrentUser';
 import { CURRENT_PRESENTATION_PAGE_SUBSCRIPTION, CurrentPresentationPagesSubscriptionResponse } from '/imports/ui/components/whiteboard/queries';
@@ -15,6 +14,7 @@ import { Layout } from '/imports/ui/components/layout/layoutTypes';
 import SkeletonUserListItem from '../list-item/skeleton/component';
 import { PluginsContext } from '/imports/ui/components/components-data/plugin-context/context';
 import useMeeting from '/imports/ui/core/hooks/useMeeting';
+import { LockSettings, Meeting, UsersPolicies } from '/imports/ui/Types/meeting';
 
 interface UserListParticipantsContainerProps {
   index: number;
@@ -25,7 +25,12 @@ interface UserListParticipantsContainerProps {
 
 interface UsersListParticipantsPage {
   users: Array<User>;
-  meeting: MeetingPermission;
+  meeting: {
+    meetingId: string;
+    isBreakout: boolean;
+    lockSettings: Meeting['lockSettings'];
+    usersPolicies: UsersPolicies;
+  };
   currentUser: Partial<User>;
   pageId: string;
   offset: number;
@@ -87,18 +92,15 @@ const UserListParticipantsPageContainer: React.FC<UserListParticipantsContainerP
   const limit = useRef(50);
 
   const {
-    data: meetingInfo,
+    data: meeting,
+    loading: meetingLoading,
   } = useMeeting((m) => ({
+    lockSettings: m.lockSettings,
+    usersPolicies: m.usersPolicies,
     isBreakout: m.isBreakout,
+    meetingId: m.meetingId,
     breakoutPolicies: m.breakoutPolicies,
   }));
-
-  const {
-    data: meetingData,
-    loading: meetingLoading,
-  } = useDeduplicatedSubscription<MeetingPermissionsSubscriptionResponse>(MEETING_PERMISSIONS_SUBSCRIPTION);
-  const { meeting: meetingArray } = (meetingData || {});
-  const meeting = meetingArray && meetingArray[0];
 
   useEffect(() => () => {
     setLocalUserList([]);
@@ -157,7 +159,7 @@ const UserListParticipantsPageContainer: React.FC<UserListParticipantsContainerP
     };
   }, []);
 
-  if (usersLoading || meetingLoading || currentUserLoading || presentationLoading) {
+  if (usersLoading || meetingLoading || !meeting || currentUserLoading || presentationLoading) {
     return Array.from({ length: isLastItem ? restOfUsers : 50 }).map((_, i) => (
       <Styled.UserListItem key={`not-visible-item-${i + 1}`}>
         {/* eslint-disable-next-line */}
@@ -183,11 +185,16 @@ const UserListParticipantsPageContainer: React.FC<UserListParticipantsContainerP
   return (
     <UsersListParticipantsPage
       users={users ?? []}
-      meeting={meeting}
+      meeting={{
+        meetingId: meeting.meetingId!,
+        isBreakout: !!meeting.isBreakout,
+        lockSettings: meeting.lockSettings as LockSettings ?? {},
+        usersPolicies: (meeting.usersPolicies as UsersPolicies) ?? {},
+      }}
       currentUser={currentUser ?? {}}
       pageId={pageId ?? ''}
       offset={offset}
-      isBreakout={meetingInfo?.isBreakout ?? false}
+      isBreakout={meeting?.isBreakout ?? false}
     />
   );
 };
