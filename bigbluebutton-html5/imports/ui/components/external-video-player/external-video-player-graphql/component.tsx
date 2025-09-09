@@ -424,7 +424,7 @@ const ExternalVideoPlayer: React.FC<ExternalVideoPlayerProps> = ({
     if (isPresenter && !playing) {
       const rate = (internalPlayer instanceof HTMLVideoElement || internalPlayer instanceof HTMLAudioElement)
         ? internalPlayer.playbackRate
-        : internalPlayer?.getPlaybackRate?.() ?? 1;
+        : await internalPlayer?.getPlaybackRate?.() ?? 1;
 
       sendMessage('start', {
         rate,
@@ -446,7 +446,7 @@ const ExternalVideoPlayer: React.FC<ExternalVideoPlayerProps> = ({
     if (isPresenter && !playing) {
       const rate = (internalPlayer instanceof HTMLVideoElement || internalPlayer instanceof HTMLAudioElement)
         ? internalPlayer.playbackRate
-        : internalPlayer?.getPlaybackRate?.() ?? 1;
+        : await internalPlayer?.getPlaybackRate?.() ?? 1;
 
       const currentTime = getServerCurrentTime();
 
@@ -479,7 +479,7 @@ const ExternalVideoPlayer: React.FC<ExternalVideoPlayerProps> = ({
       const internalPlayer = playerRef.current?.getInternalPlayer();
       let rate = (internalPlayer instanceof HTMLVideoElement || internalPlayer instanceof HTMLAudioElement)
         ? internalPlayer.playbackRate
-        : internalPlayer?.getPlaybackRate?.() ?? 1;
+        : await internalPlayer?.getPlaybackRate?.() ?? 1;
 
       if (rate instanceof Promise) {
         rate = await rate;
@@ -503,7 +503,7 @@ const ExternalVideoPlayer: React.FC<ExternalVideoPlayerProps> = ({
     if (playing && isPresenter) {
       currentTime = getServerCurrentTime();
     }
-    const interPlayerPlaybackRate = getPlaybackRate(playerRef.current as ReactPlayer);
+    const interPlayerPlaybackRate = await getPlaybackRate(playerRef.current as ReactPlayer);
     if (isPresenter && interPlayerPlaybackRate !== playerPlaybackRate) {
       sendMessage('seek', {
         rate: interPlayerPlaybackRate,
@@ -526,7 +526,7 @@ const ExternalVideoPlayer: React.FC<ExternalVideoPlayerProps> = ({
       const internalPlayer = playerRef.current?.getInternalPlayer();
       let rate = (internalPlayer instanceof HTMLVideoElement || internalPlayer instanceof HTMLAudioElement)
         ? internalPlayer.playbackRate
-        : internalPlayer?.getPlaybackRate?.() ?? 1;
+        : await internalPlayer?.getPlaybackRate?.() ?? 1;
       if (rate instanceof Promise) {
         rate = await rate;
       }
