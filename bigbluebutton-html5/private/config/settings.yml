@@ -199,6 +199,7 @@ public:
         raiseHandPushAlerts: true
         guestWaitingAudioAlerts: true
         guestWaitingPushAlerts: true
+        muteUnmuteAudioAlerts: true
         wakeLock: true
         paginationEnabled: true
         whiteboardToolbarAutoHide: false

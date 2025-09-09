@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Auth from '/imports/ui/services/auth';
 import audioManager from '/imports/ui/services/audio-manager';
+import { getSettingsSingletonInstance } from '/imports/ui/services/settings';
 import useVoiceActivity from './useVoiceActivity';
 import logger from '/imports/startup/client/logger';
 import AudioService from '/imports/ui/components/audio/service';
@@ -21,9 +22,11 @@ const useMuteSoundAlert = () => {
   const prevMutedStateRef = useRef<boolean | undefined>(isMuted);
 
   useEffect(() => {
+    const Settings = getSettingsSingletonInstance();
+    const playAudio = Settings?.application?.muteUnmuteAudioAlerts;
     const isLiveKitBridge = audioManager.bridge?.bridgeName === 'livekit';
 
-    if (!isLiveKitBridge) {
+    if (!isLiveKitBridge || !playAudio) {
       prevMutedStateRef.current = isMuted;
       return;
     }
