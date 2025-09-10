@@ -15,6 +15,7 @@ import SkeletonUserListItem from '../list-item/skeleton/component';
 import { PluginsContext } from '/imports/ui/components/components-data/plugin-context/context';
 import useMeeting from '/imports/ui/core/hooks/useMeeting';
 import { LockSettings, Meeting, UsersPolicies } from '/imports/ui/Types/meeting';
+import logger from '/imports/startup/client/logger';
 
 interface UserListParticipantsContainerProps {
   index: number;
@@ -112,7 +113,27 @@ const UserListParticipantsPageContainer: React.FC<UserListParticipantsContainerP
   } = useLoadedUserList({ offset, limit: limit.current }, (u) => u) as GraphqlDataHookSubscriptionResponse<Array<User>>;
 
   const users = meeting && usersData
-    ? (usersData as User[]).filter((u: User) => u.meetingId === meeting?.meetingId)
+    ? (usersData as User[]).filter((u: User) => {
+      const isInMeeting = u.meetingId === meeting?.meetingId;
+      if (!isInMeeting) {
+        logger.warn({
+          logCode: 'userlist_meetingid_mismatch',
+          extraInfo: {
+            name: u.name,
+            userId: u.userId,
+            meetingId: u.meetingId,
+            bot: u.bot,
+            disconnected: u.disconnected,
+            guest: u.guest,
+            isDialIn: u.isDialIn,
+            isModerator: u.isModerator,
+            loggedOut: u.loggedOut,
+            presenter: u.presenter,
+          },
+        }, 'userlist: meetingId mismatch, filtering out user');
+      }
+      return isInMeeting;
+    })
     : [];
 
   const { data: currentUser, loading: currentUserLoading } = useCurrentUser((c: Partial<User>) => ({
