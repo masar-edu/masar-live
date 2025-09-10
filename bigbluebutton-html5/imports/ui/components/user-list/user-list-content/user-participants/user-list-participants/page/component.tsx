@@ -110,7 +110,10 @@ const UserListParticipantsPageContainer: React.FC<UserListParticipantsContainerP
     data: usersData,
     loading: usersLoading,
   } = useLoadedUserList({ offset, limit: limit.current }, (u) => u) as GraphqlDataHookSubscriptionResponse<Array<User>>;
-  const users = usersData ?? [];
+
+  const users = meeting && usersData
+    ? (usersData as User[]).filter((u: User) => u.meetingId === meeting?.meetingId)
+    : [];
 
   const { data: currentUser, loading: currentUserLoading } = useCurrentUser((c: Partial<User>) => ({
     userId: c.userId,
