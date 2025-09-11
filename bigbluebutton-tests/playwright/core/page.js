@@ -313,8 +313,13 @@ class Page {
     await this.page.mouse.up();
   }
 
-  async hasElementCount(selector, count, description) {
-    const locator = await this.getVisibleLocator(selector);
+  async hasElementCount(selector, count, description, textFilter = null) {
+    let locator;
+    if (textFilter) {
+      locator = await this.page.locator(selector, { hasText: textFilter });
+    } else {
+      locator = await this.getVisibleLocator(selector);
+    }
     await expect(locator, description).toHaveCount(count, { timeout: ELEMENT_WAIT_TIME });
   }
 
