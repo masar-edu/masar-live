@@ -110,7 +110,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
     logger.info({
       logCode: 'livekit_audio_org_stream_set',
       extraInfo: {
-        bridgeName: this.bridgeName,
+        bridge: this.bridgeName,
         role: this.role,
         validStream: !!stream,
         streamData,
@@ -170,7 +170,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
     logger.debug({
       logCode: 'livekit_audio_subscribed',
       extraInfo: {
-        bridgeName: this.bridgeName,
+        bridge: this.bridgeName,
         trackSid,
         trackName,
         role: this.role,
@@ -188,7 +188,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
     logger.debug({
       logCode: 'livekit_audio_unsubscribed',
       extraInfo: {
-        bridgeName: this.bridgeName,
+        bridge: this.bridgeName,
         trackSid,
         trackName,
         role: this.role,
@@ -200,7 +200,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
     logger.error({
       logCode: 'livekit_audio_subscription_failed',
       extraInfo: {
-        bridgeName: this.bridgeName,
+        bridge: this.bridgeName,
         trackSid,
         role: this.role,
       },
@@ -218,7 +218,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
     logger.debug({
       logCode: 'livekit_audio_subscription_status_changed',
       extraInfo: {
-        bridgeName: this.bridgeName,
+        bridge: this.bridgeName,
         trackSid,
         trackName,
         role: this.role,
@@ -235,7 +235,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
     logger.info({
       logCode: 'livekit_audio_local_track_muted',
       extraInfo: {
-        bridgeName: this.bridgeName,
+        bridge: this.bridgeName,
         role: this.role,
         trackSid,
         trackName,
@@ -252,7 +252,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
     logger.info({
       logCode: 'livekit_audio_local_track_unmuted',
       extraInfo: {
-        bridgeName: this.bridgeName,
+        bridge: this.bridgeName,
         role: this.role,
         trackSid,
         trackName,
@@ -269,7 +269,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
     logger.info({
       logCode: 'livekit_audio_published',
       extraInfo: {
-        bridgeName: this.bridgeName,
+        bridge: this.bridgeName,
         role: this.role,
         trackSid,
         trackName,
@@ -287,7 +287,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
     logger.info({
       logCode: 'livekit_audio_unpublished',
       extraInfo: {
-        bridgeName: this.bridgeName,
+        bridge: this.bridgeName,
         role: this.role,
         trackSid,
         trackName,
@@ -364,7 +364,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
               errorMessage: (error as Error).message,
               errorName: (error as Error).name,
               errorStack: (error as Error).stack,
-              bridgeName: this.bridgeName,
+              bridge: this.bridgeName,
               role: this.role,
               inputDeviceId: this.inputDeviceId,
               streamData: MediaStreamUtils.getMediaStreamLogData(stream),
@@ -407,7 +407,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
         logger.warn({
           logCode: 'livekit_audio_switch_pub_stream_missing',
           extraInfo: {
-            bridgeName: this.bridgeName,
+            bridge: this.bridgeName,
             role: this.role,
             deviceId,
             streamData: MediaStreamUtils.getMediaStreamLogData(this.inputStream),
@@ -454,7 +454,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
           logger.error({
             logCode: 'audio_changeinputdevice_rollback_failure',
             extraInfo: {
-              bridgeName: this.bridgeName,
+              bridge: this.bridgeName,
               deviceId,
               errorName: rollbackError.name,
               errorMessage: rollbackError.message,
@@ -482,7 +482,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
           errorMessage: error.message,
           errorName: error.name,
           errorStack: error.stack,
-          bridgeName: this.bridgeName,
+          bridge: this.bridgeName,
           role: this.role,
           enabled: shouldEnable,
           inputDeviceId: this.inputDeviceId,
@@ -502,7 +502,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
         logger.debug({
           logCode: 'livekit_audio_track_unmute',
           extraInfo: {
-            bridgeName: this.bridgeName,
+            bridge: this.bridgeName,
             role: this.role,
             trackName,
           },
@@ -514,7 +514,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
         logger.debug({
           logCode: 'livekit_audio_track_unmute_publish',
           extraInfo: {
-            bridgeName: this.bridgeName,
+            bridge: this.bridgeName,
             role: this.role,
             trackName,
           },
@@ -523,7 +523,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
         logger.debug({
           logCode: 'livekit_audio_track_unmute_noop',
           extraInfo: {
-            bridgeName: this.bridgeName,
+            bridge: this.bridgeName,
             role: this.role,
             trackName,
             trackPubs,
@@ -559,7 +559,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
       logger.debug({
         logCode: 'livekit_audio_change_output_device',
         extraInfo: {
-          bridgeName: this.bridgeName,
+          bridge: this.bridgeName,
           role: this.role,
           deviceId,
           activeDevices,
@@ -572,7 +572,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
           errorMessage: (error as Error).message,
           errorName: (error as Error).name,
           errorStack: (error as Error).stack,
-          bridgeName: this.bridgeName,
+          bridge: this.bridgeName,
           role: this.role,
           deviceId,
         },
@@ -611,7 +611,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
         logger.warn({
           logCode: 'livekit_audio_publish_inactive_stream',
           extraInfo: {
-            bridgeName: this.bridgeName,
+            bridge: this.bridgeName,
             role: this.role,
             inputDeviceId: this.inputDeviceId,
             streamData: MediaStreamUtils.getMediaStreamLogData(inputStream),
@@ -625,7 +625,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
         logger.debug({
           logCode: 'livekit_audio_publish_with_stream',
           extraInfo: {
-            bridgeName: this.bridgeName,
+            bridge: this.bridgeName,
             role: this.role,
             inputDeviceId: this.inputDeviceId,
             streamData: MediaStreamUtils.getMediaStreamLogData(inputStream),
@@ -646,7 +646,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
         logger.debug({
           logCode: 'livekit_audio_publish_without_stream',
           extraInfo: {
-            bridgeName: this.bridgeName,
+            bridge: this.bridgeName,
             role: this.role,
             inputDeviceId: this.inputDeviceId,
             streamData: MediaStreamUtils.getMediaStreamLogData(this.originalStream),
@@ -662,7 +662,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
           errorMessage: (error as Error).message,
           errorName: (error as Error).name,
           errorStack: (error as Error).stack,
-          bridgeName: this.bridgeName,
+          bridge: this.bridgeName,
           role: this.role,
           inputDeviceId: this.inputDeviceId,
           streamData: MediaStreamUtils.getMediaStreamLogData(inputStream || this.originalStream),
@@ -693,7 +693,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
         logger.debug({
           logCode: 'livekit_audio_unpublish',
           extraInfo: {
-            bridgeName: this.bridgeName,
+            bridge: this.bridgeName,
             role: this.role,
             unpublishedTracks,
           },
@@ -706,7 +706,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
             errorMessage: (error as Error).message,
             errorName: (error as Error).name,
             errorStack: (error as Error).stack,
-            bridgeName: this.bridgeName,
+            bridge: this.bridgeName,
             role: this.role,
           },
         }, 'LiveKit: failed to unpublish audio track');
@@ -767,7 +767,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
           errorMessage: (error as Error).message,
           errorName: (error as Error).name,
           errorStack: (error as Error).stack,
-          bridgeName: this.bridgeName,
+          bridge: this.bridgeName,
           role: this.role,
           inputDeviceId: this.inputDeviceId,
           streamData: MediaStreamUtils.getMediaStreamLogData(inputStream),
@@ -807,7 +807,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
           errorMessage: (error as Error).message,
           errorName: (error as Error).name,
           errorStack: (error as Error).stack,
-          bridgeName: this.bridgeName,
+          bridge: this.bridgeName,
           role: this.role,
         },
       }, 'LiveKit: update audio constraints failed');
@@ -821,7 +821,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
         logger.info({
           logCode: 'livekit_audio_exit',
           extraInfo: {
-            bridgeName: this.bridgeName,
+            bridge: this.bridgeName,
             role: this.role,
           },
         }, 'LiveKit: audio exited');
@@ -834,7 +834,7 @@ export default class LiveKitAudioBridge extends BaseAudioBridge {
             errorMessage: (error as Error).message,
             errorName: (error as Error).name,
             errorStack: (error as Error).stack,
-            bridgeName: this.bridgeName,
+            bridge: this.bridgeName,
             role: this.role,
           },
         }, 'LiveKit: exit audio failed');
