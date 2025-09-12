@@ -182,6 +182,27 @@ module BigBlueButton
         # This can range from 83ms for 24fps video (video format), up to 400ms (presentation format deskshare)
         min_cut_len = (1000 / framerate * 2).round
 
+        # Special case handling for the start of the video
+        # If there's a cut immediately after the start of the video, the later logic would delete the cut
+        # for the start of the video, which would result in desync. Any cuts within min_cut_len of the video
+        # start have to be pushed back to avoid this situation. It multiple cuts are pushed back (they'd all get
+        # set to the same timestamp), the later logic will clean them up.
+        1.upto(edl.length - 1).each do |i|
+          # We've made it past the problematic point near the video start
+          break if edl[i][:timestamp] >= min_cut_len
+
+          BigBlueButton.logger.debug("Pushing EDL entry index #{i} from #{edl[i][:timestamp]} to #{min_cut_len}")
+          offset = min_cut_len - edl[i][:timestamp]
+          # Move the cut to start at min_cut_len
+          edl[i][:timestamp] = min_cut_len
+          # And offset the start times of every video to compensate
+          edl[i][:areas].each_value do |videos|
+            videos.each do |video|
+              video[:timestamp] += offset
+            end
+          end
+        end
+
         # Iterate through the edl entries from end to just after the start
         (edl.length - 1).downto(1).each do |i|
           duration = edl[i][:timestamp] - edl[i - 1][:timestamp]
@@ -192,20 +213,6 @@ module BigBlueButton
           BigBlueButton.logger.debug("Dropping EDL entry index #{i - 1} (#{duration} < #{min_cut_len})")
           edl.delete_at(i - 1)
           # On the next iteration through the loop, we'll be re-checking from the same end point, but a new start
-        end
-
-        # What if the first cut got deleted?
-        if edl[0][:timestamp] != 0
-          # Need to reset the first cut to start at timestamp 0
-          BigBlueButton.logger.debug('Resetting timestamp of first EDL entry to 0')
-          offset = edl[0][:timestamp]
-          edl[0][:timestamp] = 0
-          # And offset the start times of every video to compensate
-          edl[0][:areas].each_value do |videos|
-            videos.each do |video|
-              video[:timestamp] -= offset # This might become negative, that's ok.
-            end
-          end
         end
 
         # What if all of the cuts got deleted?
