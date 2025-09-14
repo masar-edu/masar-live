@@ -15,9 +15,10 @@ import (
 	"bbb-graphql-middleware/internal/hasura/retransmiter"
 	"bbb-graphql-middleware/internal/msgpatch"
 
+	"github.com/coder/websocket"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
-	"nhooyr.io/websocket"
 )
 
 // HasuraConnectionReader consumes messages from Hasura connection and add send to the browser channel
