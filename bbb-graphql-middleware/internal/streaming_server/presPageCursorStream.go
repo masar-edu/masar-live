@@ -57,7 +57,7 @@ func HandleSendCursorPositionEvtMsg(receivedMessage common.RedisMessage, browser
 		bc.ActiveStreamingsMutex.RUnlock()
 		if existsCursorStream {
 			payload := bytes.Replace(jsonDataNext, QueryIdPlaceholderInBytes, []byte(queryId), 1)
-			bc.FromHasuraToBrowserChannel.Send(payload)
+			bc.FromHasuraToBrowserChannel.TrySend(payload)
 		}
 	}
 
@@ -86,7 +86,7 @@ func SendPreviousCursorPosition(browserConnection *common.BrowserConnection, que
 			},
 		}
 		jsonDataNext, _ := json.Marshal(browserResponseData)
-		browserConnection.FromHasuraToBrowserChannel.Send(jsonDataNext)
+		browserConnection.FromHasuraToBrowserChannel.SendWait(browserConnection.Context, jsonDataNext)
 	}
 }
 

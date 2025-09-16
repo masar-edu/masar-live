@@ -1,14 +1,16 @@
 package common
 
 import (
+	"context"
 	"sync"
+	"sync/atomic"
 )
 
 type SafeChannel struct {
-	ch         chan interface{}
-	closed     bool
-	mux        sync.Mutex
-	freezeFlag bool
+	ch     chan interface{}
+	closed atomic.Bool
+	frozen atomic.Bool
+	once   sync.Once
 }
 
 func NewSafeChannel(size int) *SafeChannel {
@@ -17,15 +19,29 @@ func NewSafeChannel(size int) *SafeChannel {
 	}
 }
 
-func (s *SafeChannel) Send(value interface{}) bool {
-	s.mux.Lock()
-	defer s.mux.Unlock()
-
-	if s.closed {
+func (s *SafeChannel) TrySend(value interface{}) bool {
+	if s.closed.Load() || s.frozen.Load() {
 		return false
 	}
-	s.ch <- value
-	return true
+	select {
+	case s.ch <- value:
+		return true
+	default:
+		// full: drop
+		return false
+	}
+}
+
+func (s *SafeChannel) SendWait(ctx context.Context, value interface{}) bool {
+	if s.closed.Load() || s.frozen.Load() {
+		return false
+	}
+	select {
+	case s.ch <- value:
+		return true
+	case <-ctx.Done():
+		return false
+	}
 }
 
 func (s *SafeChannel) Receive() (interface{}, bool) {
@@ -38,36 +54,25 @@ func (s *SafeChannel) ReceiveChannel() <-chan interface{} {
 }
 
 func (s *SafeChannel) Closed() bool {
-	s.mux.Lock()
-	defer s.mux.Unlock()
-
-	return s.closed
+	return s.closed.Load()
 }
 
 func (s *SafeChannel) Close() {
-	s.mux.Lock()
-	defer s.mux.Unlock()
-
-	if !s.closed {
+	s.once.Do(func() {
+		s.frozen.Store(false)
+		s.closed.Store(true)
 		close(s.ch)
-		s.closed = true
-	}
+	})
 }
 
 func (s *SafeChannel) Frozen() bool {
-	return s.freezeFlag
+	return s.frozen.Load()
 }
 
 func (s *SafeChannel) FreezeChannel() {
-	if !s.freezeFlag {
-		s.mux.Lock()
-		s.freezeFlag = true
-	}
+	s.frozen.Store(true)
 }
 
 func (s *SafeChannel) UnfreezeChannel() {
-	if s.freezeFlag {
-		s.mux.Unlock()
-		s.freezeFlag = false
-	}
+	s.frozen.Store(false)
 }
