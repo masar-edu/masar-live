@@ -174,7 +174,7 @@ func handleMessageReceivedFromHasura(hc *common.HasuraConnection, message []byte
 		}
 
 		// Forward the message to browser
-		hc.BrowserConn.FromHasuraToBrowserChannel.Send(message)
+		hc.BrowserConn.FromHasuraToBrowserChannel.SendWait(hc.Context, message)
 	}
 }
 
@@ -237,7 +237,7 @@ func handleConnectionAckMessage(hc *common.HasuraConnection, message []byte) {
 
 	// Avoid to send `connection_ack` to the browser when it's a reconnection
 	if hc.BrowserConn.ConnAckSentToBrowser == false {
-		hc.BrowserConn.FromHasuraToBrowserChannel.Send(message)
+		hc.BrowserConn.FromHasuraToBrowserChannel.SendWait(hc.Context, message)
 		hc.BrowserConn.ConnAckSentToBrowser = true
 	}
 

@@ -32,9 +32,9 @@ func RetransmitSubscriptionStartMessages(hc *common.HasuraConnection) {
 			hc.BrowserConn.Logger.Tracef("retransmiting subscription start: %v", string(subscription.Message))
 
 			if subscription.Type == common.Streaming && subscription.StreamCursorCurrValue != nil {
-				hc.BrowserConn.FromBrowserToHasuraChannel.Send(common.PatchQuerySettingLastCursorValue(subscription))
+				hc.BrowserConn.FromBrowserToHasuraChannel.SendWait(hc.Context, common.PatchQuerySettingLastCursorValue(subscription))
 			} else {
-				hc.BrowserConn.FromBrowserToHasuraChannel.Send(subscription.Message)
+				hc.BrowserConn.FromBrowserToHasuraChannel.SendWait(hc.Context, subscription.Message)
 			}
 		}
 	}

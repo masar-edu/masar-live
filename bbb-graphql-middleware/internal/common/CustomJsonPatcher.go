@@ -94,9 +94,7 @@ func CreateJsonPatchFromMaps(original []map[string]interface{}, modified []map[s
 	}
 
 	// CREATE PATCHES FOR OPERATION "MOVE"
-	originalWithPatchesAsMap := GetMapFromByte(originalWithPatches)
-
-	movesPatches, _ := CreateMovePatches(originalWithPatches, originalWithPatchesAsMap, modifiedJson, modified, idFieldName)
+	movesPatches, _ := CreateMovePatches(originalWithPatches, modifiedJson, idFieldName)
 	mergedPatchJson, _ = MergePatches(mergedPatchJson, movesPatches)
 
 	originalWithPatches, _ = ApplyPatch(original, mergedPatchJson)
@@ -230,9 +228,9 @@ func findAndApplyMoveInversely(arr1, arr2 []map[string]interface{}, patches []ma
 	return arr1, patches, false
 }
 
-func CreateMovePatches(arr1 []byte, arr1AsMap []map[string]interface{}, arr2 []byte, arr2AsMap []map[string]interface{}, idFieldName string) ([]byte, error) {
+func CreateMovePatches(arr1 []byte, arr2 []byte, idFieldName string) ([]byte, error) {
 	methodFailed := make([]string, 0)
-	patchDirect, stepsDirect, errDirect := generateJSONPatch(arr1, arr1AsMap, arr2, arr2AsMap, idFieldName, 1)
+	patchDirect, stepsDirect, errDirect := generateJSONPatch(arr1, arr2, idFieldName, 1)
 	if stepsDirect <= 1 {
 		return patchDirect, nil
 	}
@@ -241,7 +239,7 @@ func CreateMovePatches(arr1 []byte, arr1AsMap []map[string]interface{}, arr2 []b
 	}
 
 	// Try reverse
-	patchInverse, stepsInverse, errInverse := generateJSONPatch(arr1, arr1AsMap, arr2, arr2AsMap, idFieldName, 2)
+	patchInverse, stepsInverse, errInverse := generateJSONPatch(arr1, arr2, idFieldName, 2)
 	if stepsInverse <= 1 {
 		return patchInverse, nil
 	}
@@ -250,7 +248,7 @@ func CreateMovePatches(arr1 []byte, arr1AsMap []map[string]interface{}, arr2 []b
 	}
 
 	// Try arr2First
-	patchFromArr2, stepsFromArr2, errFromArr2 := generateJSONPatch(arr1, arr1AsMap, arr2, arr2AsMap, idFieldName, 3)
+	patchFromArr2, stepsFromArr2, errFromArr2 := generateJSONPatch(arr1, arr2, idFieldName, 3)
 	if errFromArr2 != nil {
 		methodFailed = append(methodFailed, "2")
 	}
@@ -276,7 +274,10 @@ func CreateMovePatches(arr1 []byte, arr1AsMap []map[string]interface{}, arr2 []b
 	}
 }
 
-func generateJSONPatch(arr1Json []byte, arr1AsMap []map[string]interface{}, arr2Json []byte, arr2AsMap []map[string]interface{}, idFieldName string, method int) ([]byte, int, error) {
+func generateJSONPatch(arr1Json []byte, arr2Json []byte, idFieldName string, method int) ([]byte, int, error) {
+	arr1AsMap := GetMapFromByte(arr1Json)
+	arr2AsMap := GetMapFromByte(arr2Json)
+
 	patches := make([]map[string]interface{}, 0)
 	steps := 0
 	changed := true

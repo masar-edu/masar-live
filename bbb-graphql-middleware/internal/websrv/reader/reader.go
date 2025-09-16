@@ -75,7 +75,7 @@ func BrowserConnectionReader(
 
 		if browserMessageType.Type == "subscribe" {
 			if bytes.Contains(message, []byte("\"query\":\"mutation")) {
-				browserConnection.FromBrowserToGqlActionsChannel.Send(message)
+				browserConnection.FromBrowserToGqlActionsChannel.SendWait(browserConnection.Context, message)
 				continue
 			}
 			if bytes.Contains(message, []byte("\"query\":\"subscription getCursorCoordinatesStream")) {
@@ -84,6 +84,6 @@ func BrowserConnectionReader(
 			}
 		}
 
-		browserConnection.FromBrowserToHasuraChannel.Send(message)
+		browserConnection.FromBrowserToHasuraChannel.SendWait(browserConnection.Context, message)
 	}
 }
