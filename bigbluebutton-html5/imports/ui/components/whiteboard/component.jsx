@@ -1144,6 +1144,7 @@ const Whiteboard = React.memo((props) => {
   };
 
   const handleTldrawMount = (editor) => {
+    editor.history.setMaxStackSize(window.meetingClientSettings.public.whiteboard.maxHistoryStackSize);
     tlEditorRef.current = editor;
     setTldrawAPI(editor);
     setEditor(editor);
