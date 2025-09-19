@@ -1,30 +1,24 @@
 import { useEffect, useRef } from 'react';
-import Auth from '/imports/ui/services/auth';
-import audioManager from '/imports/ui/services/audio-manager';
+import AudioManager from '/imports/ui/services/audio-manager';
 import { getSettingsSingletonInstance } from '/imports/ui/services/settings';
-import useVoiceActivity from './useVoiceActivity';
+import { useReactiveVar } from '@apollo/client';
 import logger from '/imports/startup/client/logger';
 import AudioService from '/imports/ui/components/audio/service';
 
-const MUTE_SOUND_PATH = '/resources/sounds/conference-muted.mp3';
-const UNMUTE_SOUND_PATH = '/resources/sounds/conference-unmuted.mp3';
+const MUTE_SOUND_PATH = '/resources/sounds/conf-muted.mp3';
+const UNMUTE_SOUND_PATH = '/resources/sounds/conf-unmuted.mp3';
 
 const useMuteSoundAlert = () => {
-  const currentUserId = Auth.userID;
-  const { data: voiceActivityStream } = useVoiceActivity();
-
-  const currentUserVoiceState = voiceActivityStream
-    ?.slice()
-    .reverse()
-    .find((activity) => activity.userId === currentUserId);
-  const isMuted = currentUserVoiceState?.muted;
+  /* eslint no-underscore-dangle: 0 */
+  // @ts-ignore
+  const isMuted = useReactiveVar(AudioManager._isMuted.value) as boolean;
 
   const prevMutedStateRef = useRef<boolean | undefined>(isMuted);
 
   useEffect(() => {
     const Settings = getSettingsSingletonInstance();
     const playAudio = Settings?.application?.muteUnmuteAudioAlerts;
-    const isLiveKitBridge = audioManager.bridge?.bridgeName === 'livekit';
+    const isLiveKitBridge = AudioManager.bridge?.bridgeName === 'livekit';
 
     if (!isLiveKitBridge || !playAudio) {
       prevMutedStateRef.current = isMuted;
@@ -33,11 +27,6 @@ const useMuteSoundAlert = () => {
 
     const hasMuteStateChanged = prevMutedStateRef.current !== isMuted;
 
-    logger.debug({
-      logCode: 'useMuteSoundAlert_change_detection',
-      extraInfo: { hasMuteStateChanged, current: isMuted, previous: prevMutedStateRef.current },
-    }, 'Mute state change detection.');
-
     if (hasMuteStateChanged && typeof isMuted === 'boolean') {
       const soundToPlay = isMuted ? MUTE_SOUND_PATH : UNMUTE_SOUND_PATH;
 
@@ -45,12 +34,13 @@ const useMuteSoundAlert = () => {
         + window.meetingClientSettings.public.app.basename;
       const fullSoundUrl = basePath + soundToPlay;
 
-      logger.info({
-        logCode: 'useMuteSoundAlert_play_triggered',
-        extraInfo: { fullSoundUrl, reason: `State changed from ${prevMutedStateRef.current} to ${isMuted}` },
-      }, 'Attempting to play mute/unmute sound via AudioService.');
-
-      AudioService.playAlertSound(fullSoundUrl);
+      AudioService.playAlertSound(fullSoundUrl).then((played) => {
+        if (!played) {
+          logger.error({
+            logCode: 'useMuteSoundAlert_audio_play_failed',
+          }, `Failed to play alert sound: ${soundToPlay}`);
+        }
+      });
     }
 
     prevMutedStateRef.current = isMuted;

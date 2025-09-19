@@ -1,7 +1,7 @@
 import React from 'react';
 import Toggle from '/imports/ui/components/common/switch/component';
 import { defineMessages, injectIntl } from 'react-intl';
-import audioManager from '/imports/ui/services/audio-manager';
+import AudioManager from '/imports/ui/services/audio-manager';
 import BaseMenu from '../base/component';
 import Styled from './styles';
 
@@ -69,7 +69,7 @@ class NotificationMenu extends BaseMenu {
     } = this.props;
 
     const { settings } = this.state;
-    const isLiveKit = audioManager.bridge?.bridgeName === 'livekit';
+    const isLiveKit = AudioManager.bridge?.bridgeName === 'livekit';
 
     return (
       <div>
@@ -212,7 +212,17 @@ class NotificationMenu extends BaseMenu {
                 </Styled.FormElementCenter>
               </Styled.Col>
               <Styled.Col>
-                {/* Empty column to align with other rows */}
+                <Styled.FormElementCenter>
+                  {displaySettingsStatus(false)}
+                  <Toggle
+                    icons={false}
+                    defaultChecked={false}
+                    onChange={() => { }}
+                    disabled
+                    ariaLabel={`${intl.formatMessage(intlMessages.muteUnmuteLabel)} ${intl.formatMessage(intlMessages.pushAlertLabel)}`}
+                    showToggleLabel={showToggleLabel}
+                  />
+                </Styled.FormElementCenter>
               </Styled.Col>
             </Styled.Row>
           ) : null}
