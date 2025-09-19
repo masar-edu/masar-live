@@ -684,6 +684,7 @@ muteOnStart=true
 After making them modification, restart your server with `sudo bbb-conf --restart` to apply the changes.
 
 #### Turn off "you are now muted"
+
 When using audio through FreeSWITCH and/or mediasoup, you can remove this sound for all users by editing `/opt/freeswitch/etc/freeswitch/autoload_configs/conference.conf.xml` and moving the lines containing `muted-sound` and `unmuted-sound` into the commented section.
 
 ```xml
