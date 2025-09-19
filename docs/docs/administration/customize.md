@@ -733,7 +733,7 @@ public:
       application:
         muteUnmuteAudioAlerts: false
 ```
-Afterwards, restart bbb-apps-akka: $ sudo systemctl restart bbb-apps-akka
+Afterwards, restart bbb-apps-akka: `$ sudo systemctl restart bbb-apps-akka`.
 
 #### Enable background music when only one person is in a session
 
