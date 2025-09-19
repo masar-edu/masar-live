@@ -19,7 +19,6 @@ import { useIsReactionsEnabled } from '/imports/ui/services/features';
 import useWhoIsTalking from '/imports/ui/core/hooks/useWhoIsTalking';
 import useWhoIsUnmuted from '/imports/ui/core/hooks/useWhoIsUnmuted';
 import { getSettingsSingletonInstance } from '/imports/ui/services/settings';
-import useMeeting from '/imports/ui/core/hooks/useMeeting';
 
 const messages = defineMessages({
   moderator: {
@@ -94,11 +93,6 @@ const Emoji: React.FC<EmojiProps> = ({ emoji, native, size }) => (
 );
 
 const UserListItem: React.FC<UserListItemProps> = ({ user, lockSettings, index }) => {
-  const { data: meeting } = useMeeting((m) => ({
-    audioBridge: m.audioBridge,
-  }));
-  const isLiveKit = meeting?.audioBridge === 'livekit';
-
   const { pluginsExtensibleAreasAggregatedState } = useContext(PluginsContext);
   let userItemsFromPlugin = [] as PluginSdk.UserListItemAdditionalInformationInterface[];
   if (pluginsExtensibleAreasAggregatedState.userListItemAdditionalInformation) {
@@ -246,12 +240,8 @@ const UserListItem: React.FC<UserListItemProps> = ({ user, lockSettings, index }
         talking={voiceUser?.talking}
         muted={voiceUser?.muted}
         listenOnly={voiceUser?.listenOnly || voiceUser?.listenOnlyInputDevice}
-        voice={isLiveKit
-          ? (voiceUser?.joined && !voiceUser?.deafened)
-          : voiceUser?.joined}
-        noVoice={isLiveKit
-          ? (voiceUser?.joined && voiceUser?.deafened)
-          : !voiceUser?.joined}
+        voice={voiceUser?.joined && !voiceUser?.deafened}
+        noVoice={!voiceUser?.joined || voiceUser?.deafened}
         color={user.color}
         whiteboardAccess={hasWhiteboardAccess}
         animations={animations}
