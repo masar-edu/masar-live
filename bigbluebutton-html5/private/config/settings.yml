@@ -1059,6 +1059,7 @@ public:
     maxNumberOfAnnotations: 300
     # Limit the number of users who can interact with the whiteboard
     maxNumberOfActiveUsers: 25
+    maxHistoryStackSize: 400
     lockToolbarTools: false
     annotations:
       status:
