@@ -29,7 +29,9 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
     *, *:before, *:after {
       box-sizing: inherit;
     }
-
+    .hNrzQd{
+      display: none;
+    }
     body {
       position: fixed;
       height: 100%;
@@ -41,6 +43,11 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
     /* language-specific font */
     body.lang-fa {
       font-family: Tahoma, 'Source Sans Pro', Arial, sans-serif;
+    }
+    /* Arabic RTL font */
+    html[dir="rtl"][lang|="ar"] body,
+    body.lang-ar {
+      font-family: 'Almarai', sans-serif;
     }
 
     :-webkit-full-screen {
@@ -120,6 +127,7 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
       opacity: 0 !important;
     }
   </style>
+
   <script>
     document.addEventListener('gesturestart', function (e) {
       e.preventDefault();
@@ -155,6 +163,10 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
       font-style: normal;
     }
     </style>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap');
+      </style>
+      
   <!-- fonts -->
 </head>
 <body style="background-color: #06172A">

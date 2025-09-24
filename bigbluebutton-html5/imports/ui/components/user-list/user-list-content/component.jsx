@@ -11,6 +11,7 @@ import BreakoutRoomContainer from './breakout-room/container';
 import UserTitleContainer from '../user-list-graphql/user-participants-title/component';
 import GenericSidekickContentNavButtonContainer from './generic-sidekick-content-button/container';
 import deviceInfo from '/imports/utils/deviceInfo';
+import Logo from './logo.svg';
 
 const { isMobile, isPortrait } = deviceInfo;
 
@@ -43,36 +44,41 @@ class UserContent extends PureComponent {
     const ROLE_MODERATOR = window.meetingClientSettings.public.user.role_moderator;
 
     return (
-      <Styled.Content data-test="userListContent">
-        {isMobile || (isMobile && isPortrait) ? (
-          <Styled.ScrollableList role="tabpanel" tabIndex={0}>
-            <Styled.List>
+      <div style={{ fontFamily: 'Almarai' }}>
+        <img src={Logo} alt="Logo" />
+        <Styled.Content data-test="userListContent">
+          {isMobile || (isMobile && isPortrait) ? (
+            <Styled.ScrollableList role="tabpanel" tabIndex={0}>
+              <Styled.List>
+                <ChatList />
+                <UserNotesContainer />
+                {isTimerActive
+                  && <TimerContainer isModerator={currentUser?.role === ROLE_MODERATOR} />}
+                {currentUser?.role === ROLE_MODERATOR ? <GuestPanelOpenerContainer /> : null}
+                <UserPollsContainer isPresenter={currentUser?.presenter} />
+                <BreakoutRoomContainer />
+                <GenericSidekickContentNavButtonContainer />
+                <UserTitleContainer />
+                <UserListParticipants compact={compact} />
+              </Styled.List>
+            </Styled.ScrollableList>
+          ) : (
+            <>
               <ChatList />
               <UserNotesContainer />
               {isTimerActive
-              && <TimerContainer isModerator={currentUser?.role === ROLE_MODERATOR} />}
+                && <TimerContainer isModerator={currentUser?.role === ROLE_MODERATOR} />}
               {currentUser?.role === ROLE_MODERATOR ? <GuestPanelOpenerContainer /> : null}
               <UserPollsContainer isPresenter={currentUser?.presenter} />
               <BreakoutRoomContainer />
               <GenericSidekickContentNavButtonContainer />
               <UserTitleContainer />
               <UserListParticipants compact={compact} />
-            </Styled.List>
-          </Styled.ScrollableList>
-        ) : (
-          <>
-            <ChatList />
-            <UserNotesContainer />
-            {isTimerActive && <TimerContainer isModerator={currentUser?.role === ROLE_MODERATOR} />}
-            {currentUser?.role === ROLE_MODERATOR ? <GuestPanelOpenerContainer /> : null}
-            <UserPollsContainer isPresenter={currentUser?.presenter} />
-            <BreakoutRoomContainer />
-            <GenericSidekickContentNavButtonContainer />
-            <UserTitleContainer />
-            <UserListParticipants compact={compact} />
-          </>
-        )}
-      </Styled.Content>
+            </>
+          )}
+        </Styled.Content>
+      </div>
+
     );
   }
 }
