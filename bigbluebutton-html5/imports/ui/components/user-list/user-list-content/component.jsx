@@ -35,16 +35,12 @@ const defaultProps = {
 
 class UserContent extends PureComponent {
   render() {
-    const {
-      currentUser,
-      isTimerActive,
-      compact,
-    } = this.props;
+    const { currentUser, isTimerActive, compact } = this.props;
 
     const ROLE_MODERATOR = window.meetingClientSettings.public.user.role_moderator;
 
     return (
-      <div style={{ fontFamily: 'Almarai' }}>
+      <div>
         <img src={Logo} alt="Logo" />
         <Styled.Content data-test="userListContent">
           {isMobile || (isMobile && isPortrait) ? (
@@ -52,9 +48,14 @@ class UserContent extends PureComponent {
               <Styled.List>
                 <ChatList />
                 <UserNotesContainer />
-                {isTimerActive
-                  && <TimerContainer isModerator={currentUser?.role === ROLE_MODERATOR} />}
-                {currentUser?.role === ROLE_MODERATOR ? <GuestPanelOpenerContainer /> : null}
+                {isTimerActive && (
+                  <TimerContainer
+                    isModerator={currentUser?.role === ROLE_MODERATOR}
+                  />
+                )}
+                {currentUser?.role === ROLE_MODERATOR ? (
+                  <GuestPanelOpenerContainer />
+                ) : null}
                 <UserPollsContainer isPresenter={currentUser?.presenter} />
                 <BreakoutRoomContainer />
                 <GenericSidekickContentNavButtonContainer />
@@ -66,9 +67,14 @@ class UserContent extends PureComponent {
             <>
               <ChatList />
               <UserNotesContainer />
-              {isTimerActive
-                && <TimerContainer isModerator={currentUser?.role === ROLE_MODERATOR} />}
-              {currentUser?.role === ROLE_MODERATOR ? <GuestPanelOpenerContainer /> : null}
+              {isTimerActive && (
+                <TimerContainer
+                  isModerator={currentUser?.role === ROLE_MODERATOR}
+                />
+              )}
+              {currentUser?.role === ROLE_MODERATOR ? (
+                <GuestPanelOpenerContainer />
+              ) : null}
               <UserPollsContainer isPresenter={currentUser?.presenter} />
               <BreakoutRoomContainer />
               <GenericSidekickContentNavButtonContainer />
@@ -78,7 +84,6 @@ class UserContent extends PureComponent {
           )}
         </Styled.Content>
       </div>
-
     );
   }
 }
