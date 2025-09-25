@@ -41,7 +41,7 @@ class UserContent extends PureComponent {
 
     return (
       <div>
-        <img src={Logo} alt="Logo" />
+        <img className="masar-bbb-overlay-sidebar-logo" src={Logo} alt="Logo" />
         <Styled.Content data-test="userListContent">
           {isMobile || (isMobile && isPortrait) ? (
             <Styled.ScrollableList role="tabpanel" tabIndex={0}>
