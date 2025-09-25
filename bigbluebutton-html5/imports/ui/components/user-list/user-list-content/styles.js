@@ -26,6 +26,12 @@ import { ScrollboxVertical } from '/imports/ui/stylesheets/styled-components/scr
 const Content = styled(FlexColumn)`
   flex-grow: 1;
   overflow: hidden;
+  padding-left: ${mdPaddingX};
+
+  [dir="rtl"] & {
+    padding-left: 0;
+    padding-right: ${mdPaddingX};
+  }
 `;
 
 const Container = styled.div`
