@@ -4,7 +4,7 @@ const colorOffWhite = 'var(--color-off-white, #F3F6F9)';
 const colorBlack = 'var(--color-black, #000000)';
 
 const colorGray = 'var(--color-gray, #4E5A66)';
-const colorGrayDark = 'var(--color-gray-dark, #06172A)';
+const colorGrayDark = 'var(--color-gray-dark, #f8f9fa)';
 const colorGrayLight = 'var(--color-gray-light, #8B9AA8)';
 const colorGrayLighter = 'var(--color-gray-lighter, #A7B3BD)';
 const colorGrayLightest = 'var(--color-gray-lightest, #D4D9DF)';
