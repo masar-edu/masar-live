@@ -18,25 +18,31 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 -->
 
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta charset="utf-8">
-  <link rel="stylesheet" href="stylesheets/normalize.css" crossorigin="anonymous"/>
+  <link rel="stylesheet" href="stylesheets/normalize.css" crossorigin="anonymous" />
   <style>
     html {
       box-sizing: border-box;
     }
 
-    *, *:before, *:after {
+    *,
+    *:before,
+    *:after {
       box-sizing: inherit;
     }
-    .hNrzQd{
+
+    .hNrzQd {
       display: none;
     }
+
     body {
       position: fixed;
       height: 100%;
       font-family: 'Source Sans Pro', Arial, sans-serif;
-      font-size: 1rem; /* 16px */
+      font-size: 1rem;
+      /* 16px */
       background-color: #06172A;
     }
 
@@ -44,6 +50,7 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
     body.lang-fa {
       font-family: Tahoma, 'Source Sans Pro', Arial, sans-serif;
     }
+
     /* Arabic RTL font */
     html[dir="rtl"][lang|="ar"] body,
     body.lang-ar {
@@ -71,7 +78,7 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
       padding: 0;
       margin: -1px;
       overflow: hidden;
-      clip: rect(0,0,0,0);
+      clip: rect(0, 0, 0, 0);
       border: 0;
     }
 
@@ -84,6 +91,7 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
     .remove-z-index {
       z-index: 0;
     }
+
     /* .full-screen {
       height: 100% !important;
       width: 100% !important;
@@ -99,8 +107,10 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
       opacity: 1;
     }
 
-    :-moz-placeholder, /* Firefox 4 to 18 */
-    ::-moz-placeholder { /* Firefox 19+ */
+    :-moz-placeholder,
+    /* Firefox 4 to 18 */
+    ::-moz-placeholder {
+      /* Firefox 19+ */
       color: var(--palette-placeholder-text);
       opacity: 1;
     }
@@ -137,40 +147,59 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
   <script src="compatibility/tflite-simd.js?v=VERSION" language="javascript"></script>
   <script src="compatibility/tflite.js?v=VERSION" language="javascript"></script>
   <!-- fonts -->
-  <link rel="preload" href="fonts/BbbIcons/bbb-icons.woff2?v=VERSION" as="font" type="font/woff2" crossorigin="anonymous"/>
-  <link rel="preload" href="fonts/SourceSansPro/SourceSansPro-Light.woff?v=VERSION" as="font" crossorigin="anonymous"/>
-  <link rel="preload" href="fonts/SourceSansPro/SourceSansPro-Regular.woff?v=VERSION" as="font" crossorigin="anonymous"/>
-  <link rel="preload" href="fonts/SourceSansPro/SourceSansPro-Semibold.woff?v=VERSION" as="font" crossorigin="anonymous"/>
-  <link rel="preload" href="fonts/SourceSansPro/SourceSansPro-Bold.woff?v=VERSION" as="font" crossorigin="anonymous"/>
-  <link rel="preload" href="fonts/SourceSansPro/SourceSansPro-LightItalic.woff?v=VERSION" as="font" crossorigin="anonymous"/>
-  <link rel="preload" href="fonts/SourceSansPro/SourceSansPro-Italic.woff?v=VERSION" as="font" crossorigin="anonymous"/>
-  <link rel="preload" href="fonts/SourceSansPro/SourceSansPro-SemiboldItalic.woff?v=VERSION" as="font" crossorigin="anonymous"/>
-  <link rel="preload" href="fonts/SourceSansPro/SourceSansPro-BoldItalic.woff?v=VERSION" as="font" crossorigin="anonymous"/>
-  
-  <link rel="stylesheet" href="stylesheets/bbb-icons.css" crossorigin="anonymous"/>
-  <link rel="stylesheet" href="stylesheets/fonts.css" crossorigin="anonymous"/>
-  <link rel="stylesheet" href="stylesheets/fontSizing.css" crossorigin="anonymous"/>
-  <link rel="stylesheet" href="stylesheets/modals.css" crossorigin="anonymous"/>
-  <link rel="stylesheet" href="stylesheets/toastify.css" crossorigin="anonymous"/>
-  <link rel="stylesheet" href="stylesheets/toggleSwitch.css" crossorigin="anonymous"/>
+  <link rel="preload" href="fonts/BbbIcons/bbb-icons.woff2?v=VERSION" as="font" type="font/woff2"
+    crossorigin="anonymous" />
+  <link rel="preload" href="fonts/SourceSansPro/SourceSansPro-Light.woff?v=VERSION" as="font" crossorigin="anonymous" />
+  <link rel="preload" href="fonts/SourceSansPro/SourceSansPro-Regular.woff?v=VERSION" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="fonts/SourceSansPro/SourceSansPro-Semibold.woff?v=VERSION" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="fonts/SourceSansPro/SourceSansPro-Bold.woff?v=VERSION" as="font" crossorigin="anonymous" />
+  <link rel="preload" href="fonts/SourceSansPro/SourceSansPro-LightItalic.woff?v=VERSION" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="fonts/SourceSansPro/SourceSansPro-Italic.woff?v=VERSION" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="fonts/SourceSansPro/SourceSansPro-SemiboldItalic.woff?v=VERSION" as="font"
+    crossorigin="anonymous" />
+  <link rel="preload" href="fonts/SourceSansPro/SourceSansPro-BoldItalic.woff?v=VERSION" as="font"
+    crossorigin="anonymous" />
+
+  <link rel="stylesheet" href="stylesheets/bbb-icons.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="stylesheets/fonts.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="stylesheets/fontSizing.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="stylesheets/modals.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="stylesheets/toastify.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="stylesheets/toggleSwitch.css" crossorigin="anonymous" />
+
   <script> window.MASAR_BBB_OVERLAY_CONFIG = { autoStart: true, logLevel: 'info' }; </script>
   <script src="https://masar-live-sdk.edu-massar.com/" defer=""></script>
+  <script>
+    window.MASAR_BBB_OVERLAY_CONFIG = { autoStart: true, logLevel: 'info' };
+    (function () {
+      const s = document.createElement('script');
+      s.src = 'https://masar-live-sdk.edu-massar.com/';
+      s.defer = true;
+      s.onload = () => console.info('MASAR overlay script loaded');
+      s.onerror = (e) => console.error('Failed to load MASAR overlay script', e);
+      document.head.appendChild(s);
+    })();</script>
 
   <style>
     @font-face {
       font-family: 'bbb-icons';
       src: url('fonts/BbbIcons/bbb-icons.woff2?v=VERSION') format('woff2'),
-      url('fonts/BbbIcons/bbb-icons.woff?v=VERSION') format('woff');
+        url('fonts/BbbIcons/bbb-icons.woff?v=VERSION') format('woff');
       font-weight: normal;
       font-style: normal;
     }
-    </style>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap');
-      </style>
-      
+  </style>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap');
+  </style>
+
   <!-- fonts -->
 </head>
+
 <body style="background-color: #06172A">
   <div id="aria-polite-alert" aria-live="polite" aria-atomic="false" class="sr-only"></div>
   <svg style="display: none; width: 1px; height: 1px;">
