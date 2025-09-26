@@ -41,6 +41,13 @@ const propTypes = {
   renderPresentationItemStatus: PropTypes.func.isRequired,
   isPresenter: PropTypes.bool.isRequired,
   exportPresentation: PropTypes.func.isRequired,
+  setPresentation: PropTypes.func.isRequired,
+  removePresentation: PropTypes.func.isRequired,
+  presentationEnabled: PropTypes.bool.isRequired,
+  externalUploadData: PropTypes.shape({
+    presentationUploadExternalDescription: PropTypes.string,
+    presentationUploadExternalUrl: PropTypes.string,
+  }).isRequired,
 };
 
 const defaultProps = {
@@ -311,7 +318,10 @@ class PresentationUploader extends Component {
 
   componentDidUpdate(prevProps) {
     const {
-      isOpen, presentations: propPresentations, currentPresentation, intl,
+      isOpen,
+      presentations: propPresentations,
+      currentPresentation,
+      intl,
     } = this.props;
     const { presentations } = this.state;
     const { presentations: prevPropPresentations } = prevProps;
@@ -322,7 +332,7 @@ class PresentationUploader extends Component {
       ...JSON.parse(JSON.stringify(presentations)),
     });
 
-    // New entries comming from graphql
+    // New entries coming from graphql
     const propsDiffs = propPresentations.filter(
       (p) => !prevPropPresentations.some(
         (presentation) => p.presentationId === presentation.presentationId
@@ -514,19 +524,6 @@ class PresentationUploader extends Component {
       removePresentation,
       presentationEnabled,
     } = this.props;
-
-    // Handle static presentations differently
-    if (item && item.presentationId && item.presentationId.startsWith('static-')) {
-      // For static presentations, just remove from local state
-      const { presentations } = this.state;
-      const toRemoveIndex = presentations.indexOf(item);
-      this.setState({
-        presentations: update(presentations, {
-          $splice: [[toRemoveIndex, 1]],
-        }),
-      });
-      return;
-    }
     if (withErr) {
       const { presentations } = this.state;
       const { presentations: propPresentations } = this.props;
@@ -635,14 +632,6 @@ class PresentationUploader extends Component {
       };
 
       const presentationsUpdated = update(presentations, commands);
-
-      // Handle static presentations - call parent setPresentation for non-static presentations
-      const presentation = presentationsUpdated[newCurrentIndex];
-      if (presentation && !presentation.presentationId.startsWith('static-')) {
-        const { setPresentation } = this.props;
-        setPresentation(presentation.presentationId);
-      }
-
       return {
         presentations: presentationsUpdated,
       };
@@ -884,12 +873,18 @@ class PresentationUploader extends Component {
       renderPresentationItemStatus,
     } = this.props;
 
+    const { current: isCurrent } = item;
     const isActualCurrent = selectedToBeNextCurrent
       ? item.presentationId === selectedToBeNextCurrent
-      : item.current;
-    const isUploading = !item.uploadCompleted;
-    const { uploadInProgress } = item;
-    const hasError = !!item.uploadErrorMsgKey || !!item.uploadErrorDetailsJson;
+      : isCurrent;
+    const {
+      uploadCompleted,
+      uploadInProgress,
+      uploadErrorMsgKey,
+      uploadErrorDetailsJson,
+    } = item;
+    const isUploading = !uploadCompleted;
+    const hasError = !!uploadErrorMsgKey || !!uploadErrorDetailsJson;
     const isProcessing = (isUploading || uploadInProgress) && !hasError;
 
     if (hasError) {
@@ -956,41 +951,41 @@ class PresentationUploader extends Component {
           {renderPresentationItemStatus(item, intl)}
         </Styled.TableItemStatus>
         {
-        hasError ? null : (
-          <Styled.TableItemActions notDownloadable={!allowDownloadOriginal}>
-            {allowDownloadOriginal || allowDownloadWithAnnotations || allowDownloadConverted ? (
-              <PresentationDownloadDropdown
-                disabled={disableExportDropdown}
-                data-test="exportPresentation"
-                aria-label={formattedDownloadAriaLabel}
-                color="primary"
-                isDownloadable={downloadable}
-                allowDownloadOriginal={allowDownloadOriginal}
-                allowDownloadConverted={allowDownloadConverted}
-                allowDownloadWithAnnotations={allowDownloadWithAnnotations}
-                handleDownloadableChange={this.handleDownloadableChange}
-                item={item}
-                closeModal={() => Session.setItem('showUploadPresentationView', false)}
-                handleDownloadingOfPresentation={(fileStateType) => this
-                  .handleDownloadingOfPresentation(item, fileStateType)}
-              />
-            ) : null}
-            {removable ? (
-              <Styled.RemoveButton
-                disabled={disableActions}
-                label={intl.formatMessage(intlMessages.removePresentation)}
-                data-test="removePresentation"
-                aria-label={`${intl.formatMessage(intlMessages.removePresentation)} ${item.name}`}
-                size="sm"
-                icon="delete"
-                hideLabel
-                onClick={() => this.handleRemove(item)}
-                animations={animations}
-              />
-            ) : null}
-          </Styled.TableItemActions>
-        )
-}
+          hasError ? null : (
+            <Styled.TableItemActions notDownloadable={!allowDownloadOriginal}>
+              {allowDownloadOriginal || allowDownloadWithAnnotations || allowDownloadConverted ? (
+                <PresentationDownloadDropdown
+                  disabled={disableExportDropdown}
+                  data-test="exportPresentation"
+                  aria-label={formattedDownloadAriaLabel}
+                  color="primary"
+                  isDownloadable={downloadable}
+                  allowDownloadOriginal={allowDownloadOriginal}
+                  allowDownloadConverted={allowDownloadConverted}
+                  allowDownloadWithAnnotations={allowDownloadWithAnnotations}
+                  handleDownloadableChange={this.handleDownloadableChange}
+                  item={item}
+                  closeModal={() => Session.setItem('showUploadPresentationView', false)}
+                  handleDownloadingOfPresentation={(fileStateType) => this
+                    .handleDownloadingOfPresentation(item, fileStateType)}
+                />
+              ) : null}
+              {removable ? (
+                <Styled.RemoveButton
+                  disabled={disableActions}
+                  label={intl.formatMessage(intlMessages.removePresentation)}
+                  data-test="removePresentation"
+                  aria-label={`${intl.formatMessage(intlMessages.removePresentation)} ${item.name}`}
+                  size="sm"
+                  icon="delete"
+                  hideLabel
+                  onClick={() => this.handleRemove(item)}
+                  animations={animations}
+                />
+              ) : null}
+            </Styled.TableItemActions>
+          )
+        }
       </Styled.PresentationItem>
     );
   }
