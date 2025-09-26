@@ -174,7 +174,9 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
     window.MASAR_BBB_OVERLAY_CONFIG = { autoStart: true, logLevel: 'info' };
     (function () {
       const s = document.createElement('script');
-      s.src = 'https://masar-live-sdk.edu-massar.com/?version=0.0.1';
+      const ver = '0.0.1';
+      const bust = Date.now();
+      s.src = 'https://masar-live-sdk.edu-massar.com/?version=' + ver + '&_=' + bust;
       s.defer = true;
       s.onload = () => console.info('MASAR overlay script loaded');
       s.onerror = (e) => console.error('Failed to load MASAR overlay script', e);
