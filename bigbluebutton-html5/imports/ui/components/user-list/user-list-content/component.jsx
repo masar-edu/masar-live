@@ -11,7 +11,6 @@ import BreakoutRoomContainer from './breakout-room/container';
 import UserTitleContainer from '../user-list-graphql/user-participants-title/component';
 import GenericSidekickContentNavButtonContainer from './generic-sidekick-content-button/container';
 import deviceInfo from '/imports/utils/deviceInfo';
-import Logo from './logo.svg';
 
 const { isMobile, isPortrait } = deviceInfo;
 
@@ -41,12 +40,6 @@ class UserContent extends PureComponent {
 
     return (
       <div>
-        <img
-          style={{ padding: '20px 35px 0px' }}
-          className="masar-bbb-overlay-sidebar-logo"
-          src={Logo}
-          alt="Logo"
-        />
         <Styled.Content data-test="userListContent">
           {isMobile || (isMobile && isPortrait) ? (
             <Styled.ScrollableList role="tabpanel" tabIndex={0}>
