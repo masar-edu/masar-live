@@ -153,6 +153,21 @@ const renderPluginItems = (pluginItems) => {
   return (<></>);
 };
 
+// Helper to render a modal without tying it to class instance ordering
+const renderModal = (isOpen, setIsOpen, priority, ModalComponent, otherOptions) => (
+  isOpen ? (
+    <ModalComponent
+      {...{
+        ...otherOptions,
+        onRequestClose: () => setIsOpen(false),
+        priority,
+        setIsOpen,
+        isOpen,
+      }}
+    />
+  ) : null
+);
+
 class NavBar extends Component {
   constructor(props) {
     super(props);
@@ -166,20 +181,6 @@ class NavBar extends Component {
     this.state = {
       isModalOpen: props.showSessionDetailsOnJoin && !(ShownId === props.meetingId),
     };
-  }
-
-  renderModal(isOpen, setIsOpen, priority, Component, otherOptions) {
-    return isOpen ? (
-      <Component
-        {...{
-          ...otherOptions,
-          onRequestClose: () => setIsOpen(false),
-          priority,
-          setIsOpen,
-          isOpen,
-        }}
-      />
-    ) : null;
   }
 
   componentDidMount() {
@@ -225,14 +226,6 @@ class NavBar extends Component {
     clearInterval(this.interval);
   }
 
-  setModalIsOpen(isOpen) {
-    if (!isOpen) {
-      const { meetingId } = this.props;
-      getStorageSingletonInstance().setItem('alreadyShowSessionDetailsOnJoin', meetingId);
-    }
-    this.setState({ isModalOpen: isOpen });
-  }
-
   handleToggleUserList() {
     const {
       sidebarNavigation,
@@ -274,6 +267,14 @@ class NavBar extends Component {
         value: PANELS.USERLIST,
       });
     }
+  }
+
+  setModalIsOpen(isOpen) {
+    if (!isOpen) {
+      const { meetingId } = this.props;
+      getStorageSingletonInstance().setItem('alreadyShowSessionDetailsOnJoin', meetingId);
+    }
+    this.setState({ isModalOpen: isOpen });
   }
 
   splitPluginItems() {
@@ -391,6 +392,7 @@ class NavBar extends Component {
               {shouldShowNavBarToggleButton && isExpanded && document.dir === 'rtl'
                 && <Styled.ArrowRight iconName="right_arrow" />}
               {renderPluginItems(leftPluginItems)}
+              <div className="masar-bbb-overlay-nav-bar-left" />
             </Styled.Left>
             <Styled.Center>
               <Styled.PresentationTitle
@@ -405,7 +407,7 @@ class NavBar extends Component {
                   </span>
                 </Tooltip>
               </Styled.PresentationTitle>
-              {this.renderModal(isModalOpen, this.setModalIsOpen, 'low', SessionDetailsModal)}
+              {renderModal(isModalOpen, this.setModalIsOpen, 'low', SessionDetailsModal)}
               <RecordingIndicator
                 amIModerator={amIModerator}
                 currentUserId={currentUserId}
@@ -423,6 +425,7 @@ class NavBar extends Component {
                 amIModerator={amIModerator}
                 isDirectLeaveButtonEnabled={isDirectLeaveButtonEnabled}
               />
+              <div className="masar-bbb-overlay-nav-bar-right" />
             </Styled.Right>
           </Styled.Top>
         )}
