@@ -141,7 +141,7 @@ const intlMessages = defineMessages({
   },
   SCAN_FAILED: {
     id: 'app.presentationUploder.upload.scanFailed',
-    description: 'error that the file could not be uploaded because scanning failed'
+    description: 'error that the file could not be uploaded because scanning failed',
   },
   conversionProcessingSlides: {
     id: 'app.presentationUploder.conversion.conversionProcessingSlides',
@@ -310,7 +310,9 @@ class PresentationUploader extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { isOpen, presentations: propPresentations, currentPresentation, intl } = this.props;
+    const {
+      isOpen, presentations: propPresentations, currentPresentation, intl,
+    } = this.props;
     const { presentations } = this.state;
     const { presentations: prevPropPresentations } = prevProps;
 
@@ -348,8 +350,12 @@ class PresentationUploader extends Component {
     }
 
     const presStateFiltered = presState.filter((presentation) => {
-      const currentPropPres = propPresentations.find((pres) => pres.presentationId === presentation.presentationId);
-      const prevPropPres = prevPropPresentations.find((pres) => pres.presentationId === presentation.presentationId);
+      const currentPropPres = propPresentations.find(
+        (pres) => pres.presentationId === presentation.presentationId,
+      );
+      const prevPropPres = prevPropPresentations.find(
+        (pres) => pres.presentationId === presentation.presentationId,
+      );
       const hasConversionError = !!presentation?.uploadErrorMsgKey;
       const finishedConversion = !presentation?.uploadInProgress
         || !currentPropPres?.uploadInProgress;
@@ -475,7 +481,7 @@ class PresentationUploader extends Component {
     }
 
     if (currentPresentation && currentPresentation !== prevProps.currentPresentation) {
-       this.handleCurrentChange(currentPresentation);
+      this.handleCurrentChange(currentPresentation);
     }
 
     if (presentations.length > 0) {
@@ -508,6 +514,19 @@ class PresentationUploader extends Component {
       removePresentation,
       presentationEnabled,
     } = this.props;
+
+    // Handle static presentations differently
+    if (item && item.presentationId && item.presentationId.startsWith('static-')) {
+      // For static presentations, just remove from local state
+      const { presentations } = this.state;
+      const toRemoveIndex = presentations.indexOf(item);
+      this.setState({
+        presentations: update(presentations, {
+          $splice: [[toRemoveIndex, 1]],
+        }),
+      });
+      return;
+    }
     if (withErr) {
       const { presentations } = this.state;
       const { presentations: propPresentations } = this.props;
@@ -565,7 +584,9 @@ class PresentationUploader extends Component {
       const commands = {};
 
       const currentIndex = updatedPresentations.findIndex((p) => p.current);
-      const actualCurrentIndex = updatedPresentations.findIndex((p) => p.presentationId === oldCurrentId);
+      const actualCurrentIndex = updatedPresentations.findIndex(
+        (p) => p.presentationId === oldCurrentId,
+      );
 
       if (currentIndex === -1 && updatedPresentations.length > 0) {
         const newCurrentIndex = actualCurrentIndex === -1 ? 0 : actualCurrentIndex;
@@ -604,7 +625,7 @@ class PresentationUploader extends Component {
 
       commands[newCurrentIndex] = {
         $apply: (presentation) => {
-          if (!presentation) return;
+          if (!presentation) return presentation;
           const p = presentation;
           if (p) {
             p.current = true;
@@ -614,6 +635,14 @@ class PresentationUploader extends Component {
       };
 
       const presentationsUpdated = update(presentations, commands);
+
+      // Handle static presentations - call parent setPresentation for non-static presentations
+      const presentation = presentationsUpdated[newCurrentIndex];
+      if (presentation && !presentation.presentationId.startsWith('static-')) {
+        const { setPresentation } = this.props;
+        setPresentation(presentation.presentationId);
+      }
+
       return {
         presentations: presentationsUpdated,
       };
@@ -822,16 +851,13 @@ class PresentationUploader extends Component {
             </Styled.Head>
           </thead>
           <tbody>
-            {unique(presentationsSorted, p => p.presentationId) .map((item) => this.renderPresentationItem(item))}
+            {unique(presentationsSorted, (p) => p.presentationId)
+              .map((item) => this.renderPresentationItem(item))}
           </tbody>
         </Styled.Table>
       </Styled.FileList>
     );
   }
-
-
-
-
 
   renderDownloadableWithAnnotationsHint() {
     const {
@@ -862,7 +888,7 @@ class PresentationUploader extends Component {
       ? item.presentationId === selectedToBeNextCurrent
       : item.current;
     const isUploading = !item.uploadCompleted;
-    const uploadInProgress = item.uploadInProgress;
+    const { uploadInProgress } = item;
     const hasError = !!item.uploadErrorMsgKey || !!item.uploadErrorDetailsJson;
     const isProcessing = (isUploading || uploadInProgress) && !hasError;
 
@@ -963,7 +989,8 @@ class PresentationUploader extends Component {
               />
             ) : null}
           </Styled.TableItemActions>
-        )}
+        )
+}
       </Styled.PresentationItem>
     );
   }
@@ -1095,7 +1122,8 @@ class PresentationUploader extends Component {
     let hasNewUpload = false;
 
     presentations.forEach((item) => {
-      if (item?.presentationId.indexOf(item.name) !== -1 && item.totalPagesUploaded === 0) hasNewUpload = true;
+      if (item?.presentationId.indexOf(item.name) !== -1
+        && item.totalPagesUploaded === 0) hasNewUpload = true;
     });
 
     return (

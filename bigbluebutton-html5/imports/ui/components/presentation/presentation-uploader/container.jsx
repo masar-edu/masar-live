@@ -31,7 +31,31 @@ const PresentationUploaderContainer = (props) => {
   const userIsPresenter = currentUserData?.presenter;
 
   const { data: presentationData } = useDeduplicatedSubscription(PRESENTATIONS_SUBSCRIPTION);
-  const presentations = presentationData?.pres_presentation || [];
+  const dynamicPresentations = presentationData?.pres_presentation || [];
+
+  // Static presentations from public directory
+  const staticPresentations = [
+    {
+      presentationId: 'static-main-pdf',
+      name: 'Main Presentation',
+      current: false,
+      uploadCompleted: true,
+      uploadInProgress: false,
+      removable: true,
+      downloadable: true,
+      downloadFileUri: '/presentations/main.pdf',
+      totalPages: 1,
+      totalPagesUploaded: 1,
+      uploadTimestamp: Date.now(),
+      uploadErrorMsgKey: null,
+      uploadErrorDetailsJson: null,
+      filenameConverted: 'main.pdf',
+      exportToChatStatus: null,
+    },
+  ];
+
+  // Merge static and dynamic presentations
+  const presentations = [...staticPresentations, ...dynamicPresentations];
   const currentPresentation = presentations.find((p) => p.current)?.presentationId || '';
 
   const [presentationSetDownloadable] = useMutation(PRESENTATION_SET_DOWNLOADABLE);
@@ -59,10 +83,22 @@ const PresentationUploaderContainer = (props) => {
   };
 
   const setPresentation = (presentationId) => {
+    // Handle static presentations differently
+    if (presentationId.startsWith('static-')) {
+      // For static presentations, we'll handle this in the component state
+      // The component will manage the current state for static presentations
+      return;
+    }
     presentationSetCurrent({ variables: { presentationId } });
   };
 
   const removePresentation = (presentationId) => {
+    // Handle static presentations differently
+    if (presentationId.startsWith('static-')) {
+      // Static presentations can't be removed via GraphQL
+      // The component will handle this in its local state
+      return;
+    }
     presentationRemove({ variables: { presentationId } });
   };
 
