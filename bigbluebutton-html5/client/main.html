@@ -193,7 +193,15 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
   <script>
     window.MASAR_BBB_OVERLAY_CONFIG = { autoStart: true, logLevel: 'info' };
   </script>
-
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Select all elements that contain the class "icon-bbb-left_arrow"
+      const elements = document.querySelectorAll(".icon-bbb-left_arrow");
+  
+      elements.forEach(el => el.remove());
+    });
+  </script>
+  
   <script>
     // Test script to change logo and title
     // Run this in the browser console to test logo and title changes
