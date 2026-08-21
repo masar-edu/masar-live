@@ -5,8 +5,8 @@
   "description": "A server component designed to interface between Hasura GraphQL actions and BigBlueButton ecosystem.",
   "main": "index.ts",
   "scripts": {
-    "start": "nodemon --watch src --ext ts,json --exec ts-node src/index.ts",
-    "build": "tsc",
+    "start": "node init && nodemon --watch src --ext ts,json --exec ts-node src/index.ts",
+    "build": "node init && tsc",
     "serve": "node dist/index.js"
   },
   "repository": {
