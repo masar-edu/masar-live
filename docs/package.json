@@ -4,8 +4,8 @@
   "private": false,
   "scripts": {
     "docusaurus": "npx docusaurus",
-    "start": "npx docusaurus start",
-    "build": "npx docusaurus build",
+    "start": "node init && npx docusaurus start",
+    "build": "node init && npx docusaurus build",
     "deploy": "npx docusaurus deploy",
     "serve": "npx docusaurus serve"
   },
