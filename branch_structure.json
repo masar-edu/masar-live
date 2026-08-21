@@ -1,0 +1,21 @@
+{
+  "default_branch": "v3.0.x-release",
+  "branches": [
+    "dev",
+    "master",
+    "origin",
+    "v3.0.x-release"
+  ],
+  "parent": {
+    "dev": "v3.0.x-release",
+    "master": "v3.0.x-release",
+    "origin": "v3.0.x-release",
+    "v3.0.x-release": null
+  },
+  "order": [
+    "v3.0.x-release",
+    "dev",
+    "master",
+    "origin"
+  ]
+}
